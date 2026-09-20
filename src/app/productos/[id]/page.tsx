@@ -9,6 +9,8 @@ import Link from "next/link";
 import { products } from "@/data/products";
 import ProductGallery from "@/components/ProductGallery";
 import AddToCartButton from "@/components/AddToCartButton"; // nuevo botón interactivo
+import StockBadge from "@/components/StockBadge"; // nuevo badge de disponibilidad
+import { getStock } from "@/lib/stock"; // nueva función desacoplada de stock
 
 
 // Formatea el precio igual que en ProductCard - si es null, muestra "Consultar precio"
@@ -32,6 +34,12 @@ export async function generateStaticParams() {
   }));
 }
 
+// revalidate = 60 le dice a Next.js que puede volver a generar esta página
+// como máximo cada 60 segundos, en vez de dejarla 100% estática para siempre.
+// No importa mucho hoy (el stock es un valor fijo), pero en cuanto conectemos
+// el stock real, esto asegura que la página no muestre datos de hace días.
+export const revalidate = 60;
+
 // En Next.js 15+, "params" llega como una Promise, por eso la función
 // es "async" y usamos "await" para obtener el valor real de adentro
 export default async function ProductoPage({
@@ -49,6 +57,9 @@ export default async function ProductoPage({
   if (!product) {
     notFound();
   }
+
+  // Consultamos el stock de este producto - hoy devuelve el placeholder "unknown"
+  const stock = await getStock(product.id);
 
   return (
     <main className="min-h-screen bg-[#EFEDE7]">
@@ -71,6 +82,11 @@ export default async function ProductoPage({
             <h1 className="mt-2 font-[var(--font-heading)] text-3xl font-bold text-[#232320]">
               {product.name}
             </h1>
+
+            {/* Badge de disponibilidad, justo debajo del nombre */}
+            <div className="mt-3">
+              <StockBadge stock={stock} />
+            </div>
 
             <p className="mt-4 text-base leading-relaxed text-[#6B6862]">
               {product.description}

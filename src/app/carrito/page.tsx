@@ -13,9 +13,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 
-// Correo del asesor - ESTO ES UN PLACEHOLDER, hay que reemplazarlo por el
-// correo real que te confirme el cliente antes de la presentación final
-const ASESOR_EMAIL = "asesor@comercialmaya.com";
+// Antes: const ASESOR_EMAIL = "asesor@comercialmaya.com" (quemado directo en el código)
+// Ahora: lo leemos de una variable de entorno (ver .env.local.example).
+// El "?? " define un valor de respaldo por si la variable no está configurada,
+// así el proyecto no se rompe mientras aún no tienes el dato real confirmado.
+const ASESOR_EMAIL = process.env.NEXT_PUBLIC_ADVISOR_EMAIL ?? "pendiente-confirmar@comercialmaya.com";
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat("es-EC", {
