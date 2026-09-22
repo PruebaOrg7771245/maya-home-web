@@ -1,296 +1,141 @@
 // src/data/products.ts
 //
-// Archivo temporal con datos "quemados" (hardcoded) del catálogo real
-// que el cliente proporcionó (Comercial Maya).
+// Catálogo real de Maya Home, tomado del packing list del proveedor
+// (Guangdong Yingjie Sanitary Ware Technology Co., Ltd - Invoice YJ20260429CO).
 //
-// IMPORTANTE: el catálogo original NO trae precios, por lo que el campo
-// "prices" quedó en null. Hay que pedirle al cliente precios de referencia
-// antes de mostrar el boceto, o dejar el botón como "Consultar precio".
-//
-// Cuando migremos a la base de datos real (Postgres), esta misma forma
-// de datos ("shape") es la que va a devolver la API - así los componentes
-// visuales no cambian, solo cambia de dónde vienen los datos.
+// IMPORTANTE - datos que NO vienen en el packing list y siguen pendientes:
+// - Precios: el packing list es un documento de importación/logística,
+//   no de venta al público - no trae precios. Quedan en null.
+// - Nombres comerciales: el proveedor solo da un "ITEM NO." (código de
+//   fábrica) y una descripción genérica en inglés - los nombres que
+//   ves abajo son una versión legible que armé a partir de eso, no son
+//   nombres comerciales oficiales todavía. Cuando el cliente defina cómo
+//   quiere llamar a cada modelo, se actualiza aquí.
+// - Fotos: son las miniaturas de baja resolución del packing list -
+//   sirven para el boceto, pero conviene reemplazarlas por fotos de
+//   producto reales en alta resolución antes de la versión final.
 
 export type ProductVariant = {
-  attribute: string; // ej: "formato"
-  value: string;      // ej: "60x120"
+  attribute: string;
+  value: string;
 };
 
 export type ProductPrices = {
-  minorista: number | null; // precio al público, null = pendiente de confirmar con cliente
-  mayorista: number | null; // precio mayorista, null = pendiente de confirmar con cliente
+  minorista: number | null;
+  mayorista: number | null;
 };
 
 export type Product = {
-  id: string;              // identificador único, usado en la URL del producto
-  name: string;             // nombre comercial del producto
-  category: string;         // categoría principal
-  subcategory?: string;     // línea/colección dentro de la categoría
-  description: string;      // descripción corta para mostrar en el catálogo
-  images: string[];         // rutas de las imágenes (relativas a /public)
-  variants: ProductVariant[]; // variantes disponibles (formatos)
-  prices: ProductPrices;    // precios diferenciados, null si no se ha definido aún
-  brand?: string;           // marca/fabricante si aplica
+  id: string;
+  name: string;
+  category: string;
+  subcategory?: string;
+  description: string;
+  images: string[];
+  variants: ProductVariant[];
+  prices: ProductPrices;
+  brand?: string;
+  sku?: string; // código de referencia del proveedor - útil para relacionar con inventario/stock más adelante
 };
 
 export const products: Product[] = [
   // ==========================================
-  // CATEGORÍA: PORCELANATOS IMPORTADOS
-  // Marca: Azulejos Benadresa, S.A.
+  // CATEGORÍA: LAVAMANOS (Ceramic Basin)
   // ==========================================
   {
-    id: "betonhome-pearl",
-    name: "Betonhome Pearl",
-    category: "Porcelanatos",
-    subcategory: "Betonhome",
-    description: "Porcelanato importado acabado concreto, tono perla, ideal para espacios modernos y minimalistas.",
-    images: ["/images/products/betonhome-pearl.jpg"],
-    variants: [
-      { attribute: "formato", value: "30x90" },
-      { attribute: "formato", value: "60x120" },
-    ],
+    id: "lavamanos-9636m001",
+    name: "Lavamanos Rectangular Negro 9636 M-001",
+    category: "Lavamanos",
+    description: "Lavamanos cerámico de sobreponer, acabado negro mate, línea rectangular minimalista.",
+    images: ["/images/products/basin-9636m001.jpg"],
+    variants: [{ attribute: "medidas", value: "500 x 350 x 120 mm" }],
     prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
+    sku: "9636 M-001",
   },
   {
-    id: "magna-betonhome-grey",
-    name: "Magna Betonhome Grey",
-    category: "Porcelanatos",
-    subcategory: "Betonhome",
-    description: "Porcelanato importado con textura decorativa, tono gris, para muros y paredes de alto impacto visual.",
-    images: ["/images/products/magna-betonhome.jpg"],
-    variants: [{ attribute: "formato", value: "30x90" }],
+    id: "lavamanos-9636",
+    name: "Lavamanos Rectangular Blanco 9636",
+    category: "Lavamanos",
+    description: "Lavamanos cerámico de sobreponer, acabado blanco, línea rectangular minimalista.",
+    images: ["/images/products/basin-9636.jpg"],
+    variants: [{ attribute: "medidas", value: "500 x 350 x 120 mm" }],
     prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
+    sku: "9636",
   },
   {
-    id: "magna-betonhome-pearl",
-    name: "Magna Betonhome Pearl",
-    category: "Porcelanatos",
-    subcategory: "Betonhome",
-    description: "Porcelanato importado con textura decorativa, tono perla, para muros y paredes de alto impacto visual.",
-    images: ["/images/products/magna-betonhome.jpg"],
-    variants: [{ attribute: "formato", value: "30x90" }],
+    id: "lavamanos-4243",
+    name: "Lavamanos Ovalado Blanco 4243",
+    category: "Lavamanos",
+    description: "Lavamanos cerámico de sobreponer, acabado blanco, línea ovalada.",
+    images: ["/images/products/basin-4243.jpg"],
+    variants: [{ attribute: "medidas", value: "605 x 390 x 190 mm" }],
     prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
+    sku: "4243",
   },
   {
-    id: "fleur-halima-blanc",
-    name: "Fleur Halima Blanc",
-    category: "Porcelanatos",
-    subcategory: "Halima",
-    description: "Porcelanato importado con estampado floral decorativo sobre base blanca, para muros destacados.",
-    images: ["/images/products/fleur-halima-blanc.jpg"],
-    variants: [{ attribute: "formato", value: "60x120" }],
+    id: "lavamanos-b191",
+    name: "Lavamanos de Pedestal B-191",
+    category: "Lavamanos",
+    description: "Lavamanos cerámico de pedestal (columna), acabado blanco.",
+    images: ["/images/products/basin-b191.jpg"],
+    variants: [{ attribute: "medidas", value: "420 x 420 x 830 mm" }],
     prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
-  },
-  {
-    id: "halima-blanc",
-    name: "Halima Blanc",
-    category: "Porcelanatos",
-    subcategory: "Halima",
-    description: "Porcelanato importado tono blanco, acabado piedra natural, combina con la línea Fleur Halima.",
-    images: ["/images/products/fleur-halima-blanc.jpg"],
-    variants: [{ attribute: "formato", value: "60x120" }],
-    prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
-  },
-  {
-    id: "icaria-ivory",
-    name: "Icaria Ivory",
-    category: "Porcelanatos",
-    subcategory: "Icaria",
-    description: "Porcelanato importado acabado piedra natural, tono marfil, para pisos y paredes de baños y espacios amplios.",
-    images: ["/images/products/icaria-ivory.jpg"],
-    variants: [{ attribute: "formato", value: "60x120" }],
-    prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
-  },
-  {
-    id: "stryn",
-    name: "Stryn",
-    category: "Porcelanatos",
-    subcategory: "Stryn",
-    description: "Porcelanato importado tono neutro liso, base de la colección Stryn.",
-    images: ["/images/products/stryn.jpg"],
-    variants: [{ attribute: "formato", value: "60x120" }],
-    prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
-  },
-  {
-    id: "blume-stryn",
-    name: "Blume Stryn",
-    category: "Porcelanatos",
-    subcategory: "Stryn",
-    description: "Porcelanato importado con estampado botánico decorativo, ideal para muros con personalidad.",
-    images: ["/images/products/blume-stryn.jpg"],
-    variants: [{ attribute: "formato", value: "60x120" }],
-    prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
-  },
-  {
-    id: "verse-halima-bleu",
-    name: "Verse Halima Bleu",
-    category: "Porcelanatos",
-    subcategory: "Verse",
-    description: "Porcelanato importado acabado textil, tono azul grisáceo.",
-    images: ["/images/products/verse-halima-bleu.jpg"],
-    variants: [{ attribute: "formato", value: "60x120" }],
-    prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
-  },
-  {
-    id: "verse-halima-argile",
-    name: "Verse Halima Argile",
-    category: "Porcelanatos",
-    subcategory: "Verse",
-    description: "Porcelanato importado acabado textil, tono arcilla/terracota.",
-    images: ["/images/products/verse-halima-argile.jpg"],
-    variants: [{ attribute: "formato", value: "60x120" }],
-    prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
-  },
-  {
-    id: "spazio-alder",
-    name: "Spazio Alder",
-    category: "Porcelanatos",
-    subcategory: "Spazio",
-    description: "Porcelanato importado símil madera, tono claro (aliso), formato lama larga.",
-    images: ["/images/products/spazio-alder.jpg"],
-    variants: [{ attribute: "formato", value: "20x120" }],
-    prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
-  },
-  {
-    id: "spazio-maple",
-    name: "Spazio Maple",
-    category: "Porcelanatos",
-    subcategory: "Spazio",
-    description: "Porcelanato importado símil madera, tono arce, formato lama larga.",
-    images: ["/images/products/spazio-maple.jpg"],
-    variants: [{ attribute: "formato", value: "20x120" }],
-    prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
-  },
-  {
-    id: "finezza-bianco",
-    name: "Finezza Bianco",
-    category: "Porcelanatos",
-    subcategory: "Finezza",
-    description: "Porcelanato importado símil mármol Calacatta, tono blanco con vetas grises.",
-    images: ["/images/products/finezza-bianco.jpg"],
-    variants: [{ attribute: "formato", value: "80x160" }],
-    prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
-  },
-  {
-    id: "finezza-oro",
-    name: "Finezza Oro",
-    category: "Porcelanatos",
-    subcategory: "Finezza",
-    description: "Porcelanato importado símil mármol, tono blanco con vetas doradas.",
-    images: ["/images/products/finezza-oro.jpg"],
-    variants: [{ attribute: "formato", value: "80x160" }],
-    prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
-  },
-  {
-    id: "pietra-antica-nero",
-    name: "Pietra Antica Nero",
-    category: "Porcelanatos",
-    subcategory: "Pietra Antica",
-    description: "Porcelanato importado símil piedra natural, tono negro con vetas sutiles.",
-    images: ["/images/products/pietra-antica-nero.jpg"],
-    variants: [{ attribute: "formato", value: "80x160" }],
-    prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
-  },
-  {
-    id: "ravena",
-    name: "Ravena",
-    category: "Porcelanatos",
-    subcategory: "Ravena",
-    description: "Porcelanato importado símil mármol Calacatta con vetas doradas y grises, alto valor decorativo.",
-    images: ["/images/products/ravena.jpg"],
-    variants: [{ attribute: "formato", value: "80x160" }],
-    prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
-  },
-  {
-    id: "tessino-black",
-    name: "Tessino Black",
-    category: "Porcelanatos",
-    subcategory: "Tessino",
-    description: "Porcelanato importado símil piedra pulida, tono negro, acabado brillante.",
-    images: ["/images/products/tessino-black.jpg"],
-    variants: [{ attribute: "formato", value: "80x160" }],
-    prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
-  },
-  {
-    id: "tessino-ivory",
-    name: "Tessino Ivory",
-    category: "Porcelanatos",
-    subcategory: "Tessino",
-    description: "Porcelanato importado símil piedra pulida, tono marfil, acabado brillante.",
-    images: ["/images/products/tessino-ivory.jpg"],
-    variants: [{ attribute: "formato", value: "80x160" }],
-    prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
-  },
-  {
-    id: "tessino-smoke",
-    name: "Tessino Smoke",
-    category: "Porcelanatos",
-    subcategory: "Tessino",
-    description: "Porcelanato importado símil piedra pulida, tono gris humo, acabado brillante.",
-    images: ["/images/products/tessino-smoke.jpg"],
-    variants: [{ attribute: "formato", value: "80x160" }],
-    prices: { minorista: null, mayorista: null },
-    brand: "Azulejos Benadresa",
+    sku: "B-191",
   },
 
   // ==========================================
-  // CATEGORÍA: PISOS SPC
+  // CATEGORÍA: SANITARIOS (Ceramic Toilet)
   // ==========================================
   {
-    id: "spc-amareto",
-    name: "SPC Amareto",
-    category: "Pisos SPC",
-    description: "Piso SPC de alta resistencia, 7mm de espesor (cuerpo SPC 5mm + capa EVA 2mm de aislamiento acústico), clasificación AC5 para alto tráfico.",
-    images: ["/images/products/spc-amareto.jpg"],
-    variants: [{ attribute: "espesor", value: "7mm" }],
+    id: "sanitario-sd1001",
+    name: "Sanitario SD-1001",
+    category: "Sanitarios",
+    description: "Sanitario cerámico de una pieza, acabado blanco.",
+    images: ["/images/products/toilet-sd1001.jpg"],
+    variants: [{ attribute: "medidas", value: "695 x 390 x 500 mm" }],
     prices: { minorista: null, mayorista: null },
+    sku: "SD-1001",
   },
   {
-    id: "spc-espreso",
-    name: "SPC Espreso",
-    category: "Pisos SPC",
-    description: "Piso SPC de alta resistencia, 7mm de espesor (cuerpo SPC 5mm + capa EVA 2mm de aislamiento acústico), clasificación AC5 para alto tráfico.",
-    images: ["/images/products/spc-espreso.jpg"],
-    variants: [{ attribute: "espesor", value: "7mm" }],
+    id: "sanitario-sd1001-mb",
+    name: "Sanitario SD-1001 MB",
+    category: "Sanitarios",
+    description: "Sanitario cerámico de una pieza, acabado negro mate.",
+    images: ["/images/products/toilet-sd1001mb.jpg"],
+    variants: [{ attribute: "medidas", value: "695 x 390 x 500 mm" }],
     prices: { minorista: null, mayorista: null },
+    sku: "SD-1001 MB",
   },
   {
-    id: "spc-duna",
-    name: "SPC Duna",
-    category: "Pisos SPC",
-    description: "Piso SPC de alta resistencia, 7mm de espesor (cuerpo SPC 5mm + capa EVA 2mm de aislamiento acústico), clasificación AC5 para alto tráfico.",
-    images: ["/images/products/spc-duna.jpg"],
-    variants: [{ attribute: "espesor", value: "7mm" }],
+    id: "sanitario-717",
+    name: "Sanitario 717",
+    category: "Sanitarios",
+    description: "Sanitario cerámico de una pieza, acabado blanco.",
+    images: ["/images/products/toilet-717.jpg"],
+    variants: [{ attribute: "medidas", value: "660 x 420 x 665 mm" }],
     prices: { minorista: null, mayorista: null },
+    sku: "717",
   },
   {
-    id: "spc-avellana",
-    name: "SPC Avellana",
-    category: "Pisos SPC",
-    description: "Piso SPC de alta resistencia, 7mm de espesor (cuerpo SPC 5mm + capa EVA 2mm de aislamiento acústico), clasificación AC5 para alto tráfico.",
-    images: ["/images/products/spc-avellana.jpg"],
-    variants: [{ attribute: "espesor", value: "7mm" }],
+    id: "sanitario-717-mb",
+    name: "Sanitario 717 MB",
+    category: "Sanitarios",
+    description: "Sanitario cerámico de una pieza, acabado negro mate.",
+    images: ["/images/products/toilet-717mb.jpg"],
+    variants: [{ attribute: "medidas", value: "660 x 420 x 665 mm" }],
     prices: { minorista: null, mayorista: null },
+    sku: "717-MB",
+  },
+  {
+    id: "sanitario-168w",
+    name: "Sanitario 168W",
+    category: "Sanitarios",
+    description: "Sanitario cerámico de una pieza, diseño compacto, acabado blanco.",
+    images: ["/images/products/toilet-168w.jpg"],
+    variants: [{ attribute: "medidas", value: "680 x 340 x 465 mm" }],
+    prices: { minorista: null, mayorista: null },
+    sku: "168W",
   },
 ];
 
-// Categorías derivadas automáticamente de los productos (para el filtro del catálogo)
 export const categories = Array.from(new Set(products.map((p) => p.category)));

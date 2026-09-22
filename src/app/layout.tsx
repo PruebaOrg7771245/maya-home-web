@@ -19,9 +19,10 @@ const inter = Inter({
   weight: ["400", "500"],
 });
 
+// Actualizado de "Comercial Maya" a "Maya Home"
 export const metadata: Metadata = {
-  title: "Comercial Maya | Porcelanatos y Pisos", // reemplazamos el título default de create-next-app
-  description: "Catálogo de porcelanatos importados y pisos SPC de alta resistencia.",
+  title: "Maya Home | Sanitarios y acabados para el hogar",
+  description: "Catálogo de lavamanos, sanitarios y acabados cerámicos para el hogar.",
 };
 
 export default function RootLayout({

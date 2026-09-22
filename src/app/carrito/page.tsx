@@ -2,9 +2,10 @@
 //
 // Página del carrito. Muestra los productos agregados, permite ajustar
 // cantidades, y al final tiene un formulario simple que - al enviarse -
-// arma un correo pre-llenado (usando el protocolo "mailto:") dirigido al
+// arma un mensaje pre-llenado de WhatsApp (usando wa.me) dirigido al
 // asesor, con el resumen completo del pedido. Esto simula el flujo real
-// sin necesitar backend ni pasarela de pago todavía.
+// sin necesitar backend ni pasarela de pago: no se maneja pago en línea,
+// el asesor se contacta directamente con el cliente para coordinar.
 
 "use client";
 
@@ -13,11 +14,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 
-// Antes: const ASESOR_EMAIL = "asesor@comercialmaya.com" (quemado directo en el código)
-// Ahora: lo leemos de una variable de entorno (ver .env.local.example).
-// El "?? " define un valor de respaldo por si la variable no está configurada,
-// así el proyecto no se rompe mientras aún no tienes el dato real confirmado.
-const ASESOR_EMAIL = process.env.NEXT_PUBLIC_ADVISOR_EMAIL ?? "pendiente-confirmar@comercialmaya.com";
+// Igual que antes con el correo: lo leemos de una variable de entorno
+// (ver .env.local.example) en vez de quemarlo en el código. El "?? " define
+// un valor de respaldo por si la variable no está configurada todavía.
+const ASESOR_PHONE = process.env.NEXT_PUBLIC_ADVISOR_PHONE ?? "";
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat("es-EC", {
@@ -35,7 +35,7 @@ export default function CarritoPage() {
   // Estado que controla si ya se "envió" el pedido, para mostrar la pantalla de confirmación
   const [orderSent, setOrderSent] = useState(false);
 
-  // Arma el cuerpo del correo con el detalle del pedido, y abre el cliente de correo del usuario
+  // Arma el mensaje con el detalle del pedido, y abre WhatsApp con todo pre-llenado
   function handleSendOrder() {
     // Construimos el listado de productos como texto plano, línea por línea
     const itemsList = items
@@ -45,19 +45,23 @@ export default function CarritoPage() {
             item.price !== null ? formatPrice(item.price) : "precio a confirmar"
           })`
       )
-      .join("%0D%0A"); // %0D%0A es el salto de línea codificado para URLs (usado en mailto)
+      .join("\n");
 
-    // Armamos el asunto y cuerpo del correo, todo codificado para que funcione en la URL de mailto
-    const subject = encodeURIComponent(`Nuevo pedido de ${customerName || "cliente web"}`);
-    const body = encodeURIComponent(
-      `Cliente: ${customerName}\nTeléfono: ${customerPhone}\n\nProductos:\n`
-    ).replace(/%0A/g, "%0D%0A") + itemsList + `%0D%0A%0D%0ATotal estimado: ${formatPrice(totalPrice)}`;
+    // Armamos el mensaje completo del pedido
+    const message =
+      `Nuevo pedido de ${customerName || "cliente web"}\n` +
+      `Teléfono: ${customerPhone}\n\n` +
+      `Productos:\n${itemsList}\n\n` +
+      `Total estimado: ${formatPrice(totalPrice)}`;
 
-    // Armamos la URL mailto: completa y la abrimos - esto dispara el cliente de correo
-    // predeterminado del usuario (Outlook, Gmail en el navegador, etc.) con todo pre-llenado
-    window.location.href = `mailto:${ASESOR_EMAIL}?subject=${subject}&body=${body}`;
+    // wa.me solo acepta el número en dígitos (con código de país, sin "+" ni espacios)
+    const phoneDigits = ASESOR_PHONE.replace(/\D/g, "");
 
-    setOrderSent(true); // mostramos la pantalla de confirmación independientemente de si el correo se envía
+    // Armamos la URL de WhatsApp y la abrimos en una pestaña nueva - esto dispara
+    // WhatsApp Web o la app del usuario (según el dispositivo) con el mensaje pre-llenado
+    window.open(`https://wa.me/${phoneDigits}?text=${encodeURIComponent(message)}`, "_blank");
+
+    setOrderSent(true); // mostramos la pantalla de confirmación independientemente de si el envío se completa
   }
 
   // CASO: carrito vacío - mostramos un mensaje simple con link para volver a comprar
@@ -81,9 +85,9 @@ export default function CarritoPage() {
             ¡Pedido enviado!
           </h1>
           <p className="mt-3 text-[#6B6862]">
-            Se abrió tu aplicación de correo con el resumen del pedido dirigido a nuestro asesor.
-            Si no se abrió automáticamente, contáctanos directamente a{" "}
-            <span className="font-medium text-[#232320]">{ASESOR_EMAIL}</span>.
+            Se abrió WhatsApp con el resumen de tu pedido listo para enviar a nuestro asesor.
+            Si no se abrió automáticamente, contáctanos directamente al{" "}
+            <span className="font-medium text-[#232320]">{ASESOR_PHONE || "número del asesor"}</span>.
           </p>
           <Link
             href="/"
