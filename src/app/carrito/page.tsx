@@ -19,6 +19,23 @@ import { useCart } from "@/context/CartContext";
 // un valor de respaldo por si la variable no está configurada todavía.
 const ASESOR_PHONE = process.env.NEXT_PUBLIC_ADVISOR_PHONE ?? "";
 
+// Validaciones de formato para los campos que sí lo requieren (teléfono y email).
+// Los demás campos obligatorios (RUC/cédula, nombre, dirección) por ahora solo
+// se validan como "no vacíos" - su formato queda pendiente (ver pedido del cliente).
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isValidEmail(email: string): boolean {
+  return EMAIL_REGEX.test(email.trim());
+}
+
+function isValidPhone(phone: string): boolean {
+  // Aceptamos "+", espacios, guiones y paréntesis mientras se escribe, pero al
+  // limpiar el número deben quedar solo dígitos (con o sin "+" inicial) y un
+  // largo razonable de teléfono (8 a 15 dígitos, cubre fijos y celulares con código de país).
+  const cleaned = phone.trim().replace(/[\s-()]/g, "");
+  return /^\+?\d{8,15}$/.test(cleaned);
+}
+
 function formatPrice(price: number): string {
   return new Intl.NumberFormat("es-EC", {
     style: "currency",
@@ -29,11 +46,31 @@ function formatPrice(price: number): string {
 export default function CarritoPage() {
   const { items, removeItem, updateQuantity, totalPrice } = useCart();
 
-  // Estado del formulario de contacto final (nombre, teléfono) - datos simples para el boceto
+  // Estado del formulario de datos del cliente para el pedido
+  const [customerRuc, setCustomerRuc] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerCity, setCustomerCity] = useState(""); // opcional
+  const [customerEmail, setCustomerEmail] = useState("");
+  // Campos "tocados" (perdieron el foco al menos una vez), para no mostrar
+  // errores de validación antes de que el cliente haya intentado llenarlos
+  const [touched, setTouched] = useState({ phone: false, email: false });
   // Estado que controla si ya se "envió" el pedido, para mostrar la pantalla de confirmación
   const [orderSent, setOrderSent] = useState(false);
+
+  const phoneValid = isValidPhone(customerPhone);
+  const emailValid = isValidEmail(customerEmail);
+
+  // Todos los campos obligatorios llenos y, para teléfono/email, con formato válido
+  const isFormValid =
+    customerRuc.trim() !== "" &&
+    customerName.trim() !== "" &&
+    customerAddress.trim() !== "" &&
+    customerPhone.trim() !== "" &&
+    customerEmail.trim() !== "" &&
+    phoneValid &&
+    emailValid;
 
   // Arma el mensaje con el detalle del pedido, y abre WhatsApp con todo pre-llenado
   function handleSendOrder() {
@@ -50,7 +87,11 @@ export default function CarritoPage() {
     // Armamos el mensaje completo del pedido
     const message =
       `Nuevo pedido de ${customerName || "cliente web"}\n` +
-      `Teléfono: ${customerPhone}\n\n` +
+      `RUC/Cédula: ${customerRuc}\n` +
+      `Dirección: ${customerAddress}\n` +
+      `Ciudad: ${customerCity || "no especificada"}\n` +
+      `Teléfono: ${customerPhone}\n` +
+      `Email: ${customerEmail}\n\n` +
       `Productos:\n${itemsList}\n\n` +
       `Total estimado: ${formatPrice(totalPrice)}`;
 
@@ -82,7 +123,7 @@ export default function CarritoPage() {
       <main className="flex min-h-[60vh] flex-col items-center justify-center bg-[#EFEDE7] px-6 text-center">
         <div className="max-w-md">
           <h1 className="font-[var(--font-heading)] text-2xl font-bold text-[#232320]">
-            ¡Pedido enviado!
+            ¡Pedido preparado!
           </h1>
           <p className="mt-3 text-[#6B6862]">
             Se abrió WhatsApp con el resumen de tu pedido listo para enviar a nuestro asesor.
@@ -169,24 +210,66 @@ export default function CarritoPage() {
           <div className="mt-4 space-y-3">
             <input
               type="text"
-              placeholder="Nombre completo"
+              placeholder="RUC / Cédula"
+              value={customerRuc}
+              onChange={(e) => setCustomerRuc(e.target.value)}
+              className="w-full border border-[#D8D4CC] bg-white px-4 py-2 text-sm outline-none focus:border-[#A8562E]"
+            />
+            <input
+              type="text"
+              placeholder="Nombre / Razón social"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)} // actualiza el estado en cada tecla
               className="w-full border border-[#D8D4CC] bg-white px-4 py-2 text-sm outline-none focus:border-[#A8562E]"
             />
             <input
-              type="tel"
-              placeholder="Teléfono / WhatsApp"
-              value={customerPhone}
-              onChange={(e) => setCustomerPhone(e.target.value)}
+              type="text"
+              placeholder="Dirección"
+              value={customerAddress}
+              onChange={(e) => setCustomerAddress(e.target.value)}
               className="w-full border border-[#D8D4CC] bg-white px-4 py-2 text-sm outline-none focus:border-[#A8562E]"
             />
+            <input
+              type="text"
+              placeholder="Ciudad (opcional)"
+              value={customerCity}
+              onChange={(e) => setCustomerCity(e.target.value)}
+              className="w-full border border-[#D8D4CC] bg-white px-4 py-2 text-sm outline-none focus:border-[#A8562E]"
+            />
+            <div>
+              <input
+                type="tel"
+                placeholder="Teléfono / WhatsApp"
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+                onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
+                className="w-full border border-[#D8D4CC] bg-white px-4 py-2 text-sm outline-none focus:border-[#A8562E]"
+              />
+              {touched.phone && customerPhone.trim() !== "" && !phoneValid && (
+                <p className="mt-1 text-xs text-red-600">
+                  Ingresa un teléfono válido (solo dígitos, con o sin código de país, 8 a 15 dígitos).
+                </p>
+              )}
+            </div>
+            <div>
+              <input
+                type="email"
+                placeholder="Email"
+                value={customerEmail}
+                onChange={(e) => setCustomerEmail(e.target.value)}
+                onBlur={() => setTouched((t) => ({ ...t, email: true }))}
+                className="w-full border border-[#D8D4CC] bg-white px-4 py-2 text-sm outline-none focus:border-[#A8562E]"
+              />
+              {touched.email && customerEmail.trim() !== "" && !emailValid && (
+                <p className="mt-1 text-xs text-red-600">Ingresa un email válido.</p>
+              )}
+            </div>
           </div>
 
           <button
             onClick={handleSendOrder}
-            // Deshabilitamos el botón si no ha llenado nombre o teléfono, para no mandar un pedido incompleto
-            disabled={!customerName || !customerPhone}
+            // Deshabilitamos el botón si falta algún campo obligatorio o si teléfono/email no tienen formato válido
+            disabled={!isFormValid}
             className="mt-4 w-full bg-[#232320] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#A8562E] disabled:cursor-not-allowed disabled:opacity-40"
           >
             Enviar pedido al asesor
