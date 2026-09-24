@@ -36,9 +36,14 @@ Formato:
 - **Decisión:** el carrito arma un mensaje de texto con el resumen del
   pedido y abre `wa.me` con ese mensaje pre-llenado, en vez de integrar
   Stripe/MercadoPago u otra pasarela.
-- **Alternativas descartadas:** pasarela de pago real — descartada por
-  ahora porque no hay backend de pedidos ni necesidad inmediata de cobrar
-  online.
+- **Alternativas descartadas:**
+  - Pasarela de pago real — descartada por ahora porque no hay backend de
+    pedidos ni necesidad inmediata de cobrar online.
+  - Correo pre-llenado con `mailto:` a `NEXT_PUBLIC_ADVISOR_EMAIL` — fue la
+    primera versión del checkout; se reemplazó por WhatsApp el 22/09/2026
+    (commit cb6344c). El motivo puntual no quedó registrado; `mailto:`
+    además depende de que el comprador tenga un cliente de correo
+    configurado. `NEXT_PUBLIC_ADVISOR_EMAIL` quedó sin uso.
 - **Estado:** vigente. Si en el futuro se agrega pago en línea, este ADR
   queda superado y hay que documentar el reemplazo acá.
 
@@ -49,3 +54,17 @@ Formato:
   puntos que van a requerir datos externos en vivo son el stock (ADR-1) y,
   eventualmente, pedidos/pagos.
 - **Estado:** vigente.
+
+## ADR-4: Build de producción con Webpack, dev con Turbopack
+- **Contexto:** `next build --turbopack` falla en el build de Vercel por un
+  bug conocido de Turbopack con `next/font/google` (fuentes del
+  `layout.tsx`).
+- **Decisión:** el script `build` usa `next build` (Webpack); `dev` sigue
+  con `next dev --turbopack`, donde el bug no aparece.
+- **Alternativas descartadas:** mantener Turbopack en el build y cambiar la
+  carga de fuentes (p. ej. `next/font/local` con los archivos en el repo) —
+  implica tocar tipografía y assets para esquivar un bug del bundler.
+- **Consecuencia:** dev y producción usan bundlers distintos; ante un error
+  que solo aparece en uno, probar `npm run build` localmente.
+- **Estado:** vigente (23/09/2026). Revisar al actualizar Next.js: si el bug
+  se corrige, se puede volver a `--turbopack` en `build`.

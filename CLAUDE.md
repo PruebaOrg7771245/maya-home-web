@@ -11,8 +11,10 @@ antes de asumir nada sobre el estado del proyecto.
 ## Comandos
 
 - `npm run dev` — servidor de desarrollo (Turbopack) en `http://localhost:3000`.
-- `npm run build` — build de producción (Turbopack); úsalo para verificar
-  tipos y que `generateStaticParams` genere todas las páginas de producto.
+- `npm run build` — build de producción (Webpack; se quitó Turbopack de
+  este comando por un bug conocido con `next/font/google` en Vercel — ver
+  ADR correspondiente en DECISIONS.md). El `dev` sigue usando Turbopack sin
+  problema.
 - `npm run lint` — ESLint 9 (flat config en `eslint.config.mjs`).
 - No hay framework de tests configurado.
 

@@ -36,10 +36,6 @@ yarn-error.log*
 # vercel
 .vercel
 
-# claude code (config local del editor, no es parte del proyecto)
-# .claude/agents/ SÍ se versiona: son parte de la trazabilidad del proyecto.
-.claude/*
-!.claude/agents/
 
 # typescript
 *.tsbuildinfo

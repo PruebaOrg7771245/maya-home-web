@@ -18,6 +18,25 @@ Formato de entrada:
 
 ---
 
+## 24/09/2026 - Skills de Claude Code instaladas
+- `vercel-react-best-practices` (guías de performance React/Next.js de
+  Vercel, origen `vercel-labs/agent-skills`, fijada en `skills-lock.json`):
+  instalada en `.agents/skills/` y enlazada por symlink desde
+  `.claude/skills/` y `.windsurf/skills/`.
+- `maya-home-design-system` (skill propia en `.claude/skills/`): paleta
+  exacta, bordes/sombras y tipografía Archivo/Inter; se usa al crear o
+  modificar cualquier UI.
+- Ojo: `.claude/skills/` queda fuera de git por `.gitignore` (`.claude/*`
+  solo exceptúa `agents/`); la skill propia no se versiona hasta que se
+  agregue la excepción.
+
+## 23/09/2026 - Build de producción con Webpack
+- `npm run build` pasó de `next build --turbopack` a `next build`
+  (Webpack) por un bug de Turbopack con `next/font/google` en el build de
+  Vercel. `npm run dev` sigue con Turbopack. Ver ADR-4.
+- Además se agregó `vercel.json` con `git.deploymentEnabled: false`: se
+  desactivó el deploy automático de Vercel en cada push.
+
 ## 23/09/2026 - Más datos del cliente en el formulario de `/carrito`
 - El formulario final de `/carrito` ahora pide RUC/Cédula, Nombre/Razón
   social (reemplaza a "Nombre completo"), Dirección, Ciudad (opcional),
@@ -36,6 +55,8 @@ Formato de entrada:
 - Se conectó el carrito con WhatsApp (`wa.me`): al enviar el pedido se arma
   un mensaje pre-llenado con el detalle de productos, cantidades, total y
   datos de contacto, dirigido al número del asesor (`NEXT_PUBLIC_ADVISOR_PHONE`).
+- Reemplaza al envío por correo (`mailto:` a `NEXT_PUBLIC_ADVISOR_EMAIL`),
+  que queda sin uso. Ver ADR-2.
 - No hay pasarela de pago ni backend de pedidos: el asesor coordina el pago
   y envío manualmente con cada cliente.
 
