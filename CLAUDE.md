@@ -102,7 +102,7 @@ archivos. No hace falta para cambios triviales (typos, estilo).
     explícitamente un locale latinoamericano (ej. `"es-EC"`) — nunca dejar
     el locale por defecto del entorno, porque puede resolver a `en-US` y
     mostrar `MM/DD/YYYY` según dónde corra el servidor/navegador.
-  - En archivos internos (`docs/CHANGELOG.md`, commits, nombres de
-    archivo) donde importa que ordene bien alfabéticamente, usar
-    `YYYY-MM-DD` (ISO) en vez de `DD/MM/YYYY` — pero eso es la excepción
-    para orden, no para lo que ve el usuario final.
+  - Esto incluye los docs internos: `docs/CHANGELOG.md` y
+    `docs/DECISIONS.md` usan `DD/MM/YYYY` (entradas más nuevas arriba).
+  - La única excepción son los nombres de archivo, donde importa que
+    ordenen bien alfabéticamente: ahí usar `YYYY-MM-DD` (ISO).

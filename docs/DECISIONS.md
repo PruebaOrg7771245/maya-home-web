@@ -68,3 +68,27 @@ Formato:
   que solo aparece en uno, probar `npm run build` localmente.
 - **Estado:** vigente (23/09/2026). Revisar al actualizar Next.js: si el bug
   se corrige, se puede volver a `--turbopack` en `build`.
+
+## ADR-5: Validación local de RUC/Cédula por dígito verificador
+- **Contexto:** el formulario de `/carrito` pide RUC/Cédula y solo se
+  validaba como "no vacío"; hacía falta rechazar números mal tipeados.
+- **Decisión:** validar localmente en `src/lib/identificacion.ts` con los
+  algoritmos de dígito verificador (módulo 10 para cédula y RUC persona
+  natural, módulo 11 para sociedad privada y entidad pública), detectando
+  el tipo por largo y tercer dígito. Parte de un ejemplo provisto por el
+  usuario (`validarIdentificacion.ts`), extendido para devolver tipo y
+  mensaje.
+- **Alternativas descartadas:** consultar la API del SRI para confirmar que
+  el número existe y está activo — agrega una dependencia externa (y
+  necesitaría backend o proxy, ver ADR-3) para un formulario que el asesor
+  igual revisa a mano por WhatsApp.
+- **Consecuencia:** solo se garantiza que la estructura es matemáticamente
+  válida; un número bien formado pero inexistente o inactivo pasa. También
+  se decidió rechazar Consumidor Final (`9999999999999`) y no validar el
+  código de provincia.
+- **Extensión (teléfono):** el mismo criterio de validación local, sin API,
+  se aplica al teléfono en `src/lib/telefono.ts`. Se aceptan números
+  internacionales (no solo Ecuador) porque el sitio podría escalar a otros
+  países; para códigos distintos de 593 solo se valida el largo E.164, sin
+  reglas por país.
+- **Estado:** vigente (24/09/2026).

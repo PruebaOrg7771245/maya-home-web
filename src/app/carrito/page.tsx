@@ -13,27 +13,25 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import {
+  limpiarIdentificacion,
+  validarIdentificacion,
+  NOMBRE_TIPO,
+} from "@/lib/identificacion";
+import { limpiarTelefono, validarTelefono } from "@/lib/telefono";
 
 // Igual que antes con el correo: lo leemos de una variable de entorno
 // (ver .env.local.example) en vez de quemarlo en el código. El "?? " define
 // un valor de respaldo por si la variable no está configurada todavía.
 const ASESOR_PHONE = process.env.NEXT_PUBLIC_ADVISOR_PHONE ?? "";
 
-// Validaciones de formato para los campos que sí lo requieren (teléfono y email).
-// Los demás campos obligatorios (RUC/cédula, nombre, dirección) por ahora solo
-// se validan como "no vacíos" - su formato queda pendiente (ver pedido del cliente).
+// Validación de formato del email. RUC/cédula y teléfono se validan aparte
+// (ver src/lib/identificacion.ts y src/lib/telefono.ts). Nombre solo se valida
+// como "no vacío"; dirección y ciudad son opcionales.
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function isValidEmail(email: string): boolean {
   return EMAIL_REGEX.test(email.trim());
-}
-
-function isValidPhone(phone: string): boolean {
-  // Aceptamos "+", espacios, guiones y paréntesis mientras se escribe, pero al
-  // limpiar el número deben quedar solo dígitos (con o sin "+" inicial) y un
-  // largo razonable de teléfono (8 a 15 dígitos, cubre fijos y celulares con código de país).
-  const cleaned = phone.trim().replace(/[\s-()]/g, "");
-  return /^\+?\d{8,15}$/.test(cleaned);
 }
 
 function formatPrice(price: number): string {
@@ -49,27 +47,26 @@ export default function CarritoPage() {
   // Estado del formulario de datos del cliente para el pedido
   const [customerRuc, setCustomerRuc] = useState("");
   const [customerName, setCustomerName] = useState("");
-  const [customerAddress, setCustomerAddress] = useState("");
+  const [customerAddress, setCustomerAddress] = useState(""); // opcional
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerCity, setCustomerCity] = useState(""); // opcional
   const [customerEmail, setCustomerEmail] = useState("");
   // Campos "tocados" (perdieron el foco al menos una vez), para no mostrar
   // errores de validación antes de que el cliente haya intentado llenarlos
-  const [touched, setTouched] = useState({ phone: false, email: false });
+  const [touched, setTouched] = useState({ ruc: false, phone: false, email: false });
   // Estado que controla si ya se "envió" el pedido, para mostrar la pantalla de confirmación
   const [orderSent, setOrderSent] = useState(false);
 
-  const phoneValid = isValidPhone(customerPhone);
+  const identificacion = validarIdentificacion(customerRuc);
+  const telefono = validarTelefono(customerPhone);
   const emailValid = isValidEmail(customerEmail);
 
-  // Todos los campos obligatorios llenos y, para teléfono/email, con formato válido
+  // Campos obligatorios (RUC/cédula, nombre, teléfono, email) llenos y con
+  // formato válido. Dirección y ciudad son opcionales: no bloquean el envío.
   const isFormValid =
-    customerRuc.trim() !== "" &&
+    identificacion.valido &&
     customerName.trim() !== "" &&
-    customerAddress.trim() !== "" &&
-    customerPhone.trim() !== "" &&
-    customerEmail.trim() !== "" &&
-    phoneValid &&
+    telefono.valido &&
     emailValid;
 
   // Arma el mensaje con el detalle del pedido, y abre WhatsApp con todo pre-llenado
@@ -87,10 +84,11 @@ export default function CarritoPage() {
     // Armamos el mensaje completo del pedido
     const message =
       `Nuevo pedido de ${customerName || "cliente web"}\n` +
-      `RUC/Cédula: ${customerRuc}\n` +
-      `Dirección: ${customerAddress}\n` +
-      `Ciudad: ${customerCity || "no especificada"}\n` +
-      `Teléfono: ${customerPhone}\n` +
+      `${identificacion.tipo ? NOMBRE_TIPO[identificacion.tipo] : "RUC/Cédula"}: ${customerRuc}\n` +
+      `Dirección: ${customerAddress.trim() || "no especificada"}\n` +
+      `Ciudad: ${customerCity.trim() || "no especificada"}\n` +
+      // Normalizado a formato internacional (+593...) para que el asesor pueda escribirle directo
+      `Teléfono: ${telefono.normalizado ?? customerPhone}\n` +
       `Email: ${customerEmail}\n\n` +
       `Productos:\n${itemsList}\n\n` +
       `Total estimado: ${formatPrice(totalPrice)}`;
@@ -208,13 +206,29 @@ export default function CarritoPage() {
             Tus datos de contacto
           </h2>
           <div className="mt-4 space-y-3">
-            <input
-              type="text"
-              placeholder="RUC / Cédula"
-              value={customerRuc}
-              onChange={(e) => setCustomerRuc(e.target.value)}
-              className="w-full border border-[#D8D4CC] bg-white px-4 py-2 text-sm outline-none focus:border-[#A8562E]"
-            />
+            <div>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={13}
+                placeholder="RUC / Cédula"
+                value={customerRuc}
+                // Solo dígitos y máximo 13: lo demás se descarta al escribir o pegar
+                onChange={(e) => setCustomerRuc(limpiarIdentificacion(e.target.value))}
+                onBlur={() => setTouched((t) => ({ ...t, ruc: true }))}
+                className="w-full border border-[#D8D4CC] bg-white px-4 py-2 text-sm outline-none focus:border-[#A8562E]"
+              />
+              {/* Si es válido se muestra el tipo detectado apenas se completa;
+                  el error recién después de salir del campo */}
+              {identificacion.valido ? (
+                <p className="mt-1 text-xs text-[#6B6862]">{identificacion.mensaje}</p>
+              ) : (
+                touched.ruc &&
+                customerRuc !== "" && (
+                  <p className="mt-1 text-xs text-red-600">{identificacion.mensaje}</p>
+                )
+              )}
+            </div>
             <input
               type="text"
               placeholder="Nombre / Razón social"
@@ -224,7 +238,7 @@ export default function CarritoPage() {
             />
             <input
               type="text"
-              placeholder="Dirección"
+              placeholder="Dirección (opcional)"
               value={customerAddress}
               onChange={(e) => setCustomerAddress(e.target.value)}
               className="w-full border border-[#D8D4CC] bg-white px-4 py-2 text-sm outline-none focus:border-[#A8562E]"
@@ -239,16 +253,22 @@ export default function CarritoPage() {
             <div>
               <input
                 type="tel"
-                placeholder="Teléfono / WhatsApp"
+                placeholder="Celular / WhatsApp (ej. 0987654321)"
                 value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
+                // Descarta letras y cualquier "+" que no esté al inicio
+                onChange={(e) => setCustomerPhone(limpiarTelefono(e.target.value))}
                 onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
+                aria-describedby="ayuda-telefono"
                 className="w-full border border-[#D8D4CC] bg-white px-4 py-2 text-sm outline-none focus:border-[#A8562E]"
               />
-              {touched.phone && customerPhone.trim() !== "" && !phoneValid && (
-                <p className="mt-1 text-xs text-red-600">
-                  Ingresa un teléfono válido (solo dígitos, con o sin código de país, 8 a 15 dígitos).
-                </p>
+              {/* Texto de ayuda siempre visible: el cliente debe saber que el
+                  asesor lo va a contactar a este número */}
+              <p id="ayuda-telefono" className="mt-1 text-xs text-[#6B6862]">
+                Este es el número al que te contactará nuestro asesor. Si no es correcto, igual te
+                escribiremos al número desde el que envíes este WhatsApp.
+              </p>
+              {touched.phone && customerPhone.trim() !== "" && !telefono.valido && (
+                <p className="mt-1 text-xs text-red-600">{telefono.mensaje}</p>
               )}
             </div>
             <div>

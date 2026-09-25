@@ -18,6 +18,32 @@ Formato de entrada:
 
 ---
 
+## 24/09/2026 - Validación de RUC/Cédula y teléfono en `/carrito`
+- Nuevo `src/lib/identificacion.ts`: valida cédula y RUC ecuatorianos por
+  dígito verificador, sin API. `validarIdentificacion()` detecta el tipo
+  (cédula, RUC persona natural, sociedad privada o entidad pública) y
+  devuelve `{ valido, tipo, mensaje }`. Ver ADR-5.
+- Reglas: se rechaza `9999999999999` (Consumidor Final), no se valida el
+  código de provincia y el establecimiento no puede ser `000`/`0000`.
+- En `/carrito` el campo solo acepta dígitos (máx. 13), muestra el tipo
+  detectado o el error al perder el foco, bloquea el envío si no es válido
+  y el mensaje de WhatsApp etiqueta el número con el tipo detectado.
+  Resuelve lo que había quedado pendiente para RUC/cédula el 23/09/2026.
+- Nuevo `src/lib/telefono.ts` (reemplaza el `isValidPhone` genérico):
+  `validarTelefono()` devuelve `{ valido, normalizado, mensaje }`. Acepta
+  celular local de Ecuador (`09` + 8 dígitos), `593...` sin "+" y formato
+  internacional con "+" o "00" (con 593 exige celular ecuatoriano; otros
+  países solo largo E.164 de 8 a 15 dígitos). Rechaza números sin prefijo
+  que no empiecen con 0 ni 593: no se sabe de qué país son. No se limita a
+  Ecuador porque el sitio podría escalar a otros países.
+- El teléfono va normalizado (`+593987654321`) en el mensaje de WhatsApp,
+  y el campo tiene un texto de ayuda fijo aclarando que el asesor contactará
+  a ese número (o, si no es correcto, al número desde el que se envíe el
+  WhatsApp).
+- Dirección y Ciudad pasan a ser opcionales (antes Dirección era
+  obligatoria): no bloquean el envío y van como "no especificada" si están
+  vacías.
+
 ## 24/09/2026 - Skills de Claude Code instaladas
 - `vercel-react-best-practices` (guías de performance React/Next.js de
   Vercel, origen `vercel-labs/agent-skills`, fijada en `skills-lock.json`):
