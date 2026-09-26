@@ -92,3 +92,22 @@ Formato:
   países; para códigos distintos de 593 solo se valida el largo E.164, sin
   reglas por país.
 - **Estado:** vigente (24/09/2026).
+
+## ADR-6: Ciudad con `<datalist>` nativo en vez de combobox custom
+- **Contexto:** el input de Ciudad en `/carrito` era texto libre; se pidió
+  poder filtrar entre las localidades de Ecuador mientras se escribe y
+  también ver la lista completa sin escribir nada, sin perder que el campo
+  siga siendo opcional y de texto libre (no forzar a elegir una opción de
+  la lista).
+- **Decisión:** usar `<input list="ciudades-ecuador">` + `<datalist>` del
+  HTML nativo, con las opciones cargadas desde `src/data/ciudadesEcuador.ts`
+  (~138 localidades). El filtro por coincidencia parcial y el desplegable
+  completo son comportamiento nativo del navegador.
+- **Alternativas descartadas:** combobox custom en React (con estado propio
+  de apertura/filtrado/selección) — se descartó por simplicidad: `datalist`
+  cumple los dos requisitos sin código adicional propenso a bugs de foco o
+  manejo de teclado.
+- **Consecuencia:** el estilo del desplegable lo controla el navegador, no
+  el CSS del proyecto (menos consistente visualmente que un combobox
+  custom, pero aceptable para un campo opcional).
+- **Estado:** vigente (25/09/2026).

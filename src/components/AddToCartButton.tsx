@@ -7,7 +7,6 @@
 
 "use client";
 
-import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 
 type AddToCartButtonProps = {
@@ -18,25 +17,45 @@ type AddToCartButtonProps = {
 };
 
 export default function AddToCartButton({ id, name, image, price }: AddToCartButtonProps) {
-  const { addItem } = useCart();
-  // Estado local solo para mostrar un mensaje de confirmación breve tras hacer clic
-  const [justAdded, setJustAdded] = useState(false);
+  const { items, addItem, updateQuantity } = useCart();
 
-  function handleClick() {
-    addItem({ id, name, image, price }); // agrega el producto al carrito global
-    setJustAdded(true); // activamos el mensaje de confirmación
+  // Si el producto ya está en el carrito, esto no es null - es la fuente de
+  // verdad de si mostramos el botón o el selector de cantidad. A diferencia
+  // de un "✓" temporal, esto no desaparece solo: mientras el producto siga
+  // en el carrito, el control sigue ahí, sin depender de que el cliente mire
+  // el header (que puede quedar fuera de vista al hacer scroll).
+  const cartItem = items.find((item) => item.id === id);
 
-    // Después de 2 segundos, el botón vuelve a su texto normal
-    setTimeout(() => setJustAdded(false), 2000);
+  if (!cartItem) {
+    return (
+      <button
+        onClick={() => addItem({ id, name, image, price })}
+        className="mt-8 w-full bg-[#232320] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#A8562E]"
+      >
+        Agregar al pedido
+      </button>
+    );
   }
 
   return (
-    <button
-      onClick={handleClick}
-      className="mt-8 w-full bg-[#232320] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#A8562E]"
-    >
-      {/* Cambiamos el texto del botón temporalmente para dar feedback visual claro */}
-      {justAdded ? "✓ Agregado al pedido" : "Agregar al pedido"}
-    </button>
+    <div className="mt-8 flex w-full items-center justify-between border border-[#D8D4CC] bg-white px-6 py-3">
+      <button
+        onClick={() => updateQuantity(id, cartItem.quantity - 1)}
+        aria-label="Disminuir cantidad"
+        className="h-8 w-8 border border-[#D8D4CC] text-[#232320] transition-colors hover:bg-[#EFEDE7]"
+      >
+        −
+      </button>
+      <span aria-live="polite" className="text-sm font-medium text-[#232320]">
+        {cartItem.quantity} en el pedido
+      </span>
+      <button
+        onClick={() => updateQuantity(id, cartItem.quantity + 1)}
+        aria-label="Aumentar cantidad"
+        className="h-8 w-8 border border-[#D8D4CC] text-[#232320] transition-colors hover:bg-[#EFEDE7]"
+      >
+        +
+      </button>
+    </div>
   );
 }

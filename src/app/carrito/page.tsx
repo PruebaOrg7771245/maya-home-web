@@ -13,6 +13,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import { ciudadesEcuador } from "@/data/ciudadesEcuador";
 import {
   limpiarIdentificacion,
   validarIdentificacion,
@@ -81,12 +82,22 @@ export default function CarritoPage() {
       )
       .join("\n");
 
+    // El asesor carga estos campos en mayúsculas en su sistema, así que los
+    // convertimos acá - solo en el texto del mensaje, no en los inputs del
+    // formulario. Ciudad se sube a mayúsculas sin importar si el cliente la
+    // escribió a mano o la eligió del combobox (el datalist no cambia cómo
+    // se guarda el valor, es el mismo string en ambos casos). El resto de
+    // los campos (RUC/cédula, teléfono, email) se manda tal cual.
+    const nombreMayusculas = customerName.trim().toUpperCase() || "cliente web";
+    const direccionMayusculas = customerAddress.trim().toUpperCase() || "no especificada";
+    const ciudadMayusculas = customerCity.trim().toUpperCase() || "no especificada";
+
     // Armamos el mensaje completo del pedido
     const message =
-      `Nuevo pedido de ${customerName || "cliente web"}\n` +
+      `Nuevo pedido de ${nombreMayusculas}\n` +
       `${identificacion.tipo ? NOMBRE_TIPO[identificacion.tipo] : "RUC/Cédula"}: ${customerRuc}\n` +
-      `Dirección: ${customerAddress.trim() || "no especificada"}\n` +
-      `Ciudad: ${customerCity.trim() || "no especificada"}\n` +
+      `Dirección: ${direccionMayusculas}\n` +
+      `Ciudad: ${ciudadMayusculas}\n` +
       // Normalizado a formato internacional (+593...) para que el asesor pueda escribirle directo
       `Teléfono: ${telefono.normalizado ?? customerPhone}\n` +
       `Email: ${customerEmail}\n\n` +
@@ -141,8 +152,16 @@ export default function CarritoPage() {
 
   // CASO NORMAL: mostramos el carrito con productos y el formulario
   return (
-    <main className="min-h-screen bg-[#EFEDE7] px-6 py-10">
-      <div className="mx-auto max-w-3xl">
+    <main className="min-h-screen bg-[#EFEDE7]">
+      {/* Link para volver al catálogo - no se puede asumir que el cliente
+          sepa que el logo del header cumple esa función */}
+      <div className="border-b border-[#D8D4CC] bg-white px-6 py-3">
+        <Link href="/" className="text-sm text-[#6B6862] hover:text-[#232320]">
+          ← Volver al catálogo
+        </Link>
+      </div>
+
+      <div className="mx-auto max-w-3xl px-6 py-10">
         <h1 className="font-[var(--font-heading)] text-2xl font-bold text-[#232320]">
           Tu pedido
         </h1>
@@ -243,13 +262,24 @@ export default function CarritoPage() {
               onChange={(e) => setCustomerAddress(e.target.value)}
               className="w-full border border-[#D8D4CC] bg-white px-4 py-2 text-sm outline-none focus:border-[#A8562E]"
             />
-            <input
-              type="text"
-              placeholder="Ciudad (opcional)"
-              value={customerCity}
-              onChange={(e) => setCustomerCity(e.target.value)}
-              className="w-full border border-[#D8D4CC] bg-white px-4 py-2 text-sm outline-none focus:border-[#A8562E]"
-            />
+            <div>
+              <input
+                type="text"
+                list="ciudades-ecuador"
+                placeholder="Ciudad (opcional)"
+                value={customerCity}
+                onChange={(e) => setCustomerCity(e.target.value)}
+                autoComplete="off"
+                className="w-full border border-[#D8D4CC] bg-white px-4 py-2 text-sm outline-none focus:border-[#A8562E]"
+              />
+              {/* datalist: filtra mientras se escribe (coincidencia parcial) y
+                  también se puede abrir para ver la lista completa sin escribir nada */}
+              <datalist id="ciudades-ecuador">
+                {ciudadesEcuador.map((ciudad) => (
+                  <option key={ciudad} value={ciudad} />
+                ))}
+              </datalist>
+            </div>
             <div>
               <input
                 type="tel"

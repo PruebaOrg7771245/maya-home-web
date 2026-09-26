@@ -18,6 +18,26 @@ Formato de entrada:
 
 ---
 
+## 25/09/2026 - Mejoras de UX en producto y carrito
+- `AddToCartButton`: el "✓ Agregado" temporal (desaparecía a los 2s) se
+  reemplazó por un selector de cantidad persistente (−, cantidad, +) en el
+  mismo lugar del botón, leyendo/escribiendo directo de `useCart`. Al llegar
+  a 0 vuelve a mostrarse "Agregar al pedido". Antes la única confirmación
+  duradera de que el producto estaba en el carrito era mirar el header, que
+  se pierde de vista al hacer scroll.
+- `/carrito`: se agregó el link "← Volver al catálogo" también en la vista
+  normal con productos (ya existía en el carrito vacío y en la confirmación
+  de envío, pero no acá).
+- `/carrito`: el mensaje de WhatsApp arma Nombre/Razón social, Dirección y
+  Ciudad en MAYÚSCULAS (solo en el texto del mensaje, no en los inputs)
+  porque el asesor los carga así en su sistema interno. Ciudad se sube a
+  mayúsculas sin importar si el cliente la escribió a mano o la eligió del
+  combobox (es el mismo string guardado en ambos casos). RUC/Cédula,
+  Teléfono y Email se mandan tal cual los escribió el cliente.
+- `/carrito`: el input de Ciudad pasa a ser un combobox (`<input list>` +
+  `<datalist>`) con las ~138 localidades de `src/data/ciudadesEcuador.ts`,
+  en vez de texto libre. Sigue siendo opcional. Ver ADR-6.
+
 ## 24/09/2026 - Validación de RUC/Cédula y teléfono en `/carrito`
 - Nuevo `src/lib/identificacion.ts`: valida cédula y RUC ecuatorianos por
   dígito verificador, sin API. `validarIdentificacion()` detecta el tipo

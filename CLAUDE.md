@@ -77,13 +77,80 @@ Después de un cambio no trivial (funcionalidad nueva, decisión de
 arquitectura), usar el agente `trazabilidad` para dejar registro en esos
 archivos. No hace falta para cambios triviales (typos, estilo).
 
-## Agentes de proyecto (`.claude/agents/`)
+## Agentes y skills del proyecto
 
-- `trazabilidad` — mantiene `docs/CHANGELOG.md` y `docs/DECISIONS.md` al
-  día después de un cambio.
-- `stock-integration` — avanza la conexión de stock real descrita en
-  `docs/REQUIREMENTS-STOCK.md`, respetando el patrón adaptador de
-  `src/lib/stock.ts`.
+Este repo tiene tres agentes versionados en `.claude/agents/` y un skill de
+diseño versionado en `.claude/skills/`. Además hay dos skills globales
+(`frontend-design`, `vercel-react-best-practices`) vendorizados de solo
+lectura en `.agents/skills/` como referencia — no son específicos de este
+proyecto, se usan igual que cualquier skill del sistema.
+
+### Cuándo delegar a cada agente
+
+- **`front-end`** — cualquier pedido que toque un componente visual, página
+  o elemento de UI (tarjetas, botones, badges, headers, formularios,
+  estados vacíos/error, copy de interfaz). Incluye pedidos que no mencionan
+  estilo explícitamente ("agregá un botón de favoritos", "hacé una página
+  de contacto"): igual hay que pasar por acá porque el sistema de diseño ya
+  tiene reglas para eso. NO usar para lógica de negocio, arquitectura,
+  stock o datos — solo la parte visual de esos cambios, si la hay.
+  - Este agente carga `maya-home-design-system` y `frontend-design` juntos,
+    con jerarquía fija: `maya-home-design-system` manda siempre que el
+    proyecto ya tenga una decisión tomada (colores, tipografía, bordes,
+    sombras); `frontend-design` solo llena los huecos que el sistema de
+    diseño no cubre (composición, jerarquía visual, movimiento,
+    copywriting, accesibilidad). Nunca al revés.
+  - **Excepción:** si el contenido de `maya-home-design-system` ya está
+    cargado en el contexto de la sesión actual (por ejemplo, porque se leyó
+    recién para otra tarea), no hace falta delegar al agente `front-end` —
+    aplicar las reglas directamente evita el costo redundante de que un
+    subagente aislado vuelva a leer la misma skill desde cero. Esta
+    excepción NO aplica a `frontend-design`: esa sí sigue cargándose solo a
+    través del agente, ya que rara vez ya está en contexto sin haberla
+    pedido explícitamente.
+      
+- **`stock-integration`** — cualquier trabajo relacionado con
+  `src/lib/stock.ts` o con avanzar la integración de stock real (SQL
+  Server / API externa) descrita en `docs/REQUIREMENTS-STOCK.md`. NO usar
+  para otros cambios del catálogo o del carrito que no toquen el stock.
+  Recordar ADR-1: el stock SIEMPRE se consulta vía `getStock()`, nunca
+  directo desde componentes/páginas — si un pedido de UI necesita mostrar
+  stock, la lectura sigue pasando por ahí y no amerita este agente salvo
+  que se esté tocando la lógica de `getStock()` en sí.
+- **`trazabilidad`** — después de completar un cambio no trivial (funcionalidad
+  nueva, decisión de arquitectura, cambio de rumbo), para dejar registro en
+  `docs/CHANGELOG.md` y, si corresponde, `docs/DECISIONS.md` (y
+  `docs/REQUIREMENTS-STOCK.md` si el cambio deja algo pendiente de esa
+  integración). NO usar para cambios triviales (typos, formateo, ajustes de
+  estilo menores). No se dispara solo — hay que invocarlo explícitamente
+  al terminar el cambio real (los otros agentes no lo llaman por su cuenta).
+
+### Cuándo usar cada skill directamente (sin pasar por un agente)
+
+- **`maya-home-design-system`** — autoridad final de estilo visual en este
+  proyecto. Se carga siempre que se toque JSX/Tailwind visual, ya sea a
+  través del agente `front-end` o directamente si el cambio es chico y no
+  amerita delegar.
+- **`vercel-react-best-practices`** — aplica a cualquier trabajo de
+  performance en componentes/páginas React o Next.js (data fetching,
+  memoización, bundle, hidratación, etc.), independientemente de si el
+  cambio es visual o no. No está atado a ningún agente de este proyecto;
+  cargarlo cuando el pedido sea de optimización o al escribir/revisar
+  código React/Next.js en general.
+- **`frontend-design`** — solo para las partes de diseño visual que
+  `maya-home-design-system` no cubre (ver arriba). Fuera del contexto de
+  este proyecto no aplica.
+
+### Regla general
+
+Para lógica de negocio, arquitectura o datos que no sea ni visual ni de
+stock (ej. el carrito, el checkout por WhatsApp, validaciones como
+`src/lib/telefono.ts` / `src/lib/identificacion.ts`), no hay agente
+dedicado: se trabaja directo en el código siguiendo las convenciones de
+este archivo. Si un pedido cruza categorías (ej. una página nueva que
+además necesita lógica de stock), dividir el trabajo: la parte visual al
+agente `front-end`, la parte de stock al agente `stock-integration` (o
+directo si es trivial), y `trazabilidad` al final para dejar constancia.
 
 ## Convenciones ya establecidas
 
