@@ -117,6 +117,12 @@ proyecto, se usan igual que cualquier skill del sistema.
   directo desde componentes/páginas — si un pedido de UI necesita mostrar
   stock, la lectura sigue pasando por ahí y no amerita este agente salvo
   que se esté tocando la lógica de `getStock()` en sí.
+- **`database`** — cualquier trabajo que toque Supabase (esquema, RLS,
+  rutas de servidor que persisten datos, ej. `/api/pedido`). Carga la
+  skill `supabase-postgres-best-practices` para buenas prácticas
+  generales de Postgres, más sus propias reglas del proyecto (nunca
+  confiar en precios del cliente, patrón guardar-antes-de-enviar, etc.)
+  NO usar para construir el mensaje de WhatsApp ni para nada visual.
 - **`trazabilidad`** — después de completar un cambio no trivial (funcionalidad
   nueva, decisión de arquitectura, cambio de rumbo), para dejar registro en
   `docs/CHANGELOG.md` y, si corresponde, `docs/DECISIONS.md` (y
@@ -140,17 +146,23 @@ proyecto, se usan igual que cualquier skill del sistema.
 - **`frontend-design`** — solo para las partes de diseño visual que
   `maya-home-design-system` no cubre (ver arriba). Fuera del contexto de
   este proyecto no aplica.
+- **`supabase-postgres-best-practices`** — está atada al agente
+  `database`, no se usa suelta en este proyecto.
 
 ### Regla general
 
-Para lógica de negocio, arquitectura o datos que no sea ni visual ni de
-stock (ej. el carrito, el checkout por WhatsApp, validaciones como
-`src/lib/telefono.ts` / `src/lib/identificacion.ts`), no hay agente
-dedicado: se trabaja directo en el código siguiendo las convenciones de
-este archivo. Si un pedido cruza categorías (ej. una página nueva que
-además necesita lógica de stock), dividir el trabajo: la parte visual al
-agente `front-end`, la parte de stock al agente `stock-integration` (o
-directo si es trivial), y `trazabilidad` al final para dejar constancia.
+Para lógica de negocio o arquitectura que no sea visual, de stock ni de
+persistencia en Supabase (ej. la construcción del mensaje de WhatsApp en
+sí, validaciones como `src/lib/telefono.ts` / `src/lib/identificacion.ts`
+que no escriben en la base), no hay agente dedicado: se trabaja directo
+en el código siguiendo las convenciones de este archivo. Si algo toca
+Supabase (guardar o leer un pedido, cambios de esquema, RLS), eso es del
+agente `database` — ya no queda como catch-all sin agente. Si un pedido
+cruza categorías (ej. una página nueva que además necesita lógica de
+stock o persistencia), dividir el trabajo: la parte visual al agente
+`front-end`, la parte de stock al agente `stock-integration`, la parte de
+Supabase al agente `database` (o directo si es trivial), y `trazabilidad`
+al final para dejar constancia.
 
 ## Convenciones ya establecidas
 

@@ -18,6 +18,20 @@ Formato de entrada:
 
 ---
 
+## 28/09/2026 - Wizard de 3 pasos en `/carrito`
+- `/carrito` pasó de un formulario único (lista + datos + botón "Enviar
+  pedido al asesor") a un wizard de 3 pasos con estado local `step`: 1) "Tu
+  pedido" (lista, cantidades, total), 2) "Tus datos" (resumen compacto del
+  pedido + formulario completo de cliente) y 3) "Cómo enviarlo" (elegir
+  WhatsApp o que un asesor contacte por correo).
+- La opción "Que un asesor me contacte" queda deshabilitada ("Próximamente"):
+  el envío por correo se conecta en la Fase 3 del proyecto, cuando el
+  dominio esté listo.
+- No cambió la lógica de validación (`isFormValid`, `validarIdentificacion`,
+  `validarTelefono`, `isValidEmail`) ni `handleSendOrder`: solo se
+  reorganizó el JSX en pasos y se agregó un indicador "Paso X de 3". Ver
+  ADR-7.
+
 ## 25/09/2026 - Mejoras de UX en producto y carrito
 - `AddToCartButton`: el "✓ Agregado" temporal (desaparecía a los 2s) se
   reemplazó por un selector de cantidad persistente (−, cantidad, +) en el

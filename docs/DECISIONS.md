@@ -93,6 +93,28 @@ Formato:
   reglas por país.
 - **Estado:** vigente (24/09/2026).
 
+## ADR-7: Checkout de `/carrito` como wizard de 3 pasos
+- **Contexto:** el checkout era un formulario único (lista de productos +
+  datos del cliente + botón de envío) en la misma pantalla, y se necesitaba
+  espacio para agregar una segunda vía de contacto (asesor por correo) sin
+  saturar más la pantalla.
+- **Decisión:** dividir el flujo en 3 pasos con estado local (`step`) dentro
+  del mismo componente de `/carrito`: pedido → datos del cliente → método
+  de envío (WhatsApp o "que un asesor me contacte", esta última
+  deshabilitada por ahora). No se creó una máquina de estados ni rutas
+  separadas por paso.
+- **Alternativas descartadas:**
+  - Rutas separadas (`/carrito/datos`, `/carrito/enviar`) — se descartó
+    porque el carrito vive en memoria (`CartContext`, sin persistencia) y
+    cambiar de ruta no aporta nada que el estado local no resuelva.
+  - Mantener el formulario único y solo agregar el botón de correo al
+    final — se descartó porque mezclaba dos decisiones distintas (revisar
+    pedido, completar datos, elegir canal) en una sola pantalla larga.
+- **Consecuencia:** la opción de contacto por correo queda visible pero
+  deshabilitada ("Próximamente") hasta la Fase 3 del proyecto, cuando el
+  dominio propio esté listo para recibir esos pedidos.
+- **Estado:** vigente (28/09/2026).
+
 ## ADR-6: Ciudad con `<datalist>` nativo en vez de combobox custom
 - **Contexto:** el input de Ciudad en `/carrito` era texto libre; se pidió
   poder filtrar entre las localidades de Ecuador mientras se escribe y
