@@ -49,7 +49,7 @@ export const products: Product[] = [
     description: "Lavamanos cerámico de sobreponer, acabado negro mate, línea rectangular minimalista.",
     images: ["/images/products/basin-9636m001.jpg"],
     variants: [{ attribute: "medidas", value: "500 x 350 x 120 mm" }],
-    prices: { minorista: null, mayorista: null },
+    prices: { minorista: 50, mayorista: 40 },
     sku: "9636 M-001",
   },
   {

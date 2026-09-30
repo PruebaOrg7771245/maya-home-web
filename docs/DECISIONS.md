@@ -133,3 +133,72 @@ Formato:
   el CSS del proyecto (menos consistente visualmente que un combobox
   custom, pero aceptable para un campo opcional).
 - **Estado:** vigente (25/09/2026).
+
+## ADR-8: Supabase con RLS para persistir pedidos
+- **Contexto:** hasta ahora el checkout (ADR-2) solo armaba un mensaje de
+  WhatsApp/correo sin guardar el pedido en ningún lado — no había forma de
+  auditar pedidos ni de retomar un envío de correo fallido. Hacía falta
+  persistencia real sin salir del modelo "sin backend propio" (ADR-3) de
+  mantener el sitio simple.
+- **Decisión:** usar Supabase (Postgres gestionado) para la tabla
+  `pedidos`, con RLS activo y sin ninguna política pública — el único
+  acceso es desde `POST /api/pedido` (ruta de servidor) usando
+  `supabaseServidor`, un cliente con la llave `service_role` que nunca se
+  importa desde el navegador. El precio/total se recalcula siempre en el
+  servidor desde `src/data/products.ts`, nunca se confía en lo que manda
+  el cliente. Para el canal "correo", el pedido se guarda primero con
+  `estado_correo: "pendiente"` y recién después se intenta el envío real
+  (Resend, fase futura) — nunca al revés.
+- **Alternativas descartadas:**
+  - Seguir sin persistencia (solo `wa.me`/`mailto:` como hasta ahora) —
+    descartada porque no permite recuperar un pedido si el envío de correo
+    falla, ni tener registro de qué se pidió.
+  - RLS con políticas públicas de insert desde el navegador (cliente
+    público de Supabase) — descartada porque expondría la tabla a
+    inserts/lecturas arbitrarias sin pasar por la validación de servidor
+    (precio recalculado, formato de RUC/teléfono); se verificó en vivo que
+    la llave pública no puede ni leer ni escribir (`42501` al intentar
+    insert).
+  - Migraciones automatizadas / CLI de Supabase conectada al repo —
+    descartada por ahora: los cambios de esquema se aplican a mano en el
+    SQL Editor de Supabase (ver reglas del agente `database`); la tabla
+    `pedidos` ya estaba provisionada así antes de esta integración.
+- **Consecuencia:** cualquier trabajo futuro sobre esta tabla (o tablas
+  nuevas que guarden datos de Maya Home) pasa por el agente `database`, que
+  aplica RLS sin políticas públicas por defecto. El envío real de correo
+  (Resend) para pedidos con canal "correo" queda pendiente — el estado
+  `"pendiente"` es el punto donde se retoma.
+- **Estado:** vigente (29/09/2026).
+
+## ADR-9: Anti-bot/anti-abuso en `POST /api/pedido` sin servicios externos
+- **Contexto:** `POST /api/pedido` (ADR-8) no tenía ninguna protección
+  contra envíos automatizados ni contra el caso más común de abuso
+  involuntario, el doble clic en "Enviar pedido" que crea dos filas para el
+  mismo pedido.
+- **Decisión:** tres capas livianas, todas dentro de la misma ruta de
+  servidor, antes del insert: honeypot (campo oculto `sitioWeb` que un bot
+  que autocompleta formularios sí llena), límite de 5 pedidos por IP cada
+  10 minutos, y deduplicación por RUC/cédula + teléfono en una ventana de
+  60 segundos. Las verificaciones de IP y deduplicación son *fail-open*: si
+  la consulta a Supabase falla, no bloquean el pedido, solo lo registran en
+  el log — se prioriza no perder una venta real por un error de la
+  verificación en sí misma.
+- **Alternativas descartadas:**
+  - CAPTCHA (reCAPTCHA/hCaptcha) — agrega una dependencia de terceros,
+    fricción visible para el cliente y un script externo, para un
+    formulario de checkout de un solo paso de envío; se descartó por
+    desproporcionado frente al volumen y riesgo actuales del sitio.
+  - Rate limiting a nivel de edge/middleware (ej. Vercel Edge Config o un
+    KV externo) — se descartó porque agrega infraestructura nueva
+    (almacenamiento de contadores fuera de Postgres) cuando Supabase ya
+    tiene el dato necesario (`creado_en`, `ip`) para resolverlo con una
+    consulta simple; se puede migrar a edge más adelante si el volumen de
+    tráfico lo justifica.
+- **Consecuencia:** columna nueva `ip inet` (nullable) en `pedidos`, con
+  índice parcial `pedidos_ip_creado_en_idx` (`where ip is not null`) y
+  `pedidos_dedup_idx` sobre `(ruc_cedula, telefono, creado_en)`, ambos
+  creados con `concurrently` para no bloquear escrituras. El honeypot
+  depende de que el campo oculto en `/carrito` nunca se le ponga
+  `display:none` (algunos bots lo detectan y lo saltean) — se oculta
+  sacándolo del viewport en su lugar.
+- **Estado:** vigente (30/09/2026).

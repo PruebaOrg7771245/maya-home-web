@@ -96,6 +96,11 @@ export default function CarritoPage() {
   const [touched, setTouched] = useState({ ruc: false, phone: false, email: false });
   // Estado que controla si ya se "envió" el pedido, para mostrar la pantalla de confirmación
   const [orderSent, setOrderSent] = useState(false);
+  // Honeypot anti-bot: campo señuelo que un usuario real nunca ve ni completa.
+  // Se manda vacío siempre; si llega con algún valor, el servidor
+  // (src/app/api/pedido/route.ts) rechaza la request asumiendo que la llenó
+  // un bot. Nunca se le pone un valor por defecto acá.
+  const [sitioWeb, setSitioWeb] = useState("");
 
   const identificacion = validarIdentificacion(customerRuc);
   const telefono = validarTelefono(customerPhone);
@@ -110,7 +115,7 @@ export default function CarritoPage() {
     emailValid;
 
   // Arma el mensaje con el detalle del pedido, y abre WhatsApp con todo pre-llenado
-  function handleSendOrder() {
+  async function handleSendOrder() {
     // Construimos el listado de productos como texto plano, línea por línea
     const itemsList = items
       .map(
@@ -142,6 +147,35 @@ export default function CarritoPage() {
       `Email: ${customerEmail}\n\n` +
       `Productos:\n${itemsList}\n\n` +
       `Total estimado: ${formatPrice(totalPrice)}`;
+
+    // Guardamos el pedido en Supabase antes de abrir WhatsApp. Si el guardado
+    // falla (ej. algún producto todavía sin precio confirmado), no bloqueamos
+    // la venta por eso - el cliente igual puede mandar el WhatsApp - pero
+    // queda registrado en la consola para poder investigarlo después.
+    try {
+      const respuesta = await fetch("/api/pedido", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: items.map((item) => ({ id: item.id, cantidad: item.quantity })),
+          rucCedula: customerRuc,
+          nombreRazonSocial: customerName,
+          direccion: customerAddress,
+          ciudad: customerCity,
+          telefono: customerPhone,
+          email: customerEmail,
+          canal: "whatsapp",
+          sitioWeb,
+        }),
+      });
+
+      if (!respuesta.ok) {
+        const cuerpoError = await respuesta.json().catch(() => null);
+        console.error("No se pudo guardar el pedido:", cuerpoError?.error ?? respuesta.status);
+      }
+    } catch (error) {
+      console.error("No se pudo guardar el pedido:", error);
+    }
 
     // wa.me solo acepta el número en dígitos (con código de país, sin "+" ni espacios)
     const phoneDigits = ASESOR_PHONE.replace(/\D/g, "");
@@ -288,6 +322,28 @@ export default function CarritoPage() {
             </p>
 
             <div className="mt-6 space-y-3">
+              {/* Honeypot anti-bot: invisible y no alcanzable por tabulación
+                  para una persona, pero presente en el DOM para que un bot
+                  que autocompleta formularios lo rellene. Deliberadamente NO
+                  usa display:none (algunos bots lo detectan y lo ignoran) ni
+                  visibility:hidden - se oculta sacándolo del viewport. El
+                  servidor rechaza la request si este campo llega con algún
+                  valor. */}
+              <div
+                aria-hidden="true"
+                style={{ position: "absolute", left: "-9999px", top: "auto" }}
+              >
+                <label htmlFor="sitioWeb">No completar este campo</label>
+                <input
+                  type="text"
+                  id="sitioWeb"
+                  name="sitioWeb"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={sitioWeb}
+                  onChange={(e) => setSitioWeb(e.target.value)}
+                />
+              </div>
               <div>
                 <input
                   type="text"
@@ -357,8 +413,7 @@ export default function CarritoPage() {
                 {/* Texto de ayuda siempre visible: el cliente debe saber que el
                     asesor lo va a contactar a este número */}
                 <p id="ayuda-telefono" className="mt-1 text-xs text-[#6B6862]">
-                  Este es el número al que te contactará nuestro asesor. Si no es correcto, igual te
-                  escribiremos al número desde el que envíes este WhatsApp.
+                  Este es el número al que te contactará nuestro asesor. Verfica que sea correcto
                 </p>
                 {touched.phone && customerPhone.trim() !== "" && !telefono.valido && (
                   <p className="mt-1 text-xs text-red-600">{telefono.mensaje}</p>
@@ -404,7 +459,7 @@ export default function CarritoPage() {
             <h1 className="font-[var(--font-heading)] text-2xl font-bold text-[#232320]">
               Cómo enviarlo
             </h1>
-            <p className="mt-2 text-sm text-[#6B6862]">Elegí cómo querés que te contactemos.</p>
+            <p className="mt-2 text-sm text-[#6B6862]">Elige cómo quieres que te contactemos.</p>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               {/* Opción A: enviar por WhatsApp - dispara el mismo handleSendOrder de siempre */}

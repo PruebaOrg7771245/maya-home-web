@@ -40,7 +40,7 @@ function validarEcuador(nacional: string): ResultadoTelefono {
     : {
         valido: false,
         normalizado: null,
-        mensaje: "Escribe el número sin +593, debe empezar con 09 (ej: 0991234567)",
+        mensaje: "Revise el número escrito",
       };
 }
 

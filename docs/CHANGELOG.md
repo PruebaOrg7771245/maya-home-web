@@ -18,6 +18,66 @@ Formato de entrada:
 
 ---
 
+## 30/09/2026 - Protecciones anti-bot/anti-abuso en `POST /api/pedido`
+- Tres protecciones nuevas en `src/app/api/pedido/route.ts`, antes del
+  insert a `pedidos`: 1) **honeypot** — campo oculto `sitioWeb` en el body;
+  si llega con contenido se rechaza con `400` y mensaje genérico (sin
+  delatar la trampa); 2) **límite por IP** — máx. 5 pedidos por IP
+  (`x-forwarded-for`) en 10 minutos, `429` si se supera; 3)
+  **deduplicación** — rechaza con `409` si el mismo RUC/cédula + teléfono
+  ya mandó un pedido en los últimos 60 segundos (cubre doble clic). La IP
+  ahora se guarda en la fila del pedido.
+- `/carrito`: nuevo input oculto `name="sitioWeb"` (fuera del viewport con
+  `position: absolute; left: -9999px`, no `display:none`, con
+  `aria-hidden` y `tabIndex={-1}`) que se suma al body del fetch existente
+  en `handleSendOrder`.
+- Esquema de Supabase (ya aplicado por el usuario): columna `ip inet`
+  (nullable) en `pedidos` y dos índices nuevos
+  (`pedidos_ip_creado_en_idx` parcial `where ip is not null`,
+  `pedidos_dedup_idx` sobre `ruc_cedula, telefono, creado_en`), ambos con
+  `concurrently`. Ver ADR-9.
+- Hecho en paralelo: agente `database` (servidor + esquema), agente
+  `front-end` (input oculto). Lint y `tsc --noEmit` sin errores nuevos.
+
+## 29/09/2026 - Conexión de Supabase y `POST /api/pedido`
+- Nuevo agente versionado `.claude/agents/database.md`: dueño de todo lo
+  que Maya Home guarda o lee de Supabase (cliente de servidor, rutas de
+  servidor que persisten datos, esquema, RLS). `CLAUDE.md` ya quedó
+  actualizado con esto (agente `database` y skill
+  `supabase-postgres-best-practices`) en el commit `a45cf45`.
+- Se conectó Supabase de verdad: `src/lib/supabase.ts` (cliente
+  `supabaseServidor` con `service_role`, exclusivo de rutas de servidor) y
+  la nueva ruta `POST /api/pedido`, que recalcula precio/total siempre
+  desde `src/data/products.ts` por id (nunca confía en lo que manda el
+  navegador) e inserta el pedido en la tabla `pedidos`.
+- El agente `database` corrigió imports rotos que tenía `route.ts`
+  (apuntaban a `@/lib/validarIdentificacion` y `@/lib/validarTelefono`,
+  archivos inexistentes) para usar los reales `validarIdentificacion` de
+  `src/lib/identificacion.ts` y `validarTelefono` de `src/lib/telefono.ts`,
+  que devuelven objetos `{valido, ...}` en vez de booleanos. También
+  endureció la validación de tipos del body JSON y ahora guarda el
+  teléfono ya normalizado (`+593...`) en vez del string crudo.
+- La tabla `pedidos` ya existía en Supabase antes de esta sesión, con RLS
+  activo y sin políticas públicas (verificado en vivo: `select`/`insert`
+  con la llave pública fallan; solo `supabaseServidor` puede escribir). No
+  hizo falta SQL nuevo.
+- Probado end-to-end con un pedido real: `201`, fila insertada y confirmada,
+  luego borrada. Para la prueba se le puso precio temporal en `products.ts`
+  al lavamanos `9636 M-001` (`minorista: 50, mayorista: 40`); quedó
+  confirmado como precio real y no se revirtió. Lint y `tsc --noEmit` sin
+  errores.
+- `/carrito`: `handleSendOrder` ahora es `async` y, antes de abrir WhatsApp,
+  hace `fetch("/api/pedido", { method: "POST", ... })` con canal
+  `"whatsapp"` para guardar el pedido. Si el guardado falla, no bloquea el
+  envío por WhatsApp — solo queda registrado con `console.error`. También
+  se simplificaron dos textos de esa página (ayuda del campo teléfono y el
+  paso "Cómo enviarlo").
+- `src/lib/telefono.ts`: se simplificó el mensaje de error de validación de
+  teléfono ecuatoriano.
+- Pendiente: el envío real de correo (Resend) para el canal "correo" sigue
+  sin implementar; el pedido queda con `estado_correo: "pendiente"`. Ver
+  ADR-8.
+
 ## 28/09/2026 - Wizard de 3 pasos en `/carrito`
 - `/carrito` pasó de un formulario único (lista + datos + botón "Enviar
   pedido al asesor") a un wizard de 3 pasos con estado local `step`: 1) "Tu
