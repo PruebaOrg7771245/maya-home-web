@@ -46,6 +46,12 @@ Formato:
     configurado. `NEXT_PUBLIC_ADVISOR_EMAIL` quedó sin uso.
 - **Estado:** vigente. Si en el futuro se agrega pago en línea, este ADR
   queda superado y hay que documentar el reemplazo acá.
+- **Nota (01/10/2026):** WhatsApp dejó de ser el único canal de envío real
+  del checkout — desde esta fecha `/carrito` también ofrece "que un asesor
+  me contacte" por correo (ver ADR-7 y ADR-8). No cambia la decisión de
+  fondo de este ADR (sin pasarela de pago, el asesor coordina pago y envío
+  a mano): ambos canales terminan en que el asesor contacta manualmente al
+  cliente, solo cambia el medio por el que se entera del pedido.
 
 ## ADR-3: Sin backend propio (todavía)
 - **Contexto:** el catálogo vive en `src/data/products.ts` (datos
@@ -113,7 +119,9 @@ Formato:
 - **Consecuencia:** la opción de contacto por correo queda visible pero
   deshabilitada ("Próximamente") hasta la Fase 3 del proyecto, cuando el
   dominio propio esté listo para recibir esos pedidos.
-- **Estado:** vigente (28/09/2026).
+- **Estado:** vigente (28/09/2026). **Nota (01/10/2026):** la opción de
+  correo ya se activó (ver ADR-8 y CHANGELOG del 01/10/2026); la estructura
+  de 3 pasos en sí no cambió.
 
 ## ADR-6: Ciudad con `<datalist>` nativo en vez de combobox custom
 - **Contexto:** el input de Ciudad en `/carrito` era texto libre; se pidió
@@ -168,7 +176,10 @@ Formato:
   aplica RLS sin políticas públicas por defecto. El envío real de correo
   (Resend) para pedidos con canal "correo" queda pendiente — el estado
   `"pendiente"` es el punto donde se retoma.
-- **Estado:** vigente (29/09/2026).
+- **Estado:** vigente (29/09/2026). **Nota (01/10/2026):** el envío real
+  con Resend ya está implementado (`src/lib/email.ts`, llamado desde
+  `POST /api/pedido`), que actualiza `estado_correo` a `"enviado"` o
+  `"fallido"` según el resultado — ver CHANGELOG del 01/10/2026.
 
 ## ADR-9: Anti-bot/anti-abuso en `POST /api/pedido` sin servicios externos
 - **Contexto:** `POST /api/pedido` (ADR-8) no tenía ninguna protección

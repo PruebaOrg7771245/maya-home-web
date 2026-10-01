@@ -18,6 +18,39 @@ Formato de entrada:
 
 ---
 
+## 01/10/2026 - Correo al asesor (Resend) y canal "correo" activado en el checkout
+- Nuevo `src/lib/email.ts`: `enviarCorreoAsesor(pedido)` envía al asesor un
+  correo HTML con los datos del cliente y el detalle del pedido, vía Resend
+  (`RESEND_API_KEY` se lee solo del env). Nueva variable server-only
+  `ADVISOR_EMAIL` (sin `NEXT_PUBLIC_`, a diferencia de
+  `NEXT_PUBLIC_ADVISOR_PHONE`, porque este correo no se expone al cliente).
+  `replyTo` apunta al email del cliente, así que si el asesor responde el
+  correo le llega directo al cliente.
+- `POST /api/pedido`: después del insert a Supabase, si `canal === "correo"`
+  se llama a `enviarCorreoAsesor()` y se actualiza `estado_correo` de esa
+  misma fila a `"enviado"` o `"fallido"` (el motivo del fallo solo se
+  loguea con `console.error`, nunca se expone al cliente). La respuesta
+  sigue siendo `201` si el insert funcionó, sin importar si el correo se
+  pudo enviar: el pedido guardado es lo que importa, el correo es
+  best-effort. Resuelve lo pendiente anotado el 29/09/2026 (ver ADR-8).
+- `/carrito`: la opción "Que un asesor me contacte" del Paso 3 (antes
+  deshabilitada con "Próximamente", ver ADR-7) ya es funcional: llama a
+  `POST /api/pedido` con `canal: "correo"`. `handleSendOrder` ahora toma el
+  canal como parámetro (WhatsApp y correo reutilizan el mismo payload). El
+  estado `orderSent: boolean` se reemplazó por
+  `sentChannel: "whatsapp" | "correo" | null`, para mostrar un mensaje de
+  confirmación distinto por canal (correo: "Recibimos tu pedido, un asesor
+  te contactará pronto", sin prometer plazo).
+- A diferencia de WhatsApp (avanza a confirmación aunque el guardado en
+  Supabase falle, porque WhatsApp se abre igual del lado del cliente), el
+  canal correo depende enteramente de que el `POST /api/pedido` tenga
+  éxito: si falla, muestra un error inline en el Paso 3 (mismo estilo que
+  los errores de validación del Paso 2) y el cliente se queda ahí para
+  reintentar, sin avanzar a la confirmación.
+- Con esto el checkout pasa a tener dos canales reales (antes solo
+  WhatsApp estaba conectado de verdad); ver notas agregadas a ADR-7 y
+  ADR-8 en `DECISIONS.md`. `tsc --noEmit` sin errores.
+
 ## 30/09/2026 - Protecciones anti-bot/anti-abuso en `POST /api/pedido`
 - Tres protecciones nuevas en `src/app/api/pedido/route.ts`, antes del
   insert a `pedidos`: 1) **honeypot** — campo oculto `sitioWeb` en el body;
