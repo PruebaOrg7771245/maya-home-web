@@ -11,9 +11,15 @@ import { Resend } from "resend";
 // entorno, así que no hace falta pasarla a mano acá.
 const resend = new Resend();
 
-if (!process.env.ADVISOR_EMAIL) {
-  throw new Error("Falta la variable de entorno ADVISOR_EMAIL");
-}
+// El destinatario ya no es fijo: route.ts decide a qué asesor le toca
+// este pedido (round-robin vía obtener_asesor_disponible(), con
+// ADVISOR_EMAIL como respaldo de emergencia) y nos lo pasa acá. Por eso
+// ya no hace falta validar ADVISOR_EMAIL a nivel de módulo en este
+// archivo - esa variable ahora se resuelve y valida en route.ts.
+type DestinatarioAsesor = {
+  email: string;
+  nombre: string;
+};
 
 type ProductoPedido = {
   nombre: string;
@@ -97,15 +103,18 @@ function construirHtmlPedido(pedido: DatosPedido): string {
   `;
 }
 
-// Envía el correo. Devuelve { exito: true } o { exito: false, error }
-// para que quien la llame decida qué guardar en estado_correo.
+// Envía el correo al asesor indicado en `destinatario` (resuelto por
+// route.ts, vía round-robin o el respaldo de emergencia). Devuelve
+// { exito: true } o { exito: false, error } para que quien la llame
+// decida qué guardar en estado_correo.
 export async function enviarCorreoAsesor(
-  pedido: DatosPedido
+  pedido: DatosPedido,
+  destinatario: DestinatarioAsesor
 ): Promise<{ exito: true } | { exito: false; error: string }> {
   try {
     const resultado = await resend.emails.send({
       from: "Maya Home <pedidos@notificaciones.comercialmaya.com>",
-      to: process.env.ADVISOR_EMAIL as string,
+      to: `${destinatario.nombre} <${destinatario.email}>`,
       replyTo: pedido.email, // al darle "Responder", el asesor le escribe directo al cliente
       subject: `Nuevo pedido - ${pedido.nombreRazonSocial}`,
       html: construirHtmlPedido(pedido),

@@ -23,6 +23,16 @@ import { enviarCorreoAsesor } from "@/lib/email";
 // busca el servidor en su propia copia de products.ts.
 type ItemPedido = { id: string; cantidad: number };
 
+// Fila que devuelve la función Postgres obtener_asesor_disponible() (ver
+// SQL en el SQL Editor de Supabase). supabaseServidor no está tipado con
+// un Database generado, así que el resultado de .rpc() llega sin tipo -
+// lo afirmamos acá a mano con la forma que la función devuelve.
+type AsesorDisponible = {
+  id: string;
+  email: string;
+  nombre: string;
+};
+
 type CuerpoPedido = {
   items: ItemPedido[];
   rucCedula: string;
@@ -227,6 +237,53 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // --- Elegir asesor (round-robin) SOLO si el canal es "correo" ---
+  // WhatsApp sigue yendo siempre al coordinador fijo (NEXT_PUBLIC_ADVISOR_PHONE),
+  // no pasa por esta lógica - asesorId queda null en ese caso.
+  //
+  // La elección es 100% server-side: el navegador no interviene ni elige
+  // asesor. Se resuelve ANTES del insert para poder guardar el asesor_id
+  // en la misma fila del pedido.
+  let asesorId: string | null = null;
+  let destinatarioCorreo: { email: string; nombre: string } | null = null;
+
+  if (cuerpo.canal === "correo") {
+    const { data: asesorDisponibleRaw, error: errorAsesor } = await supabaseServidor
+      .rpc("obtener_asesor_disponible")
+      .maybeSingle();
+    const asesorDisponible = asesorDisponibleRaw as AsesorDisponible | null;
+
+    if (errorAsesor) {
+      console.error("Error llamando a obtener_asesor_disponible():", errorAsesor);
+    }
+
+    if (asesorDisponible) {
+      asesorId = asesorDisponible.id;
+      destinatarioCorreo = {
+        email: asesorDisponible.email,
+        nombre: asesorDisponible.nombre,
+      };
+    } else {
+      // No debería pasar en operación normal - señal de que hay que
+      // revisar la tabla "asesores" (¿todos inactivos? ¿tabla vacía?).
+      console.warn(
+        "ADVERTENCIA: obtener_asesor_disponible() no devolvió ningún asesor activo. " +
+          "Usando ADVISOR_EMAIL de respaldo. Revisar la tabla 'asesores' en Supabase."
+      );
+
+      if (!process.env.ADVISOR_EMAIL) {
+        console.error(
+          "No hay asesor disponible NI ADVISOR_EMAIL de respaldo configurado - no se puede enviar el correo del pedido."
+        );
+      } else {
+        destinatarioCorreo = {
+          email: process.env.ADVISOR_EMAIL,
+          nombre: "Asesor Maya Home",
+        };
+      }
+    }
+  }
+
   // --- Guardar en Supabase ---
   // Si el canal es "correo", queda "pendiente" hasta que, más abajo,
   // intentemos el envío real y actualicemos esta misma fila.
@@ -244,6 +301,7 @@ export async function POST(request: NextRequest) {
       total,
       canal: cuerpo.canal,
       estado_correo: cuerpo.canal === "correo" ? "pendiente" : "no_aplica",
+      asesor_id: asesorId,
       ip,
     })
     .select("id")
@@ -265,20 +323,28 @@ export async function POST(request: NextRequest) {
   // cliente ni bloqueamos la respuesta, solo dejamos constancia en
   // estado_correo y en los logs para revisarlo después.
   if (cuerpo.canal === "correo") {
-    const resultadoCorreo = await enviarCorreoAsesor({
-      rucCedula,
-      nombreRazonSocial: cuerpo.nombreRazonSocial.trim(),
-      direccion: typeof cuerpo.direccion === "string" && cuerpo.direccion.trim() ? cuerpo.direccion.trim() : null,
-      ciudad: typeof cuerpo.ciudad === "string" && cuerpo.ciudad.trim() ? cuerpo.ciudad.trim() : null,
-      telefono: resultadoTelefono.normalizado,
-      email: cuerpo.email,
-      productos: productosDelPedido.map((p) => ({
-        nombre: p.nombre,
-        cantidad: p.cantidad,
-        precio: p.precio as number, // ya se validó arriba que ninguno es null
-      })),
-      total,
-    });
+    // Si no hay NI asesor de la tabla NI ADVISOR_EMAIL de respaldo, no hay
+    // a quién enviarle el correo - se registra como "fallido" sin intentar
+    // el envío (ya quedó el console.error de más arriba explicando por qué).
+    const resultadoCorreo = destinatarioCorreo
+      ? await enviarCorreoAsesor(
+          {
+            rucCedula,
+            nombreRazonSocial: cuerpo.nombreRazonSocial.trim(),
+            direccion: typeof cuerpo.direccion === "string" && cuerpo.direccion.trim() ? cuerpo.direccion.trim() : null,
+            ciudad: typeof cuerpo.ciudad === "string" && cuerpo.ciudad.trim() ? cuerpo.ciudad.trim() : null,
+            telefono: resultadoTelefono.normalizado,
+            email: cuerpo.email,
+            productos: productosDelPedido.map((p) => ({
+              nombre: p.nombre,
+              cantidad: p.cantidad,
+              precio: p.precio as number, // ya se validó arriba que ninguno es null
+            })),
+            total,
+          },
+          destinatarioCorreo
+        )
+      : { exito: false as const, error: "Sin destinatario disponible (ni asesor ni ADVISOR_EMAIL)" };
 
     const nuevoEstadoCorreo = resultadoCorreo.exito ? "enviado" : "fallido";
 
