@@ -213,3 +213,43 @@ Formato:
   `display:none` (algunos bots lo detectan y lo saltean) — se oculta
   sacándolo del viewport en su lugar.
 - **Estado:** vigente (30/09/2026).
+
+## ADR-10: Reparto de correos entre asesores por conteo mensual (no por timestamp)
+- **Contexto:** desde ADR-8, todos los pedidos con canal "correo" iban a un
+  único `ADVISOR_EMAIL` fijo. Con varios asesores reales operando, hacía
+  falta repartir la carga entre ellos sin tocar código cada vez que se
+  agrega, quita o pausa un asesor.
+- **Decisión:** tabla `asesores` en Supabase (`id`, `nombre`, `email`,
+  `activo`), columna `pedidos.asesor_id` (uuid, FK nullable) y una función
+  SQL `obtener_asesor_disponible()` (`language sql stable`) que cuenta los
+  pedidos de canal "correo" que recibió cada asesor activo en lo que va del
+  mes y devuelve el que tenga menos. `POST /api/pedido` la llama por RPC
+  antes del insert cuando el canal es "correo"; el asesor elegido recibe el
+  correo (vía `enviarCorreoAsesor()`, que ahora toma el destinatario como
+  parámetro en vez de leerlo fijo de `ADVISOR_EMAIL`) y su `id` queda
+  guardado en `asesor_id`. El canal "whatsapp" no pasa por esta lógica:
+  sigue yendo siempre al coordinador fijo, `asesor_id` queda `null`.
+- **Alternativas descartadas:**
+  - Round-robin clásico por timestamp (columna `ultimo_asignado_en`, elegir
+    el asesor con el timestamp más antiguo, `for update skip locked` para
+    concurrencia) — descartada en favor del conteo mensual: no necesita
+    columna ni índice extra, ni lock explícito porque es una sola consulta
+    de agregación, y además sirve de base para calcular comisiones
+    mensuales por asesor más adelante (por eso se guarda `asesor_id` en
+    cada pedido).
+  - Lógica de asignación en el código de la app (round-robin en memoria o
+    variable global) — descartada porque no sobrevive a reinicios/despliegues
+    ni a múltiples instancias serverless corriendo en paralelo; la función en
+    Postgres es la única fuente de verdad consistente entre requests
+    concurrentes.
+  - `security definer` en la función — no se usó porque quien llama
+    (`supabaseServidor`, `service_role`) ya bypassea RLS por sí mismo, no
+    hace falta elevar privilegios.
+- **Consecuencia:** si todos los asesores de la tabla quedan `activo = false`
+  (no debería pasar en operación normal), `obtener_asesor_disponible()` no
+  devuelve filas y `POST /api/pedido` cae a `ADVISOR_EMAIL` como respaldo de
+  emergencia (con `console.warn`); si tampoco hay `ADVISOR_EMAIL`
+  configurado, el pedido queda `estado_correo: "fallido"` sin intentar el
+  envío. Esta tabla y columna, igual que `pedidos`, se aplicaron a mano en
+  el SQL Editor de Supabase (ver ADR-8), no vía migraciones.
+- **Estado:** vigente (01/10/2026).

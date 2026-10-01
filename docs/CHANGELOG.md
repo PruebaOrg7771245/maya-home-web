@@ -18,6 +18,29 @@ Formato de entrada:
 
 ---
 
+## 01/10/2026 - Reparto de correos entre varios asesores (round-robin)
+- Nuevas piezas en Supabase (aplicadas a mano en el SQL Editor, no vía
+  migraciones): tabla `asesores` (`id`, `nombre`, `email`, `activo`, RLS sin
+  políticas públicas), columna `pedidos.asesor_id` (uuid, FK nullable) y la
+  función `obtener_asesor_disponible()` (`language sql stable`), que elige
+  el asesor activo con menos pedidos de canal "correo" en lo que va del mes.
+  Ya se cargaron los 3 asesores reales.
+- `src/lib/email.ts`: `enviarCorreoAsesor()` ahora recibe el destinatario
+  (`{ email, nombre }`) como parámetro, en vez de leerlo fijo de
+  `ADVISOR_EMAIL` a nivel de módulo.
+- `POST /api/pedido`: para canal "correo", antes del insert llama por RPC a
+  `obtener_asesor_disponible()`; si devuelve un asesor, ese recibe el correo
+  y su `id` queda en `asesor_id` del pedido. Si no devuelve ninguno (no
+  debería pasar en operación normal), cae a `ADVISOR_EMAIL` como respaldo de
+  emergencia con un `console.warn`; si tampoco hay `ADVISOR_EMAIL`, no se
+  intenta el envío y el pedido queda `estado_correo: "fallido"` directo. El
+  canal "whatsapp" no cambia: `asesor_id` siempre `null`.
+- Por qué: con varios asesores reales operando, hacía falta repartir la
+  carga sin tocar código cada vez que se agrega, quita o pausa uno (por eso
+  `activo` en la tabla en vez de una lista hardcodeada). El conteo mensual
+  por asesor también sirve de base para calcular comisiones más adelante.
+  Ver ADR-10.
+
 ## 01/10/2026 - Correo al asesor (Resend) y canal "correo" activado en el checkout
 - Nuevo `src/lib/email.ts`: `enviarCorreoAsesor(pedido)` envía al asesor un
   correo HTML con los datos del cliente y el detalle del pedido, vía Resend
