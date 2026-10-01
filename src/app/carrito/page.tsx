@@ -44,7 +44,7 @@ function formatPrice(price: number): string {
 }
 
 // Los pasos del wizard del carrito. El "paso 4" (confirmación) sigue siendo
-// la pantalla controlada por `orderSent` (ver más abajo) y no necesita un
+// la pantalla controlada por `sentChannel` (ver más abajo) y no necesita un
 // valor propio acá: una vez que se envía el pedido no se vuelve a los pasos.
 type Step = 1 | 2 | 3;
 
@@ -94,8 +94,17 @@ export default function CarritoPage() {
   // Campos "tocados" (perdieron el foco al menos una vez), para no mostrar
   // errores de validación antes de que el cliente haya intentado llenarlos
   const [touched, setTouched] = useState({ ruc: false, phone: false, email: false });
-  // Estado que controla si ya se "envió" el pedido, para mostrar la pantalla de confirmación
-  const [orderSent, setOrderSent] = useState(false);
+  // Canal por el que se envió el pedido ("whatsapp" | "correo"), o null si
+  // todavía no se envió. Reemplaza al booleano simple de antes: además de
+  // controlar si se muestra la pantalla de confirmación, determina qué
+  // mensaje mostrar ahí (ver más abajo).
+  const [sentChannel, setSentChannel] = useState<"whatsapp" | "correo" | null>(null);
+  // Estado propio del canal "correo": a diferencia de WhatsApp (que se abre
+  // igual aunque falle el guardado), ahí el guardado en Supabase ES la
+  // acción completa - necesita su propio estado de carga y de error para
+  // dar feedback en el Paso 3 y permitir reintentar.
+  const [enviandoCorreo, setEnviandoCorreo] = useState(false);
+  const [correoError, setCorreoError] = useState<string | null>(null);
   // Honeypot anti-bot: campo señuelo que un usuario real nunca ve ni completa.
   // Se manda vacío siempre; si llega con algún valor, el servidor
   // (src/app/api/pedido/route.ts) rechaza la request asumiendo que la llenó
@@ -114,8 +123,60 @@ export default function CarritoPage() {
     telefono.valido &&
     emailValid;
 
-  // Arma el mensaje con el detalle del pedido, y abre WhatsApp con todo pre-llenado
-  async function handleSendOrder() {
+  // Guarda el pedido en Supabase (siempre) y completa la acción del canal
+  // elegido en el Paso 3:
+  // - "whatsapp": abre WhatsApp con el mensaje pre-llenado. Se abre igual
+  //   aunque el guardado falle - WhatsApp es la acción real, el guardado es
+  //   un registro adicional - pero el error queda en consola para investigar.
+  // - "correo": el guardado ES la acción (el backend se encarga de avisarle
+  //   al asesor). Si falla, no hay nada más que la salve: se le muestra un
+  //   error al cliente y se queda en este paso para poder reintentar.
+  async function handleSendOrder(canal: "whatsapp" | "correo") {
+    if (canal === "correo") {
+      setCorreoError(null);
+      setEnviandoCorreo(true);
+    }
+
+    let guardadoFallo = false;
+    try {
+      const respuesta = await fetch("/api/pedido", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: items.map((item) => ({ id: item.id, cantidad: item.quantity })),
+          rucCedula: customerRuc,
+          nombreRazonSocial: customerName,
+          direccion: customerAddress,
+          ciudad: customerCity,
+          telefono: customerPhone,
+          email: customerEmail,
+          canal,
+          sitioWeb,
+        }),
+      });
+
+      if (!respuesta.ok) {
+        guardadoFallo = true;
+        const cuerpoError = await respuesta.json().catch(() => null);
+        console.error("No se pudo guardar el pedido:", cuerpoError?.error ?? respuesta.status);
+      }
+    } catch (error) {
+      guardadoFallo = true;
+      console.error("No se pudo guardar el pedido:", error);
+    }
+
+    if (canal === "correo") {
+      setEnviandoCorreo(false);
+      if (guardadoFallo) {
+        setCorreoError("No pudimos enviar tu pedido. Probá de nuevo en un momento.");
+        return;
+      }
+      setSentChannel("correo");
+      return;
+    }
+
+    // --- A partir de acá, lógica específica del canal WhatsApp ---
+
     // Construimos el listado de productos como texto plano, línea por línea
     const itemsList = items
       .map(
@@ -148,35 +209,6 @@ export default function CarritoPage() {
       `Productos:\n${itemsList}\n\n` +
       `Total estimado: ${formatPrice(totalPrice)}`;
 
-    // Guardamos el pedido en Supabase antes de abrir WhatsApp. Si el guardado
-    // falla (ej. algún producto todavía sin precio confirmado), no bloqueamos
-    // la venta por eso - el cliente igual puede mandar el WhatsApp - pero
-    // queda registrado en la consola para poder investigarlo después.
-    try {
-      const respuesta = await fetch("/api/pedido", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: items.map((item) => ({ id: item.id, cantidad: item.quantity })),
-          rucCedula: customerRuc,
-          nombreRazonSocial: customerName,
-          direccion: customerAddress,
-          ciudad: customerCity,
-          telefono: customerPhone,
-          email: customerEmail,
-          canal: "whatsapp",
-          sitioWeb,
-        }),
-      });
-
-      if (!respuesta.ok) {
-        const cuerpoError = await respuesta.json().catch(() => null);
-        console.error("No se pudo guardar el pedido:", cuerpoError?.error ?? respuesta.status);
-      }
-    } catch (error) {
-      console.error("No se pudo guardar el pedido:", error);
-    }
-
     // wa.me solo acepta el número en dígitos (con código de país, sin "+" ni espacios)
     const phoneDigits = ASESOR_PHONE.replace(/\D/g, "");
 
@@ -184,11 +216,11 @@ export default function CarritoPage() {
     // WhatsApp Web o la app del usuario (según el dispositivo) con el mensaje pre-llenado
     window.open(`https://wa.me/${phoneDigits}?text=${encodeURIComponent(message)}`, "_blank");
 
-    setOrderSent(true); // mostramos la pantalla de confirmación independientemente de si el envío se completa
+    setSentChannel("whatsapp"); // mostramos la pantalla de confirmación independientemente de si el guardado se completó
   }
 
   // CASO: carrito vacío - mostramos un mensaje simple con link para volver a comprar
-  if (items.length === 0 && !orderSent) {
+  if (items.length === 0 && sentChannel === null) {
     return (
       <main className="flex min-h-[60vh] flex-col items-center justify-center bg-[#EFEDE7] px-6 text-center">
         <p className="text-lg text-[#232320]">Tu carrito está vacío.</p>
@@ -199,8 +231,11 @@ export default function CarritoPage() {
     );
   }
 
-  // CASO: el pedido ya se "envió" - pantalla de confirmación (paso 4 conceptual)
-  if (orderSent) {
+  // CASO: el pedido ya se "envió" - pantalla de confirmación (paso 4 conceptual).
+  // El texto cambia según el canal: por WhatsApp sabemos que se abrió con el
+  // mensaje listo; por correo el guardado en Supabase ya fue la acción
+  // completa, así que no hay nada que "se abra" del lado del cliente.
+  if (sentChannel !== null) {
     return (
       <main className="flex min-h-[60vh] flex-col items-center justify-center bg-[#EFEDE7] px-6 text-center">
         <div className="max-w-md">
@@ -208,9 +243,15 @@ export default function CarritoPage() {
             ¡Pedido preparado!
           </h1>
           <p className="mt-3 text-[#6B6862]">
-            Se abrió WhatsApp con el resumen de tu pedido listo para enviar a nuestro asesor.
-            Si no se abrió automáticamente, contáctanos directamente al{" "}
-            <span className="font-medium text-[#232320]">{ASESOR_PHONE || "número del asesor"}</span>.
+            {sentChannel === "whatsapp" ? (
+              <>
+                Se abrió WhatsApp con el resumen de tu pedido listo para enviar a nuestro asesor.
+                Si no se abrió automáticamente, contáctanos directamente al{" "}
+                <span className="font-medium text-[#232320]">{ASESOR_PHONE || "número del asesor"}</span>.
+              </>
+            ) : (
+              "Recibimos tu pedido, un asesor te contactará pronto."
+            )}
           </p>
           <Link
             href="/"
@@ -462,9 +503,9 @@ export default function CarritoPage() {
             <p className="mt-2 text-sm text-[#6B6862]">Elige cómo quieres que te contactemos.</p>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              {/* Opción A: enviar por WhatsApp - dispara el mismo handleSendOrder de siempre */}
+              {/* Opción A: enviar por WhatsApp */}
               <button
-                onClick={handleSendOrder}
+                onClick={() => handleSendOrder("whatsapp")}
                 className="flex flex-col items-start gap-2 border border-[#D8D4CC] bg-white p-5 text-left transition-colors hover:border-[#A8562E]"
               >
                 <span className="font-[var(--font-heading)] text-base font-semibold text-[#232320]">
@@ -475,20 +516,26 @@ export default function CarritoPage() {
                 </span>
               </button>
 
-              {/* Opción B: que un asesor contacte por correo - todavía no está conectada (Fase 3) */}
-              <div className="flex flex-col items-start gap-2 border border-[#D8D4CC] bg-white p-5 text-left">
-                <span className="font-[var(--font-heading)] text-base font-semibold text-[#232320]">
-                  Que un asesor me contacte
-                </span>
-                <span className="text-sm text-[#6B6862]">
-                  Muy pronto vas a poder pedir que te escribamos nosotros primero, sin pasar por WhatsApp.
-                </span>
+              {/* Opción B: que un asesor contacte por correo. A diferencia de
+                  WhatsApp, acá el guardado del pedido ES la acción completa:
+                  si falla, mostramos el error debajo y el cliente se queda en
+                  este paso para reintentar (no hay pantalla de confirmación). */}
+              <div className="flex flex-col gap-1">
                 <button
-                  disabled
-                  className="mt-2 w-full border border-[#D8D4CC] bg-[#EFEDE7] px-4 py-2 text-sm font-medium text-[#6B6862] disabled:cursor-not-allowed"
+                  onClick={() => handleSendOrder("correo")}
+                  disabled={enviandoCorreo}
+                  className="flex flex-col items-start gap-2 border border-[#D8D4CC] bg-white p-5 text-left transition-colors hover:border-[#A8562E] disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  Próximamente
+                  <span className="font-[var(--font-heading)] text-base font-semibold text-[#232320]">
+                    Que un asesor me contacte
+                  </span>
+                  <span className="text-sm text-[#6B6862]">
+                    {enviandoCorreo
+                      ? "Enviando tu pedido..."
+                      : "Guardamos tu pedido y un asesor te escribe por correo, sin pasar por WhatsApp."}
+                  </span>
                 </button>
+                {correoError && <p className="text-xs text-red-600">{correoError}</p>}
               </div>
             </div>
 
