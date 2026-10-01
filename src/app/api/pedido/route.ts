@@ -5,16 +5,18 @@
 // cliente "ya validó" algo del lado del cliente), lo guarda en Supabase,
 // y devuelve el id del pedido creado.
 //
-// Por ahora NO envía el correo todavía (eso es la Fase 3, cuando el
-// dominio esté verificado en Resend) - si el canal es "correo", el pedido
-// se guarda con estado_correo = "pendiente" y ahí se queda hasta que
-// conectemos el envío real.
+// Si el canal es "correo", el pedido se guarda primero con
+// estado_correo = "pendiente" y, recién después del insert exitoso, se
+// intenta el envío real con Resend (src/lib/email.ts) - el resultado
+// actualiza esa misma fila a "enviado" o "fallido". Nunca al revés: la
+// acción externa no debe decidir si el pedido se guarda o no.
 
 import { NextRequest, NextResponse } from "next/server";
 import { products } from "@/data/products";
 import { validarIdentificacion } from "@/lib/identificacion";
 import { validarTelefono } from "@/lib/telefono";
 import { supabaseServidor } from "@/lib/supabase";
+import { enviarCorreoAsesor } from "@/lib/email";
 
 // Forma esperada del cuerpo de la petición. El navegador solo manda el id
 // del producto y la cantidad - nunca el nombre ni el precio, esos los
@@ -226,8 +228,8 @@ export async function POST(request: NextRequest) {
   }
 
   // --- Guardar en Supabase ---
-  // Si el canal es "correo", queda "pendiente" hasta que la Fase 3
-  // (envío real con Resend) lo procese y lo actualice a "enviado"/"fallido".
+  // Si el canal es "correo", queda "pendiente" hasta que, más abajo,
+  // intentemos el envío real y actualicemos esta misma fila.
 
   const { data, error } = await supabaseServidor
     .from("pedidos")
@@ -256,6 +258,51 @@ export async function POST(request: NextRequest) {
       { error: "No se pudo guardar el pedido, intenta de nuevo" },
       { status: 500 }
     );
+  }
+
+  // --- Envío de correo al asesor (solo si el canal elegido es "correo") ---
+  // El pedido ya quedó guardado - si el envío falla, no lo exponemos al
+  // cliente ni bloqueamos la respuesta, solo dejamos constancia en
+  // estado_correo y en los logs para revisarlo después.
+  if (cuerpo.canal === "correo") {
+    const resultadoCorreo = await enviarCorreoAsesor({
+      rucCedula,
+      nombreRazonSocial: cuerpo.nombreRazonSocial.trim(),
+      direccion: typeof cuerpo.direccion === "string" && cuerpo.direccion.trim() ? cuerpo.direccion.trim() : null,
+      ciudad: typeof cuerpo.ciudad === "string" && cuerpo.ciudad.trim() ? cuerpo.ciudad.trim() : null,
+      telefono: resultadoTelefono.normalizado,
+      email: cuerpo.email,
+      productos: productosDelPedido.map((p) => ({
+        nombre: p.nombre,
+        cantidad: p.cantidad,
+        precio: p.precio as number, // ya se validó arriba que ninguno es null
+      })),
+      total,
+    });
+
+    const nuevoEstadoCorreo = resultadoCorreo.exito ? "enviado" : "fallido";
+
+    if (!resultadoCorreo.exito) {
+      console.error(
+        `Error enviando correo del pedido ${data.id}:`,
+        resultadoCorreo.error
+      );
+    }
+
+    const { error: errorUpdateEstado } = await supabaseServidor
+      .from("pedidos")
+      .update({ estado_correo: nuevoEstadoCorreo })
+      .eq("id", data.id);
+
+    if (errorUpdateEstado) {
+      // Si falla el UPDATE en sí (no el envío), tampoco bloqueamos la
+      // respuesta al cliente - el pedido ya está guardado, esto solo
+      // queda pendiente de revisar en los logs.
+      console.error(
+        `Error actualizando estado_correo del pedido ${data.id}:`,
+        errorUpdateEstado
+      );
+    }
   }
 
   return NextResponse.json({ id: data.id, total }, { status: 201 });
