@@ -20,7 +20,7 @@ export type CartItem = {
   id: string; // id del producto, para poder identificarlo/quitarlo después
   name: string;
   image: string;
-  price: number | null; // precio unitario minorista - null si el cliente no lo ha confirmado
+  price: number | null; // precio público del ERP (IVA incluido) - null si no hay precio cargado
   quantity: number; // cuántas unidades de este producto están en el carrito
 };
 

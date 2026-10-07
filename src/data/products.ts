@@ -64,16 +64,17 @@ export const products: Product[] = [
     prices: { minorista: null, mayorista: null },
     sku: "9636",
   },
-  {
-    id: "lavamanos-4243",
-    name: "Lavamanos Bajo Encimera Blanco 4243",
-    category: "Lavamanos",
+   {
+    id: "lavamanos-4243", // id interno: no cambia, porque la URL /productos/lavamanos-4243 depende de él
+    name: "Lavamanos Bajo Encimera Blanco 4243", // nombre visible para el cliente
+    category: "Lavamanos", // categoría del filtro
+    // Nota interna: en el ERP figura como "LAV BAJO TOPE BLANCO" ("bajo tope" = bajo encimera). NO mostrar al cliente.
     description:
-      "Lavamanos cerámico bajo encimera (en el ERP figura como \"bajo tope\"), acabado blanco. Se instala por debajo de la encimera y deja la superficie libre y fácil de limpiar. Incluye rebosadero.",
-    images: ["/images/products/lavamanos-4243.jpg"],
-    variants: [{ attribute: "medidas", value: "605 x 390 x 190 mm" }],
-    prices: { minorista: null, mayorista: null },
-    sku: "4243",
+      "Lavamanos bajo encimera, acabado blanco. Se instala por debajo de la encimera y deja la superficie libre y fácil de limpiar. Incluye rebosadero.", // texto visible, tomado del PDF
+    images: ["/images/products/lavamanos-4243.jpg"], // foto principal
+    variants: [{ attribute: "medidas", value: "605 x 390 x 190 mm" }], // equivale a 60,5 x 39 x 19 cm del PDF
+    prices: { minorista: null, mayorista: null }, // el precio viene del ERP, no de este archivo
+    sku: "4243", // código del ERP (coincide exacto con stock_espejo)
   },
   {
     id: "lavamanos-b191",

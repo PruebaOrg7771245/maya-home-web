@@ -11,9 +11,25 @@ depender de memoria o de un chat externo.
 disponibles.
 
 ## Estado actual
-- `getStock(sku)` en `src/lib/stock.ts` es un placeholder: siempre devuelve
-  `{ status: "unknown", quantity: null }`.
-- No hay conexión real a SQL Server todavía.
+- Implementada una vía intermedia (no la Opción A): `src/lib/stock.ts` lee
+  stock y precio de la tabla `stock_espejo` de Supabase
+  (`codigo_producto`, `producto`, `existencia`, `precio_publico`,
+  `actualizado_en`) con `supabaseServidor`. El ERP (SQL Server) sigue sin
+  conexión directa desde la web.
+- La tabla se llena A MANO ejecutando `sync-stock.js` desde la red de la
+  oficina. No hay sincronización automática: los datos pueden estar
+  desactualizados entre corridas.
+- `precio_publico` ya incluye el 15% de IVA y es el único precio que se
+  muestra en la web; los mayoristas no se usan.
+- API de `stock.ts`: `getStock(sku)`, `getStockPorSkus(skus)` (una sola
+  consulta `.in(...)`, usada por `/`) y `getPrecioProducto(sku)` (fuente de
+  precio que usará `/api/pedido`; todavía lee `product.prices.minorista`
+  hasta migrarlo).
+- Estados: sin sku -> `coming_soon` (no consulta); sin fila o error de
+  Supabase -> `unknown` con precio `null`; `existencia <= 0` ->
+  `out_of_stock`; `1..5` -> `low_stock`; `> 5` -> `in_stock`.
+- Verificado: `KW-7226WHITE` muestra 24 disponibles y $26,75.
+- Pendiente: sincronización automática, combos, migrar `/api/pedido`.
 
 ## Opciones evaluadas (según comentario en el código)
 - **Opción A - vía API:** un endpoint intermedio (`STOCK_API_URL`) que
@@ -23,10 +39,16 @@ disponibles.
   encargado externo, ej. conexión directa, réplica, webhook, etc.)_
 
 ## Datos pendientes de confirmar con el encargado externo
-- [ ] ¿Qué opción se va a implementar (A, B, otra)?
-- [ ] Estructura del endpoint / tabla (campos, formato de SKU, unidades).
+- [x] ¿Qué opción se va a implementar (A, B, otra)? Resuelto: tabla espejo
+  `stock_espejo` en Supabase, cargada con `sync-stock.js` (ni API ni conexión
+  directa).
+- [x] Estructura del endpoint / tabla (campos, formato de SKU, unidades).
+  Resuelto: ver "Estado actual"; el SKU es `codigo_producto` (`sku` en
+  `products.ts`, se aplica `trim()`).
 - [ ] Autenticación (API key, VPN, IP whitelist, etc.).
 - [ ] Frecuencia de actualización del stock (tiempo real, polling, caché).
+  Hoy: manual (cada vez que se corre `sync-stock.js`); la web revalida cada
+  60 s lo que haya en la tabla. Falta definir si se automatiza.
 - [ ] Quién es el encargado externo y cómo contactarlo.
 - [ ] Fecha estimada de entrega de la integración.
 

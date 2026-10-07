@@ -11,6 +11,7 @@ import type { Product } from "@/data/products"; // importamos el tipo TypeScript
 // Definimos qué props (propiedades) recibe este componente
 type ProductCardProps = {
   product: Product; // un solo producto, con la forma que ya definimos en products.ts
+  precio: number | null; // precio público del ERP (IVA incluido) - null si no hay precio cargado
 };
 
 // Función auxiliar: formatea un precio a texto legible, o muestra "Consultar precio" si es null
@@ -26,7 +27,7 @@ function formatPrice(price: number | null): string {
 }
 
 // Componente principal - recibe "product" desestructurado directamente de las props
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, precio }: ProductCardProps) {
   return (
     // Contenedor de la tarjeta completa - Link envuelve todo para que la tarjeta sea clickeable
     <Link
@@ -67,16 +68,11 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Línea divisoria fina antes del precio */}
         <div className="mt-3 border-t border-[#D8D4CC] pt-3">
+          {/* Un solo precio: el precio público del ERP (IVA incluido). El mayorista ya no se muestra */}
           <div className="flex items-center justify-between text-sm">
-            <span className="text-[#6B6862]">Minorista</span>
+            <span className="text-[#6B6862]">Precio (IVA incl.)</span>
             <span className="font-medium text-[#232320]">
-              {formatPrice(product.prices.minorista)}
-            </span>
-          </div>
-          <div className="mt-1 flex items-center justify-between text-sm">
-            <span className="text-[#6B6862]">Mayorista</span>
-            <span className="font-medium text-[#232320]">
-              {formatPrice(product.prices.mayorista)}
+              {formatPrice(precio)}
             </span>
           </div>
         </div>

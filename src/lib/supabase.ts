@@ -6,6 +6,7 @@
 // componente de cliente ("use client") ni exponerse al navegador.
 
 import { createClient } from "@supabase/supabase-js";
+import "server-only";
 
 // Si alguna de las 2 variables falta, preferimos que la app falle fuerte
 // y claro al arrancar, en vez de fallar en silencio más adelante cuando

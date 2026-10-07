@@ -18,6 +18,8 @@ const STATUS_CONFIG: Record<
   low_stock: { label: "Pocas unidades", bg: "#F5EAD9", text: "#8A5A1F" },
   out_of_stock: { label: "Agotado", bg: "#F5E3E0", text: "#A8362E" },
   unknown: { label: "Consultar disponibilidad", bg: "#EFEDE7", text: "#6B6862" },
+  // producto sin sku en el ERP: mismos colores neutros que "unknown"
+  coming_soon: { label: "Próximamente", bg: "#EFEDE7", text: "#6B6862" },
 };
 
 export default function StockBadge({ stock }: { stock: StockInfo }) {

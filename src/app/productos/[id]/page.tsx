@@ -10,7 +10,7 @@ import { products } from "@/data/products";
 import ProductGallery from "@/components/ProductGallery";
 import AddToCartButton from "@/components/AddToCartButton"; // nuevo botón interactivo
 import StockBadge from "@/components/StockBadge"; // nuevo badge de disponibilidad
-import { getStock } from "@/lib/stock"; // nueva función desacoplada de stock
+import { getStock } from "@/lib/stock"; // adaptador de stock y precio (ADR-1)
 
 
 // Formatea el precio igual que en ProductCard - si es null, muestra "Consultar precio"
@@ -36,8 +36,9 @@ export async function generateStaticParams() {
 
 // revalidate = 60 le dice a Next.js que puede volver a generar esta página
 // como máximo cada 60 segundos, en vez de dejarla 100% estática para siempre.
-// No importa mucho hoy (el stock es un valor fijo), pero en cuanto conectemos
-// el stock real, esto asegura que la página no muestre datos de hace días.
+// El stock y el precio vienen de stock_espejo, que se llena a mano con
+// sync-stock.js: esto asegura que la página no muestre datos de hace días
+// respecto de lo último que haya en la tabla.
 export const revalidate = 60;
 
 // En Next.js 15+, "params" llega como una Promise, por eso la función
@@ -58,8 +59,10 @@ export default async function ProductoPage({
     notFound();
   }
 
-  // Consultamos el stock de este producto - hoy devuelve el placeholder "unknown"
-  const stock = await getStock(product.id);
+  // Stock y precio reales (tabla stock_espejo). Se consulta por sku, el código
+  // del ERP; si el producto no tiene sku, getStock() devuelve "coming_soon"
+  // sin consultar nada.
+  const stock = await getStock(product.sku);
 
   return (
     <main className="min-h-screen bg-[#EFEDE7]">
@@ -108,15 +111,9 @@ export default async function ProductoPage({
 
             <div className="mt-8 border-t border-[#D8D4CC] pt-6">
               <div className="flex items-center justify-between">
-                <span className="text-[#6B6862]">Precio minorista</span>
+                <span className="text-[#6B6862]">Precio (IVA incluido)</span>
                 <span className="text-xl font-semibold text-[#232320]">
-                  {formatPrice(product.prices.minorista)}
-                </span>
-              </div>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-[#6B6862]">Precio mayorista</span>
-                <span className="text-xl font-semibold text-[#232320]">
-                  {formatPrice(product.prices.mayorista)}
+                  {formatPrice(stock.precio)}
                 </span>
               </div>
             </div>
@@ -127,7 +124,7 @@ export default async function ProductoPage({
               id={product.id}
               name={product.name}
               image={product.images[0]}
-              price={product.prices.minorista}
+              price={stock.precio}
             />
           </div>
         </div>
