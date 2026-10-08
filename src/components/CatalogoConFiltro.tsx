@@ -18,6 +18,10 @@ type CatalogoConFiltroProps = {
   stockPorId: Record<string, StockInfo>;
 };
 
+// Respaldo por si algún producto no llegara en el mapa (no debería pasar:
+// page.tsx arma una entrada por producto). Sin precio = no se puede vender.
+const STOCK_DESCONOCIDO: StockInfo = { status: "unknown", quantity: null, precio: null };
+
 export default function CatalogoConFiltro({ stockPorId }: CatalogoConFiltroProps) {
   // Estado que guarda qué categoría está seleccionada actualmente. Empieza en "Todos".
   const [activeCategory, setActiveCategory] = useState("Todos");
@@ -49,7 +53,7 @@ export default function CatalogoConFiltro({ stockPorId }: CatalogoConFiltroProps
             <ProductCard
               key={product.id}
               product={product}
-              precio={stockPorId[product.id]?.precio ?? null}
+              stock={stockPorId[product.id] ?? STOCK_DESCONOCIDO}
             />
           ))}
         </div>

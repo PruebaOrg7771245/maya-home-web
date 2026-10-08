@@ -27,8 +27,13 @@ Formato:
 - **Por qué:** cuando la integración con SQL Server esté lista, solo se
   reemplaza el contenido de esa función — no hay que tocar páginas ni
   componentes que ya consumen `getStock()`.
-- **Estado:** vigente. Pendiente reemplazar el placeholder — ver
-  [`REQUIREMENTS-STOCK.md`](./REQUIREMENTS-STOCK.md).
+- **Estado:** parcialmente reemplazado (07/10/2026). Sigue vigente la regla
+  de fondo (todo el acceso a stock y precio pasa por `src/lib/stock.ts`,
+  nunca directo desde componentes/páginas). Lo que dice sobre SQL Server
+  como fuente y sobre el placeholder `unknown` quedó superado por el
+  [ADR-11](#adr-11-stock-y-precio-desde-una-tabla-espejo-en-supabase-stock_espejo):
+  la fuente es la tabla `stock_espejo` de Supabase. Se deja el texto original
+  como historia.
 
 ## ADR-2: Checkout vía WhatsApp en vez de pasarela de pago
 - **Contexto:** el negocio no procesa pagos en línea; el asesor coordina
@@ -180,6 +185,9 @@ Formato:
   con Resend ya está implementado (`src/lib/email.ts`, llamado desde
   `POST /api/pedido`), que actualiza `estado_correo` a `"enviado"` o
   `"fallido"` según el resultado — ver CHANGELOG del 01/10/2026.
+  **Nota (07/10/2026):** el precio/total ya no se recalcula desde
+  `src/data/products.ts` sino desde el precio del ERP (`stock_espejo`); ver
+  ADR-12.
 
 ## ADR-9: Anti-bot/anti-abuso en `POST /api/pedido` sin servicios externos
 - **Contexto:** `POST /api/pedido` (ADR-8) no tenía ninguna protección
@@ -253,3 +261,87 @@ Formato:
   envío. Esta tabla y columna, igual que `pedidos`, se aplicaron a mano en
   el SQL Editor de Supabase (ver ADR-8), no vía migraciones.
 - **Estado:** vigente (01/10/2026).
+
+## ADR-11: Stock y precio desde una tabla espejo en Supabase (`stock_espejo`)
+- **Contexto:** el stock y el precio reales viven en el ERP (SQL Server de la
+  oficina). ADR-1 asumía que la web lo leería de ahí. Pero el SQL Server solo
+  es accesible desde la red de la oficina (IP privada), no desde Vercel.
+- **Decisión:** la web lee de la tabla `stock_espejo` de Supabase
+  (`codigo_producto`, `producto`, `existencia`, `precio_publico`,
+  `actualizado_en`), que se llena **a mano** corriendo `sync-stock.js` desde la
+  red de la oficina. `src/lib/stock.ts` sigue siendo el único punto de acceso
+  (`getStock`, `getStockPorSkus`, `getPrecioProducto`) y usa
+  `supabaseServidor`. El `sku` de cada producto de `products.ts` es el
+  `codigo_producto` del ERP. Solo se muestra el precio **público con IVA
+  incluido** (`precio_publico`); los precios mayoristas no se usan. Estados:
+  sin sku -> `coming_soon`; sin fila o error -> `unknown`; existencia <= 0 ->
+  `out_of_stock`; 1 a 5 -> `low_stock`; > 5 -> `in_stock`.
+- **Alternativas descartadas:**
+  - Leer el SQL Server directo desde Vercel — descartada: el servidor tiene IP
+    privada y darle una IP fija accesible desde Vercel cuesta $120/mes.
+  - Endpoint/API intermedio en la oficina (Opción A de
+    `REQUIREMENTS-STOCK.md`) — descartada por ahora por el mismo problema de
+    exponer la red de la oficina y por depender del encargado externo.
+- **Consecuencia:** el dato puede estar desactualizado entre corridas de
+  `sync-stock.js` (no hay sincronización automática); la web revalida cada
+  60 s lo que haya en la tabla, pero eso no acerca el dato al ERP.
+  Automatizar el sync queda pendiente (`REQUIREMENTS-STOCK.md`).
+- **Estado:** vigente (07/10/2026). Reemplaza parcialmente a ADR-1.
+
+## ADR-12: `/api/pedido` calcula el total con el precio del ERP y guarda un snapshot
+- **Contexto:** con ADR-8 el servidor recalculaba precios desde
+  `products.ts`, pero esos precios ahora son `null` (ver ADR-11): el precio
+  real vive en `stock_espejo`.
+- **Decisión:** `POST /api/pedido` valida id y cantidad de cada item, consulta
+  el precio y el stock de todos los productos con **una sola** llamada a
+  `getStockPorSkus`, y arma el snapshot guardado en `pedidos.productos`:
+  `{ id, nombre, cantidad, precio, stock }` (precio unitario con IVA y estado
+  de stock al momento del pedido). El total se calcula en el servidor
+  (redondeado a centavos). Si algún producto no tiene precio (sin sku, sin
+  fila, precio 0 o error de lectura) se rechaza todo el pedido con `400`; un
+  producto agotado con precio **se acepta** (queda marcado en el snapshot y en
+  el correo como "(sin stock)").
+- **Alternativas descartadas:**
+  - Confiar en el precio que manda el navegador — descartada, igual que en
+    ADR-8.
+  - Rechazar pedidos con productos agotados — descartada: la regla de negocio
+    es que el asesor confirma la disponibilidad con el cliente (ver ADR-13).
+  - Una consulta por producto (`getPrecioProducto` en un bucle) — descartada
+    por N viajes a Supabase; `getPrecioProducto` queda disponible pero no lo
+    usa la ruta.
+- **Consecuencia:** el navegador solo manda `id` y `cantidad`; el flag
+  `sinStock` del carrito no viaja al servidor (solo afecta el mensaje de
+  WhatsApp). El snapshot guarda el precio vigente en ese momento, así que
+  cambios posteriores en el ERP no alteran pedidos viejos.
+- **Estado:** vigente (07/10/2026).
+
+## ADR-13: Reglas de interfaz para productos sin precio y agotados
+- **Contexto:** con precio y stock reales, hay productos sin sku (aún no están
+  en el ERP), con sku pero sin fila/precio (error de datos) y agotados. Hacía
+  falta una regla única y coherente en tarjeta, detalle, carrito, WhatsApp y
+  correo.
+- **Decisión:**
+  - **Sin precio = no se vende:** no se muestra precio ni botón de compra.
+    Sin sku -> badge "Próximamente"; con sku pero sin precio -> badge neutro
+    "No disponible por ahora" (componente `AvisoSinPrecio`, compartido por
+    tarjeta y detalle).
+  - **Agotado = se puede agregar** al pedido, con el aviso "Consulta la
+    disponibilidad con tu asesor". WhatsApp y correo lo marcan con
+    "(sin stock)".
+  - Diseño: "No disponible por ahora" usa los neutros de "Próximamente" (no
+    es un estado de stock, así que no lleva los colores semánticos); todos
+    los badges llevan borde de 1px (los neutros con `#D8D4CC`, para que no se
+    pierdan sobre el fondo piedra del detalle); en la tarjeta la etiqueta
+    "Precio (IVA incluido)" va apilada sobre el precio porque no cabe en una
+    línea en el grid de 2 columnas del móvil; `CategoryFilter` desplaza la
+    pestaña activa a la vista (8 pestañas no caben en un celular).
+- **Alternativas descartadas:** bloquear la compra de agotados (el negocio
+  prefiere que el asesor consulte) y mostrar "Consultar precio" en productos
+  sin precio (sugiere que se puede comprar con el asesor; el dato faltante es
+  un error o producto aún no cargado).
+- **Consecuencia:** el flag `sinStock` del `CartItem` solo afecta el texto del
+  mensaje de WhatsApp (quien arma ese mensaje es el navegador); el snapshot y
+  el correo toman el estado de stock del servidor (ADR-12). `StockBadge` ya no
+  muestra "(0 disponibles)" en Agotado. Los correos y `/carrito` rotulan "IVA
+  incluido".
+- **Estado:** vigente (07/10/2026).

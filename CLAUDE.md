@@ -18,9 +18,15 @@ antes de asumir nada sobre el estado del proyecto.
 - `npm run lint` — ESLint 9 (flat config en `eslint.config.mjs`).
 - No hay framework de tests configurado.
 
+**Ruta del proyecto:** `C:\dev\e-commercetest`. El proyecto vive fuera de
+OneDrive a propósito (dentro de OneDrive daba errores de build); no moverlo
+de vuelta.
+
 Variables de entorno en `.env.local` (no versionado):
 `NEXT_PUBLIC_ADVISOR_PHONE` (número de WhatsApp con código de país, destino
-de los pedidos) y `NEXT_PUBLIC_ADVISOR_EMAIL` (sin uso actual).
+de los pedidos), `NEXT_PUBLIC_ADVISOR_EMAIL` (sin uso actual),
+`NEXT_PUBLIC_SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` (solo servidor),
+`RESEND_API_KEY` y `ADVISOR_EMAIL` (correo al asesor, solo servidor).
 
 ## Estructura
 
@@ -28,14 +34,18 @@ de los pedidos) y `NEXT_PUBLIC_ADVISOR_EMAIL` (sin uso actual).
 src/
   app/
     layout.tsx            # fuentes, metadata, CartProvider + Header global
-    page.tsx              # "/" catálogo con filtro por categoría
+    page.tsx              # "/" catálogo (server): lee stock y precio
     productos/[id]/       # "/productos/:id" detalle de producto
-    carrito/              # "/carrito" resumen y envío por WhatsApp
-  components/             # Header, ProductCard, CategoryFilter, ProductGallery,
-                          # AddToCartButton, StockBadge
+    carrito/              # "/carrito" wizard de 3 pasos (WhatsApp o correo)
+    api/pedido/           # POST: valida, calcula el total y guarda el pedido
+  components/             # Header, ProductCard, CatalogoConFiltro, CategoryFilter,
+                          # ProductGallery, AddToCartButton, StockBadge,
+                          # AvisoSinPrecio
   context/CartContext.tsx # estado del carrito (useCart)
-  data/products.ts        # catálogo estático
-  lib/stock.ts            # adaptador de stock (getStock)
+  data/products.ts        # catálogo estático (25 productos, sin precios)
+  lib/stock.ts            # stock y precio (getStock, getStockPorSkus)
+  lib/supabase.ts         # cliente de servidor (import "server-only")
+  lib/email.ts            # correo al asesor (Resend)
 public/images/            # logos (brand/) e imágenes de productos
 docs/                     # CHANGELOG, DECISIONS (ADRs), REQUIREMENTS-STOCK
 .claude/agents/           # agentes de proyecto (versionados)
@@ -46,20 +56,42 @@ docs/                     # CHANGELOG, DECISIONS (ADRs), REQUIREMENTS-STOCK
 App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
 
 - **Catálogo estático:** `src/data/products.ts` es la única fuente de
-  productos (tipo `Product`, `categories` derivado de ahí). Precios y
-  nombres comerciales siguen pendientes del cliente: `prices.minorista` /
-  `prices.mayorista` pueden ser `null` y la UI debe mostrar "Consultar
-  precio" / "precio a confirmar" en ese caso.
-- **`/` (`src/app/page.tsx`)** — client component; filtra por categoría en
-  el navegador.
+  productos (25, tipo `Product`, `categories` derivado de ahí). Cada
+  producto tiene `sku` = código del ERP (mapeo en
+  `docs/MAPEO-PRODUCTOS-ERP.md`). **Los precios ya no viven acá:**
+  `prices` quedó en `null` (campo vestigial) y el precio sale del ERP.
+- **Stock y precio:** vienen de la tabla `stock_espejo` de Supabase, llenada
+  a mano con `sync-stock.js` desde la red de la oficina (ver ADR-11). Solo se
+  muestra el precio público con IVA incluido. Los datos pueden estar
+  desactualizados entre corridas. Solo se accede vía `src/lib/stock.ts`
+  (`getStock`, `getStockPorSkus` con una consulta para varios skus,
+  `getPrecioProducto`), que usa `supabaseServidor` y por eso solo se importa
+  desde server components o rutas de servidor; los componentes cliente
+  reciben `StockInfo` por props (importando solo el tipo).
+- **Reglas de interfaz (ADR-13):** sin precio = no se vende (sin sku:
+  "Próximamente"; con sku sin precio: "No disponible por ahora", ambos vía
+  `AvisoSinPrecio`). Agotado con precio = se puede agregar, con el aviso
+  "Consulta la disponibilidad con tu asesor".
+- **`/` (`src/app/page.tsx`)** — server component con `revalidate = 60`: pide
+  stock y precio de todo el catálogo con `getStockPorSkus` y se los pasa a
+  `CatalogoConFiltro` (client component), que filtra por categoría en el
+  navegador.
 - **`/productos/[id]`** — server component, prerenderizado con
-  `generateStaticParams` + `revalidate = 60` (ISR, pensado para cuando el
-  stock sea real). Es el único lugar que llama a `getStock()`.
+  `generateStaticParams` + `revalidate = 60` (ISR). Llama a `getStock()`
+  para un producto; sin precio no muestra precio ni botón de compra.
+- **`POST /api/pedido`** — valida, calcula el total en el servidor con el
+  precio del ERP (una consulta `getStockPorSkus`) y guarda en `pedidos` un
+  snapshot `{ id, nombre, cantidad, precio, stock }`. Rechaza productos sin
+  precio (400) y acepta agotados (ADR-12). Para canal "correo" reparte entre
+  asesores (ADR-10) y envía con Resend.
 - **Carrito:** `src/context/CartContext.tsx` (`CartProvider` envuelve toda la
   app en `layout.tsx`, se consume con `useCart()`). Estado solo en memoria:
   se pierde al recargar.
-- **Checkout (`/carrito`):** arma un mensaje de texto con el pedido y abre
-  `https://wa.me/<teléfono>?text=...` (ver ADR-2).
+- **Checkout (`/carrito`):** wizard de 3 pasos (ADR-7). Guarda el pedido en
+  `/api/pedido` y luego abre `https://wa.me/<teléfono>?text=...` (ver ADR-2) o
+  deja que el asesor contacte por correo. El flag `sinStock` del carrito solo
+  afecta el texto de WhatsApp; el snapshot y el correo usan el stock del
+  servidor.
 - `formatPrice` (locale `es-EC`, moneda USD) está duplicado en
   `ProductCard.tsx`, `productos/[id]/page.tsx` y `carrito/page.tsx`; si se
   cambia el formato, cambiarlo en los tres.
@@ -70,8 +102,8 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
 - [`docs/DECISIONS.md`](./docs/DECISIONS.md) — por qué se eligió cada
   enfoque (ADRs).
 - [`docs/REQUIREMENTS-STOCK.md`](./docs/REQUIREMENTS-STOCK.md) — estado de
-  la integración pendiente de stock real (SQL Server) con el encargado
-  externo.
+  la integración de stock real (hoy tabla espejo `stock_espejo`; pendiente
+  automatizar el sync) con el encargado externo.
 
 Después de un cambio no trivial (funcionalidad nueva, decisión de
 arquitectura), usar el agente `trazabilidad` para dejar registro en esos

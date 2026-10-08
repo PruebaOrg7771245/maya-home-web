@@ -21,15 +21,24 @@ disponibles.
   desactualizados entre corridas.
 - `precio_publico` ya incluye el 15% de IVA y es el único precio que se
   muestra en la web; los mayoristas no se usan.
-- API de `stock.ts`: `getStock(sku)`, `getStockPorSkus(skus)` (una sola
-  consulta `.in(...)`, usada por `/`) y `getPrecioProducto(sku)` (fuente de
-  precio que usará `/api/pedido`; todavía lee `product.prices.minorista`
-  hasta migrarlo).
+- API de `stock.ts`: `getStock(sku)` (detalle de producto),
+  `getStockPorSkus(skus)` (una sola consulta `.in(...)`, usada por `/` y por
+  `/api/pedido`) y `getPrecioProducto(sku)` (sin uso actual en rutas).
+  `/api/pedido` ya calcula el total con este precio (ADR-12).
+- Catálogo: 25 productos con `sku` = código del ERP (ver
+  [`MAPEO-PRODUCTOS-ERP.md`](./MAPEO-PRODUCTOS-ERP.md)); los precios ya no
+  están en `products.ts`. Decisión y alternativas descartadas en ADR-11
+  (SQL Server desde Vercel: IP privada, IP fija $120/mes).
 - Estados: sin sku -> `coming_soon` (no consulta); sin fila o error de
   Supabase -> `unknown` con precio `null`; `existencia <= 0` ->
   `out_of_stock`; `1..5` -> `low_stock`; `> 5` -> `in_stock`.
 - Verificado: `KW-7226WHITE` muestra 24 disponibles y $26,75.
-- Pendiente: sincronización automática, combos, migrar `/api/pedido`.
+- Pendiente: sincronización automática y combos (etapa 2: stock = menor
+  existencia de las 2 piezas, precio = suma de los públicos). Ya no está
+  pendiente migrar `/api/pedido` (hecho el 07/10/2026).
+- Pendiente al corregir `sync-stock.js`: el código del mueble
+  `MUEBLLUX-600SMOKE` tiene espacios al final en el ERP (el `trim()` de
+  `stock.ts` lo cubre al leer, pero conviene limpiarlo al cargar el espejo).
 
 ## Opciones evaluadas (según comentario en el código)
 - **Opción A - vía API:** un endpoint intermedio (`STOCK_API_URL`) que
@@ -45,7 +54,9 @@ disponibles.
 - [x] Estructura del endpoint / tabla (campos, formato de SKU, unidades).
   Resuelto: ver "Estado actual"; el SKU es `codigo_producto` (`sku` en
   `products.ts`, se aplica `trim()`).
-- [ ] Autenticación (API key, VPN, IP whitelist, etc.).
+- [x] Autenticación: no aplica con la tabla espejo (la web solo habla con
+  Supabase vía `service_role` en servidor; el ERP se consulta únicamente
+  desde la oficina al correr `sync-stock.js`).
 - [ ] Frecuencia de actualización del stock (tiempo real, polling, caché).
   Hoy: manual (cada vez que se corre `sync-stock.js`); la web revalida cada
   60 s lo que haya en la tabla. Falta definir si se automatiza.

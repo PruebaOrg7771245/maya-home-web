@@ -7,19 +7,18 @@
 import Image from "next/image"; // componente optimizado de imágenes de Next.js (comprime y hace lazy-load automático)
 import Link from "next/link"; // componente para navegación sin recargar la página completa
 import type { Product } from "@/data/products"; // importamos el tipo TypeScript para tener autocompletado y validación
+import type { StockInfo } from "@/lib/stock"; // solo el TIPO: no arrastra el cliente de servidor al navegador
+import AvisoSinPrecio from "@/components/AvisoSinPrecio"; // qué mostrar cuando el producto no tiene precio
 
 // Definimos qué props (propiedades) recibe este componente
 type ProductCardProps = {
   product: Product; // un solo producto, con la forma que ya definimos en products.ts
-  precio: number | null; // precio público del ERP (IVA incluido) - null si no hay precio cargado
+  stock: StockInfo; // stock y precio del ERP (precio con IVA incluido; null = no se puede vender)
 };
 
-// Función auxiliar: formatea un precio a texto legible, o muestra "Consultar precio" si es null
-function formatPrice(price: number | null): string {
-  if (price === null) {
-    return "Consultar precio"; // caso cuando el cliente aún no definió el precio
-  }
-  // Intl.NumberFormat da formato de moneda correcto (ej: $25.00) sin tener que armarlo a mano
+// Función auxiliar: formatea un precio a texto legible (ej: $25.00)
+function formatPrice(price: number): string {
+  // Intl.NumberFormat da formato de moneda correcto sin tener que armarlo a mano
   return new Intl.NumberFormat("es-EC", {
     style: "currency",
     currency: "USD", // Ecuador usa USD como moneda oficial
@@ -27,7 +26,9 @@ function formatPrice(price: number | null): string {
 }
 
 // Componente principal - recibe "product" desestructurado directamente de las props
-export default function ProductCard({ product, precio }: ProductCardProps) {
+export default function ProductCard({ product, stock }: ProductCardProps) {
+  const precio = stock.precio; // null = producto sin precio: no se muestra precio y no se vende
+
   return (
     // Contenedor de la tarjeta completa - Link envuelve todo para que la tarjeta sea clickeable
     <Link
@@ -66,15 +67,23 @@ export default function ProductCard({ product, precio }: ProductCardProps) {
           {/* ej: "60x120 · 80x160" si tuviera más de un formato */}
         </p>
 
-        {/* Línea divisoria fina antes del precio */}
+        {/* Línea divisoria fina antes del precio (o del aviso, si no hay precio) */}
         <div className="mt-3 border-t border-[#D8D4CC] pt-3">
-          {/* Un solo precio: el precio público del ERP (IVA incluido). El mayorista ya no se muestra */}
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-[#6B6862]">Precio (IVA incl.)</span>
-            <span className="font-medium text-[#232320]">
-              {formatPrice(precio)}
-            </span>
-          </div>
+          {precio !== null ? (
+            // Un solo precio: el precio público del ERP (IVA incluido). El mayorista ya no se muestra.
+            // Apilado (etiqueta arriba, precio abajo) porque en el grid de 2 columnas
+            // del móvil la etiqueta larga y el precio no caben en la misma línea.
+            <div>
+              <p className="text-xs text-[#6B6862]">Precio (IVA incluido)</p>
+              <p className="mt-0.5 text-base font-semibold text-[#232320]">
+                {formatPrice(precio)}
+              </p>
+            </div>
+          ) : (
+            // Sin precio: no se muestra precio. "Próximamente" si no tiene sku,
+            // "No disponible por ahora" si tiene sku pero no precio
+            <AvisoSinPrecio stock={stock} />
+          )}
         </div>
       </div>
     </Link>

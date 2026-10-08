@@ -10,14 +10,13 @@ import { products } from "@/data/products";
 import ProductGallery from "@/components/ProductGallery";
 import AddToCartButton from "@/components/AddToCartButton"; // nuevo botón interactivo
 import StockBadge from "@/components/StockBadge"; // nuevo badge de disponibilidad
+import AvisoSinPrecio from "@/components/AvisoSinPrecio"; // qué mostrar cuando el producto no tiene precio
 import { getStock } from "@/lib/stock"; // adaptador de stock y precio (ADR-1)
 
 
-// Formatea el precio igual que en ProductCard - si es null, muestra "Consultar precio"
-function formatPrice(price: number | null): string {
-  if (price === null) {
-    return "Consultar precio";
-  }
+// Formatea el precio igual que en ProductCard (el precio ya no puede ser null aquí:
+// los productos sin precio no muestran precio)
+function formatPrice(price: number): string {
   return new Intl.NumberFormat("es-EC", {
     style: "currency",
     currency: "USD",
@@ -64,6 +63,11 @@ export default async function ProductoPage({
   // sin consultar nada.
   const stock = await getStock(product.sku);
 
+  // Sin precio = no se puede vender: no se muestra precio ni botón de compra.
+  // Agotado (con precio y sin existencias) SÍ se puede agregar, con aviso.
+  const precio = stock.precio;
+  const agotado = stock.status === "out_of_stock";
+
   return (
     <main className="min-h-screen bg-[#EFEDE7]">
       <div className="border-b border-[#D8D4CC] bg-white px-6 py-3">
@@ -86,9 +90,11 @@ export default async function ProductoPage({
               {product.name}
             </h1>
 
-            {/* Badge de disponibilidad, justo debajo del nombre */}
+            {/* Badge de disponibilidad, justo debajo del nombre. Sin precio no
+                mostramos el estado de stock (diría "En stock" de algo que no se
+                vende): va el aviso "Próximamente" / "No disponible por ahora" */}
             <div className="mt-3">
-              <StockBadge stock={stock} />
+              {precio !== null ? <StockBadge stock={stock} /> : <AvisoSinPrecio stock={stock} />}
             </div>
 
             <p className="mt-4 text-base leading-relaxed text-[#6B6862]">
@@ -109,23 +115,29 @@ export default async function ProductoPage({
               </div>
             </div>
 
-            <div className="mt-8 border-t border-[#D8D4CC] pt-6">
-              <div className="flex items-center justify-between">
-                <span className="text-[#6B6862]">Precio (IVA incluido)</span>
-                <span className="text-xl font-semibold text-[#232320]">
-                  {formatPrice(stock.precio)}
-                </span>
-              </div>
-            </div>
+            {/* Precio y botón de compra solo si el producto tiene precio */}
+            {precio !== null && (
+              <>
+                <div className="mt-8 border-t border-[#D8D4CC] pt-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-[#6B6862]">Precio (IVA incluido)</span>
+                    <span className="text-xl font-semibold text-[#232320]">
+                      {formatPrice(precio)}
+                    </span>
+                  </div>
+                </div>
 
-            {/* Reemplazamos el <button> estático por el componente interactivo,
-                pasándole los datos del producto que necesita para agregarse al carrito */}
-            <AddToCartButton
-              id={product.id}
-              name={product.name}
-              image={product.images[0]}
-              price={stock.precio}
-            />
+                {/* Componente interactivo (cliente): botón "Agregar al pedido" / selector de
+                    cantidad. Si está agotado igual se puede agregar, con aviso debajo */}
+                <AddToCartButton
+                  id={product.id}
+                  name={product.name}
+                  image={product.images[0]}
+                  price={precio}
+                  agotado={agotado}
+                />
+              </>
+            )}
           </div>
         </div>
       </div>

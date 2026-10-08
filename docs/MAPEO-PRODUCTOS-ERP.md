@@ -6,7 +6,7 @@ Fuente: resultados reales de las consultas sobre `stock_espejo` (bodega BG, prec
 
 - La web muestra **solo el precio PÚBLICO del ERP** (`stock_espejo.precio_publico`, **IVA incluido**). Los precios del catálogo/Excel son mayoristas y **no se usan**.
 - Estado de stock: existencia ≤ 0 → Agotado; > 0 y ≤ 5 → Pocas unidades; > 5 → Disponible.
-- **Combos = ETAPA 2 (todavía no se implementan).** Alcance: solo los combos del catálogo (LUX-800 con sus 2 versiones del catálogo, no las 4 combinaciones). Stock del combo = la **menor** existencia de sus dos piezas. Precio = **suma de los precios públicos de las dos piezas (IVA incluido)**; los descuentos los maneja el asesor y la tarjeta del combo dice 'Consulta nuestros descuentos por llevarte el combo'.
+- **Combos = ETAPA 2 (todavía no se implementan).** Alcance: **todas las combinaciones válidas por familia** (9 en total; LUX-800 admite sus 4 combinaciones). Stock del combo = la **menor** existencia de sus dos piezas. Precio = **suma de los precios públicos de las dos piezas (IVA incluido)**; los descuentos los maneja el asesor y la tarjeta del combo dice 'Consulta nuestros descuentos por llevarte el combo'.
 - **Sin precio = no se vende.** Un producto sin fila en `stock_espejo` o con precio 0 es un error de datos o un producto que aún no está en el ERP: no se agrega al carrito. Un producto **agotado** (con fila y precio, existencia <= 0) **sí** se puede agregar, con el aviso 'Consulta la disponibilidad con tu asesor'.
 - Los datos se actualizan **a mano** con `sync-stock.js` desde la red de la oficina.
 
@@ -40,27 +40,35 @@ Fuente: resultados reales de las consultas sobre `stock_espejo` (bodega BG, prec
 | Saunas | Sauna 120×100×200 (vidrio 6 mm) [nombre provisional, sale del ERP] | `SN96129-1200` | 4 | 2508.70 | 2885.00 | Pocas unidades | Sin foto ni descripción: no está en el PDF |
 | Saunas | Sauna 135×110×210 (vidrio 8 mm) [nombre provisional, sale del ERP] | `SN96137-1350` | 2 | 4660.87 | 5360.00 | Pocas unidades | Sin foto ni descripción: no está en el PDF |
 
-## Combos (2 códigos por versión)
+## Combos (2 códigos por versión) — 9 combinaciones válidas
 
-| Combo | Versión | Código lavamanos | Código mueble | Stock lav. | Stock mueble | Stock combo | Suma piezas sin IVA | ≈ Precio mostrado (con IVA) | Estado | Nota |
-|---|---|---|---|---:|---:|---:|---:|---:|---|---|
-| Combo LUX-600 | lavamanos blanco + mueble nogal | `LAVLUX-600BL` | `MUEBLLUX-600SMOKE` | 30 | 30 | 30 | 360.13 | 414.15 | Disponible | El código del mueble tiene espacios al final en el ERP (corregir en el script de sincronización) |
-| Combo FLUTE-800 | lavamanos blanco + mueble roble claro | `LAVFLUTE800BL` | `MUEBLFLUTE800NATURA` | 12 | 12 | 12 | 410.48 | 472.05 | Disponible |  |
-| Combo CONNON SX800 | lavamanos negro mate + mueble nogal oscuro | `LAVCONNONSX800BLACK` | `MUEBLCONNOSX-800SMOK` | 6 | 12 | 6 | 473.43 | 544.44 | Disponible | El mismo mueble sirve para las 2 versiones |
-| Combo CONNON SX800 | lavamanos blanco + mueble nogal oscuro | `LAVCONNONSX800BL` | `MUEBLCONNOSX-800SMOK` | 6 | 12 | 6 | 473.43 | 544.44 | Disponible |  |
-| Combo LUX-800 | lavamanos negro + mueble nogal (HONEY) — catálogo pág. 7 | `LAVLUX-800BLACK` | `MUEBLLUX-800HONEY` | 12 | 12 | 12 | 416.61 | 479.10 | Disponible |  |
-| Combo LUX-800 | lavamanos blanco (BL) + mueble roble claro (SUNTH) — catálogo pág. 8 | `LAVLUX-800BL` | `MUEBLLUX-800SUNTH` | 12 | 12 | 12 | 416.61 | 479.10 | Disponible | PENDIENTE: el texto de la pág. 8 dice lavamanos 'negro mate' pero el código BL es el blanco |
-| Combo LUMINA-1600 | 2 lavamanos blancos + mueble oscuro | `LAVLUMINA-1600BL` | `MUEBLLUMINA-1600DANI` | 12 | 6 | 6 | 694.47 | 798.64 | Disponible |  |
+Regla de familias: lavamanos y mueble solo se combinan si **comparten la referencia de familia en el código** (`LUX-600`, `FLUTE800`, `CONNONSX800`/`CONNOSX-800`, `LUX-800`, `LUMINA-1600`). LUX-600 **no** se mezcla con LUX-800 ni con ninguna otra. Que LUX-800 admita lavamanos y muebles cruzados es intencional (así lo creó el negocio).
+
+| Familia | Código lavamanos | Código mueble | Stock lav. | Stock mueble | Stock combo | Suma sin IVA | Precio mostrado (con IVA) |
+|---|---|---|---:|---:|---:|---:|---:|
+| LUX-600 | `LAVLUX-600BL` | `MUEBLLUX-600SMOKE` | 30 | 30 | 30 | 360.13 | 414.15 |
+| FLUTE-800 | `LAVFLUTE800BL` | `MUEBLFLUTE800NATURA` | 12 | 12 | 12 | 410.48 | 472.05 |
+| CONNON SX800 | `LAVCONNONSX800BL` | `MUEBLCONNOSX-800SMOK` | 6 | 12 | 6 | 473.43 | 544.44 |
+| CONNON SX800 | `LAVCONNONSX800BLACK` | `MUEBLCONNOSX-800SMOK` | 6 | 12 | 6 | 473.43 | 544.44 |
+| LUX-800 | `LAVLUX-800BL` | `MUEBLLUX-800HONEY` | 12 | 12 | 12 | 416.61 | 479.10 |
+| LUX-800 | `LAVLUX-800BL` | `MUEBLLUX-800SUNTH` | 12 | 12 | 12 | 416.61 | 479.10 |
+| LUX-800 | `LAVLUX-800BLACK` | `MUEBLLUX-800HONEY` | 12 | 12 | 12 | 416.61 | 479.10 |
+| LUX-800 | `LAVLUX-800BLACK` | `MUEBLLUX-800SUNTH` | 12 | 12 | 12 | 416.61 | 479.10 |
+| LUMINA-1600 | `LAVLUMINA-1600BL` | `MUEBLLUMINA-1600DANI` | 12 | 6 | 6 | 694.47 | 798.64 |
+
+Cálculo: (precio lavamanos + precio mueble) × 1,15, con los precios públicos sin IVA del ERP. Con el redondeo por pieza (IVA por separado) el total puede diferir 1 centavo; el prompt de la etapa 2 define cuál se usa.
 
 ### Notas de combos
 
-- **El ERP no tiene precio de combo.** El precio mostrado es la suma de los precios públicos de las dos piezas (IVA incluido). Los descuentos por combo los maneja el asesor; la tarjeta dice 'Consulta nuestros descuentos por llevarte el combo'.
-- LUX-800 tiene 4 piezas en el ERP (2 lavamanos × 2 muebles, mismo precio y stock 12). Se venden todas las combinaciones, pero **por ahora solo se manejan las 2 del catálogo**; las otras quedan como mejora futura.
-- Si dos combos comparten una pieza (ej. el mismo lavamanos), el stock de cada combo **no descuenta** el del otro. Es una simplificación aceptada por ahora.
+- **El ERP no tiene precio de combo.** El precio mostrado es la suma de los precios públicos de las dos piezas (IVA incluido). Los descuentos los maneja el asesor; la tarjeta dice 'Consulta nuestros descuentos por llevarte el combo'.
+- Si falta una pieza en el ERP (sin fila o precio 0): el combo no tiene precio y **no se vende**. Si una pieza está agotada: el combo está agotado y **se puede agregar** con el aviso.
+- Si dos combos comparten una pieza (ej. el mismo mueble CONNON o LUX-800), el stock de cada combo **no descuenta** el del otro. Simplificación aceptada por ahora.
+- `MUEBLLUX-600SMOKE` llega con espacios al final desde el ERP: sin el `.trim()` en `sync-stock.js` el combo LUX-600 no encuentra su pieza.
+- Fotos: hay una foto por combo/versión en el catálogo (LUX-800: 2 de las 4 combinaciones). Las demás combinaciones usan la foto de la pieza o piden foto nueva.
 
 ## Pendientes del catálogo (a corregir antes de publicar)
 
-- Combo LUX-800 (pág. 8): texto 'lavamanos negro mate' vs código `LAVLUX-800BL` (blanco).
+- Combo LUX-800 (pág. 8): texto 'lavamanos negro mate' vs código `LAVLUX-800BL` (blanco). Con las 4 combinaciones abiertas deja de ser bloqueante, pero el texto del PDF debe corregirse.
 - Pág. 3: secador mediano 'negro' vs acero (GUNGREY).
 - Inodoro 717/717-MB: ERP 'tanque alto' vs PDF 'una pieza'.
 - Textos de plantilla con corchetes (`[110 / 220] V`, `[de toallas]`) y typo 'Dispensor'.

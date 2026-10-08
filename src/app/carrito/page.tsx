@@ -182,8 +182,10 @@ export default function CarritoPage() {
       .map(
         (item) =>
           `- ${item.name} x${item.quantity} (${
-            item.price !== null ? formatPrice(item.price) : "precio a confirmar"
-          })`
+            item.price !== null ? `${formatPrice(item.price)} IVA incluido` : "precio a confirmar"
+          })` +
+          // Se agregó estando agotado: el asesor debe confirmar la disponibilidad con el cliente
+          (item.sinStock ? " (sin stock: confirmar disponibilidad)" : "")
       )
       .join("\n");
 
@@ -207,7 +209,7 @@ export default function CarritoPage() {
       `Teléfono: ${telefono.normalizado ?? customerPhone}\n` +
       `Email: ${customerEmail}\n\n` +
       `Productos:\n${itemsList}\n\n` +
-      `Total estimado: ${formatPrice(totalPrice)}`;
+      `Total estimado (IVA incluido): ${formatPrice(totalPrice)}`;
 
     // wa.me solo acepta el número en dígitos (con código de país, sin "+" ni espacios)
     const phoneDigits = ASESOR_PHONE.replace(/\D/g, "");
@@ -299,8 +301,14 @@ export default function CarritoPage() {
                   <div className="flex-1">
                     <p className="font-medium text-[#232320]">{item.name}</p>
                     <p className="text-sm text-[#6B6862]">
-                      {item.price !== null ? formatPrice(item.price) : "Precio a confirmar"}
+                      {item.price !== null ? `${formatPrice(item.price)} (IVA incluido)` : "Precio a confirmar"}
                     </p>
+                    {/* Producto agregado estando agotado: aviso corto en su línea */}
+                    {item.sinStock && (
+                      <p className="mt-1 text-xs text-[#6B6862]">
+                        Sin stock por ahora. Consulta con tu asesor.
+                      </p>
+                    )}
                   </div>
 
                   {/* Controles de cantidad: botones - y + */}
@@ -335,7 +343,7 @@ export default function CarritoPage() {
 
             {/* Total estimado */}
             <div className="mt-4 flex items-center justify-between border-t border-[#D8D4CC] pt-4">
-              <span className="text-[#6B6862]">Total estimado</span>
+              <span className="text-[#6B6862]">Total estimado (IVA incluido)</span>
               <span className="text-xl font-semibold text-[#232320]">{formatPrice(totalPrice)}</span>
             </div>
 
@@ -359,7 +367,7 @@ export default function CarritoPage() {
 
             {/* Resumen compacto del pedido - la lista completa ya se vio en el paso 1 */}
             <p className="mt-2 text-sm text-[#6B6862]">
-              {items.length} {items.length === 1 ? "producto" : "productos"} · {formatPrice(totalPrice)}
+              {items.length} {items.length === 1 ? "producto" : "productos"} · {formatPrice(totalPrice)} (IVA incluido)
             </p>
 
             <div className="mt-6 space-y-3">

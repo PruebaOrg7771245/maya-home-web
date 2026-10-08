@@ -18,6 +18,51 @@ Formato de entrada:
 
 ---
 
+## 07/10/2026 - Etapa 1 de stock y precio reales (catálogo de 25 productos, espejo en Supabase)
+- **Catálogo:** `src/data/products.ts` pasó de 9 a 25 productos, todos con
+  `sku` = código del ERP (mapeo en
+  [`MAPEO-PRODUCTOS-ERP.md`](./MAPEO-PRODUCTOS-ERP.md)). Hay **7 categorías**
+  en el código (Lavamanos, Sanitarios, Dispensadores de jabón, Dispensadores
+  de papel, Secadores de manos, Accesorios, Saunas), o sea 8 pestañas con
+  "Todos". Se mantiene "Sanitarios" (no "Inodoros"). Ojo: el mapeo dice que los
+  dispensadores van en una sola categoría "Dispensadores", pero el código
+  todavía los separa en jabón y papel; pendiente de unificar o de ajustar
+  el mapeo. Los precios ya no viven en `products.ts` (`prices` quedó en
+  `null` en los 25 productos, campo vestigial).
+- **Stock y precio:** salen de `stock_espejo` (Supabase), cargada a mano con
+  `sync-stock.js` desde la red de la oficina. Solo se muestra el precio
+  PÚBLICO con IVA incluido. `src/lib/stock.ts` expone `getStock`,
+  `getStockPorSkus` (una consulta `.in(...)`) y `getPrecioProducto`; `/` pasó
+  de client component a server component con `revalidate = 60` que pasa el
+  stock por props a `CatalogoConFiltro`. Ver ADR-11.
+- **`POST /api/pedido`:** ya no lee precios de `products.ts`; calcula el
+  total en el servidor con el precio del ERP y guarda un snapshot
+  `{ id, nombre, cantidad, precio, stock }`. Rechaza con `400` productos sin
+  precio y acepta agotados. Ver ADR-12.
+- **Interfaz:** sin precio = no se vende; agotado = se puede agregar con el
+  aviso "Consulta la disponibilidad con tu asesor". Nuevo
+  `AvisoSinPrecio.tsx`, badge neutro "No disponible por ahora", borde de 1px
+  en los badges, etiqueta de precio apilada en la tarjeta y auto-scroll de
+  la pestaña activa en `CategoryFilter`. Ver ADR-13.
+- **Detalles:** el flag `sinStock` del carrito solo afecta el texto de
+  WhatsApp (agrega "(sin stock: confirmar disponibilidad)"); el snapshot y el
+  correo toman el estado de stock del servidor. `StockBadge` ya no muestra
+  "(0 disponibles)" en Agotado. El correo rotula "(IVA incluido)" y marca
+  "(sin stock)"; `/carrito` y el mensaje de WhatsApp también rotulan IVA
+  incluido.
+- **Infraestructura:** el proyecto se movió fuera de OneDrive a
+  `C:\dev\e-commercetest` por errores de build. `src/lib/supabase.ts` ahora
+  importa `"server-only"` (dependencia nueva) para que el build falle si
+  alguien lo importa desde un componente cliente.
+- **Pendientes:** etapa 2 (combos, ver `MAPEO-PRODUCTOS-ERP.md`); fotos
+  finales (los 2 saunas no tienen foto y usan `placeholder.jpg`; el resto
+  son del PDF, baja resolución); borrar los pedidos de prueba de la tabla
+  `pedidos`; probar en producción el límite por IP de `/api/pedido` (ADR-9,
+  nunca se probó en Vercel); probar el correo real (Resend) con los
+  rótulos nuevos "(IVA incluido)" / "(sin stock)", que no se probó; y
+  automatizar `sync-stock.js` (ver
+  [`REQUIREMENTS-STOCK.md`](./REQUIREMENTS-STOCK.md)).
+
 ## 01/10/2026 - Reparto de correos entre varios asesores (round-robin)
 - Nuevas piezas en Supabase (aplicadas a mano en el SQL Editor, no vía
   migraciones): tabla `asesores` (`id`, `nombre`, `email`, `activo`, RLS sin
