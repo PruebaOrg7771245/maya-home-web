@@ -45,3 +45,8 @@ esa skill no puede saber por ser genérica:
 
 7. No invoques el agente trazabilidad vos mismo - avisá que conviene
    correrlo después de un cambio no trivial, pero no lo dispares solo.
+   
+8. No modifiques filas de stock_espejo, asesores ni ninguna tabla que no
+   sea pedidos (salvo tus propios pedidos de prueba, que borras al
+   terminar). Si una prueba necesita simular un caso, propón el método y
+   espera confirmación antes de tocar datos.

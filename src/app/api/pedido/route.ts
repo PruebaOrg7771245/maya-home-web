@@ -13,6 +13,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { products } from "@/data/products";
+import { getStockPorSkus, type StockStatus } from "@/lib/stock";
 import { validarIdentificacion } from "@/lib/identificacion";
 import { validarTelefono } from "@/lib/telefono";
 import { supabaseServidor } from "@/lib/supabase";
@@ -20,7 +21,7 @@ import { enviarCorreoAsesor } from "@/lib/email";
 
 // Forma esperada del cuerpo de la petición. El navegador solo manda el id
 // del producto y la cantidad - nunca el nombre ni el precio, esos los
-// busca el servidor en su propia copia de products.ts.
+// busca el servidor (nombre en products.ts, precio en stock_espejo).
 type ItemPedido = { id: string; cantidad: number };
 
 // Fila que devuelve la función Postgres obtener_asesor_disponible() (ver
@@ -133,22 +134,22 @@ export async function POST(request: NextRequest) {
   }
 
   // --- Reconstruir los productos y el total DESDE EL SERVIDOR ---
-  // Nunca usamos un precio que venga del navegador - lo buscamos en
-  // nuestra propia fuente de verdad (products.ts) usando solo el id.
+  // Nunca usamos un precio que venga del navegador: del item solo leemos el
+  // id y la cantidad. El nombre sale de products.ts y el precio público
+  // (IVA incluido) del ERP, vía stock_espejo (src/lib/stock.ts).
 
-  const productosDelPedido: Array<{
-    id: string;
-    nombre: string;
+  // Paso 1: validar id y cantidad de cada item y buscar su producto.
+  const itemsValidados: Array<{
+    producto: (typeof products)[number];
     cantidad: number;
-    precio: number | null;
   }> = [];
 
   for (const item of cuerpo.items) {
-    const producto = products.find((p) => p.id === item.id);
+    const producto = products.find((p) => p.id === item?.id);
 
     if (!producto) {
       return NextResponse.json(
-        { error: `Producto no encontrado: ${item.id}` },
+        { error: `Producto no encontrado: ${String(item?.id)}` },
         { status: 400 }
       );
     }
@@ -160,33 +161,52 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    itemsValidados.push({ producto, cantidad: item.cantidad });
+  }
+
+  // Paso 2: stock y precio de TODOS los items con UNA sola consulta.
+  const skus = itemsValidados.flatMap(({ producto }) =>
+    producto.sku ? [producto.sku] : []
+  );
+  const infoPorSku = await getStockPorSkus(skus);
+
+  // Paso 3: armar el snapshot. Un producto sin precio (sin sku, sin fila,
+  // precio 0 o error de lectura) rechaza el pedido completo. Un producto
+  // agotado CON precio sí se acepta (se marca en el snapshot).
+  const productosDelPedido: Array<{
+    id: string;
+    nombre: string;
+    cantidad: number;
+    precio: number; // precio público CON IVA por unidad
+    stock: StockStatus; // estado de stock al momento del pedido
+  }> = [];
+
+  for (const { producto, cantidad } of itemsValidados) {
+    const info = producto.sku ? infoPorSku[producto.sku] : undefined;
+
+    if (!info || info.precio === null || !(info.precio > 0)) {
+      return NextResponse.json(
+        {
+          error: `El producto "${producto.name}" todavía no tiene precio confirmado`,
+        },
+        { status: 400 }
+      );
+    }
+
     productosDelPedido.push({
       id: producto.id,
       nombre: producto.name,
-      cantidad: item.cantidad,
-      precio: producto.prices.minorista, // puede ser null si aún no hay precio confirmado
+      cantidad,
+      precio: info.precio,
+      stock: info.status,
     });
   }
 
-  // Si CUALQUIER producto del pedido todavía no tiene precio confirmado,
-  // no podemos calcular un total real - por ahora rechazamos el pedido
-  // completo en ese caso. (Si el cliente necesita pedir algo sin precio
-  // todavía, eso se resuelve por WhatsApp/correo manual, no por este flujo).
-  const hayPrecioPendiente = productosDelPedido.some((p) => p.precio === null);
-  if (hayPrecioPendiente) {
-    return NextResponse.json(
-      {
-        error:
-          "Uno o más productos del pedido todavía no tienen precio confirmado",
-      },
-      { status: 400 }
-    );
-  }
-
-  const total = productosDelPedido.reduce(
-    (suma, p) => suma + (p.precio as number) * p.cantidad,
-    0
-  );
+  // Total con IVA, redondeado a centavos para evitar residuos de punto flotante.
+  const total =
+    Math.round(
+      productosDelPedido.reduce((suma, p) => suma + p.precio * p.cantidad, 0) * 100
+    ) / 100;
 
   const ip = obtenerIp(request);
 
@@ -338,7 +358,8 @@ export async function POST(request: NextRequest) {
             productos: productosDelPedido.map((p) => ({
               nombre: p.nombre,
               cantidad: p.cantidad,
-              precio: p.precio as number, // ya se validó arriba que ninguno es null
+              precio: p.precio,
+              sinStock: p.stock === "out_of_stock",
             })),
             total,
           },

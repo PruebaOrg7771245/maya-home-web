@@ -24,7 +24,8 @@ type DestinatarioAsesor = {
 type ProductoPedido = {
   nombre: string;
   cantidad: number;
-  precio: number;
+  precio: number; // precio público por unidad, IVA incluido
+  sinStock?: boolean; // true si estaba agotado (out_of_stock) al hacer el pedido
 };
 
 type DatosPedido = {
@@ -53,7 +54,7 @@ function construirHtmlPedido(pedido: DatosPedido): string {
     .map(
       (p) =>
         `<tr>
-          <td style="padding:8px;border-bottom:1px solid #D8D4CC;">${p.nombre}</td>
+          <td style="padding:8px;border-bottom:1px solid #D8D4CC;">${p.nombre}${p.sinStock ? ' <strong style="color:#B3261E;">(sin stock)</strong>' : ""}</td>
           <td style="padding:8px;border-bottom:1px solid #D8D4CC;text-align:center;">${p.cantidad}</td>
           <td style="padding:8px;border-bottom:1px solid #D8D4CC;text-align:right;">${formatearPrecio(p.precio)}</td>
         </tr>`
@@ -83,14 +84,14 @@ function construirHtmlPedido(pedido: DatosPedido): string {
           <tr style="background:#EFEDE7;">
             <th style="padding:8px;text-align:left;">Producto</th>
             <th style="padding:8px;text-align:center;">Cantidad</th>
-            <th style="padding:8px;text-align:right;">Precio</th>
+            <th style="padding:8px;text-align:right;">Precio (IVA incluido)</th>
           </tr>
         </thead>
         <tbody>${filasProductos}</tbody>
       </table>
 
       <p style="text-align:right; font-size:1.1em; margin-top:12px;">
-        <strong>Total: ${formatearPrecio(pedido.total)}</strong>
+        <strong>Total (IVA incluido): ${formatearPrecio(pedido.total)}</strong>
       </p>
 
       <p style="color:#6B6862; font-size:0.9em; margin-top:24px;">
