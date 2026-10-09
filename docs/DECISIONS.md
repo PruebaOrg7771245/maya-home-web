@@ -345,3 +345,71 @@ Formato:
   muestra "(0 disponibles)" en Agotado. Los correos y `/carrito` rotulan "IVA
   incluido".
 - **Estado:** vigente (07/10/2026).
+
+## ADR-14: Combos como combinaciones derivadas, con id compuesto validado en el servidor
+- **Contexto:** el ERP no tiene combos ni precio de combo. El negocio quiere
+  vender lavamanos + mueble por familia (9 combinaciones válidas en 5
+  familias), sin mezclar familias (LUX-600 nunca con LUX-800), salvo LUX-800,
+  que admite sus 4 cruces a propósito.
+- **Decisión:** las familias y sus piezas (con sku del ERP) viven en
+  `src/data/combos.ts`; las combinaciones se **generan** (`generarCombinaciones`)
+  y no se listan a mano. Cada una se identifica con el id
+  `<familia>__<skuLavamanos>__<skuMueble>`. `POST /api/pedido` acepta items con
+  id de producto o de combo (`pareceIdCombo` -> `parsearIdCombinacion`, que
+  devuelve `null` si el id es inválido o la pieza es de otra familia; eso es
+  `400`). El navegador solo manda id y cantidad; el servidor recalcula todo. El
+  snapshot de `pedidos.productos` agrega `piezas: [{ sku, nombre }, ...]` en el
+  mismo jsonb (sin cambio de esquema SQL, sin tabla nueva de combos).
+- **Alternativas descartadas:**
+  - Cargar los combos como productos en `products.ts` o como filas en el ERP —
+    descartada: el ERP no los tiene y duplicaría precio y stock de las piezas.
+  - Una tabla `combos` en Supabase — descartada: más esquema para algo que se
+    deriva de datos estáticos y del espejo.
+  - Aceptar del cliente el precio o las piezas — descartada, igual que ADR-8 y
+    ADR-12.
+- **Consecuencia:** agregar una familia o pieza es editar `combos.ts` y el test
+  (`scripts/test-combos.ts` exige exactamente 9 combinaciones). Pedidos viejos
+  no cambian porque el snapshot guarda nombre y precio de ese momento.
+- **Estado:** vigente (08/10/2026).
+
+## ADR-15: Precio y stock del combo (suma redondeada una vez, mínimo, una consulta)
+- **Contexto:** hay que definir cómo se calcula el precio y el stock de algo
+  que el ERP no conoce, y qué pasa si falta una pieza.
+- **Decisión:** precio = suma de los precios públicos **con IVA** de las dos
+  piezas, redondeada **una sola vez** al final. Stock = **mínimo** de las
+  existencias de las dos piezas, clasificado con el mismo umbral que los
+  productos. Si falta una pieza (sin fila) o su precio es 0, el combo es
+  `no_vendible` (botón deshabilitado, "Esta combinación no está disponible para
+  la venta"); si está agotado con precio, **se puede agregar** con el aviso
+  (ADR-12/13). `calcularCombo` recibe el mapa de stock ya consultado, así que
+  cada página hace **una sola** llamada a `getStockPorSkus`, sin cambiar su
+  forma.
+- **Alternativas descartadas:**
+  - Redondear cada pieza por separado o partir del precio sin IVA x 1,15 —
+    descartada: se prefirió sumar lo que el cliente ve en cada pieza.
+  - Descontar stock entre combos que comparten una pieza — descartada por
+    ahora (simplificación aceptada): el stock de cada combo es independiente.
+  - Precio de combo con descuento — descartada: los descuentos los maneja el
+    asesor; la tarjeta solo dice "Consulta nuestros descuentos por llevarte el
+    combo".
+- **Consecuencia:** el precio en vivo puede diferir hasta 1 centavo de la tabla
+  de `MAPEO-PRODUCTOS-ERP.md` (CONNON: $544,45 vs $544,44). Esa tabla es
+  referencia; manda el cálculo del código.
+- **Estado:** vigente (08/10/2026).
+
+## ADR-16: Un solo `formatPrice` y un solo umbral de stock (`src/lib/`)
+- **Contexto:** `formatPrice` estaba copiado en tres archivos (y una copia
+  idéntica en el correo), y con los combos el umbral de "pocas unidades" se
+  iba a necesitar en `stock.ts` y en `combos.ts`.
+- **Decisión:** `src/lib/formatPrice.ts` es la única función de formato
+  (`es-EC`, USD) y reemplazó todas las copias (`ProductCard`, `productos/[id]`,
+  `carrito`, `ComboCard`, `SelectorCombo`, `email.ts`). `src/lib/umbralStock.ts`
+  exporta `UMBRAL_POCO_STOCK = 5` y `clasificarExistencia`, sin dependencias
+  (no importa Supabase), así que lo pueden usar tanto servidor como lógica
+  pura testeable con Node.
+- **Alternativas descartadas:** mantener las copias (ya eran 6 con los
+  combos) y poner el umbral dentro de `stock.ts` (arrastra `server-only` y
+  Supabase al test).
+- **Consecuencia:** cambiar el formato de precio o el umbral es tocar un solo
+  archivo. La nota de `CLAUDE.md` sobre `formatPrice` duplicado ya no aplica.
+- **Estado:** vigente (08/10/2026).

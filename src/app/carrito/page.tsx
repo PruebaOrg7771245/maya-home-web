@@ -21,6 +21,8 @@ import {
   NOMBRE_TIPO,
 } from "@/lib/identificacion";
 import { limpiarTelefono, validarTelefono } from "@/lib/telefono";
+import { parsearIdCombinacion } from "@/lib/combos";
+import { formatPrice } from "@/lib/formatPrice";
 
 // Igual que antes con el correo: lo leemos de una variable de entorno
 // (ver .env.local.example) en vez de quemarlo en el código. El "?? " define
@@ -34,13 +36,6 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function isValidEmail(email: string): boolean {
   return EMAIL_REGEX.test(email.trim());
-}
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("es-EC", {
-    style: "currency",
-    currency: "USD",
-  }).format(price);
 }
 
 // Los pasos del wizard del carrito. El "paso 4" (confirmación) sigue siendo
@@ -185,7 +180,16 @@ export default function CarritoPage() {
             item.price !== null ? `${formatPrice(item.price)} IVA incluido` : "precio a confirmar"
           })` +
           // Se agregó estando agotado: el asesor debe confirmar la disponibilidad con el cliente
-          (item.sinStock ? " (sin stock: confirmar disponibilidad)" : "")
+          (item.sinStock ? " (sin stock: confirmar disponibilidad)" : "") +
+          // Combo: las dos piezas (lavamanos y mueble) bajo el combo; null = producto normal
+          (() => {
+            const combo = parsearIdCombinacion(item.id);
+            return combo
+              ? `
+   · ${combo.lavamanos.nombre}
+   · ${combo.mueble.nombre}`
+              : "";
+          })()
       )
       .join("\n");
 
@@ -290,16 +294,27 @@ export default function CarritoPage() {
 
             {/* Lista de productos en el carrito */}
             <div className="mt-6 divide-y divide-[#D8D4CC] border border-[#D8D4CC] bg-white">
-              {items.map((item) => (
+              {items.map((item) => {
+                // Si el id es de un combo, sacamos sus dos piezas para mostrarlas bajo el nombre
+                const combo = parsearIdCombinacion(item.id);
+
+                return (
                 <div key={item.id} className="flex items-center gap-4 p-4">
                   {/* Miniatura de la foto del producto */}
                   <div className="relative h-20 w-20 shrink-0 overflow-hidden bg-[#EFEDE7]">
                     <Image src={item.image} alt={item.name} fill sizes="80px" className="object-cover" />
                   </div>
 
-                  {/* Nombre y precio unitario */}
-                  <div className="flex-1">
+                  {/* Nombre y precio unitario (min-w-0: los nombres largos se parten en vez de desbordar) */}
+                  <div className="min-w-0 flex-1">
                     <p className="font-medium text-[#232320]">{item.name}</p>
+                    {/* Combo: las dos piezas como líneas secundarias discretas */}
+                    {combo && (
+                      <>
+                        <p className="break-words text-xs text-[#6B6862]">· {combo.lavamanos.nombre}</p>
+                        <p className="break-words text-xs text-[#6B6862]">· {combo.mueble.nombre}</p>
+                      </>
+                    )}
                     <p className="text-sm text-[#6B6862]">
                       {item.price !== null ? `${formatPrice(item.price)} (IVA incluido)` : "Precio a confirmar"}
                     </p>
@@ -338,7 +353,8 @@ export default function CarritoPage() {
                     Quitar
                   </button>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Total estimado */}

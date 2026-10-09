@@ -33,9 +33,15 @@ disponibles.
   Supabase -> `unknown` con precio `null`; `existencia <= 0` ->
   `out_of_stock`; `1..5` -> `low_stock`; `> 5` -> `in_stock`.
 - Verificado: `KW-7226WHITE` muestra 24 disponibles y $26,75.
-- Pendiente: sincronización automática y combos (etapa 2: stock = menor
-  existencia de las 2 piezas, precio = suma de los públicos). Ya no está
-  pendiente migrar `/api/pedido` (hecho el 07/10/2026).
+- Combos (etapa 2, hecha el 08/10/2026): stock = menor existencia de las 2
+  piezas, precio = suma de los públicos con IVA (ver ADR-14/15). Usan
+  `getStockPorSkus` con una sola consulta por página; `stock.ts` no cambió de
+  forma. El umbral de stock ahora vive en `src/lib/umbralStock.ts`. Limitación
+  conocida: combos que comparten pieza no descuentan stock entre sí. Si los
+  datos del espejo faltan para alguna pieza, el combo no se vende; por eso es
+  más importante que `sync-stock.js` cargue las 13 piezas de combos.
+- Pendiente: sincronización automática. Ya no está pendiente migrar
+  `/api/pedido` (hecho el 07/10/2026).
 - Pendiente al corregir `sync-stock.js`: el código del mueble
   `MUEBLLUX-600SMOKE` tiene espacios al final en el ERP (el `trim()` de
   `stock.ts` lo cubre al leer, pero conviene limpiarlo al cargar el espejo).

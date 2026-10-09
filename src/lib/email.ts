@@ -6,6 +6,7 @@
 // dentro del correo en sí.
 
 import { Resend } from "resend";
+import { formatPrice } from "@/lib/formatPrice"; // mismo formato de precio que el resto del sitio
 
 // El SDK busca RESEND_API_KEY automáticamente en las variables de
 // entorno, así que no hace falta pasarla a mano acá.
@@ -26,6 +27,7 @@ type ProductoPedido = {
   cantidad: number;
   precio: number; // precio público por unidad, IVA incluido
   sinStock?: boolean; // true si estaba agotado (out_of_stock) al hacer el pedido
+  piezas?: Array<{ sku: string; nombre: string }>; // solo combos: lavamanos y mueble
 };
 
 type DatosPedido = {
@@ -39,11 +41,15 @@ type DatosPedido = {
   total: number;
 };
 
-function formatearPrecio(valor: number): string {
-  return new Intl.NumberFormat("es-EC", {
-    style: "currency",
-    currency: "USD",
-  }).format(valor);
+// Lista las piezas de un combo (lavamanos y mueble) bajo el nombre del combo
+function filasPiezas(piezas: ProductoPedido["piezas"]): string {
+  if (!piezas || piezas.length === 0) return "";
+  return piezas
+    .map(
+      (pz) =>
+        `<div style="font-size:0.9em;color:#6B6862;margin-top:2px;">· ${pz.nombre} (${pz.sku})</div>`
+    )
+    .join("");
 }
 
 // Arma el cuerpo HTML del correo. Nombre y dirección van en MAYÚSCULAS -
@@ -54,9 +60,9 @@ function construirHtmlPedido(pedido: DatosPedido): string {
     .map(
       (p) =>
         `<tr>
-          <td style="padding:8px;border-bottom:1px solid #D8D4CC;">${p.nombre}${p.sinStock ? ' <strong style="color:#B3261E;">(sin stock)</strong>' : ""}</td>
+          <td style="padding:8px;border-bottom:1px solid #D8D4CC;">${p.nombre}${p.sinStock ? ' <strong style="color:#B3261E;">(sin stock)</strong>' : ""}${filasPiezas(p.piezas)}</td>
           <td style="padding:8px;border-bottom:1px solid #D8D4CC;text-align:center;">${p.cantidad}</td>
-          <td style="padding:8px;border-bottom:1px solid #D8D4CC;text-align:right;">${formatearPrecio(p.precio)}</td>
+          <td style="padding:8px;border-bottom:1px solid #D8D4CC;text-align:right;">${formatPrice(p.precio)}</td>
         </tr>`
     )
     .join("");
@@ -91,7 +97,7 @@ function construirHtmlPedido(pedido: DatosPedido): string {
       </table>
 
       <p style="text-align:right; font-size:1.1em; margin-top:12px;">
-        <strong>Total (IVA incluido): ${formatearPrecio(pedido.total)}</strong>
+        <strong>Total (IVA incluido): ${formatPrice(pedido.total)}</strong>
       </p>
 
       <p style="color:#6B6862; font-size:0.9em; margin-top:24px;">

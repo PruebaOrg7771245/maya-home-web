@@ -92,9 +92,9 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
   deja que el asesor contacte por correo. El flag `sinStock` del carrito solo
   afecta el texto de WhatsApp; el snapshot y el correo usan el stock del
   servidor.
-- `formatPrice` (locale `es-EC`, moneda USD) está duplicado en
-  `ProductCard.tsx`, `productos/[id]/page.tsx` y `carrito/page.tsx`; si se
-  cambia el formato, cambiarlo en los tres.
+- `formatPrice` (locale `es-EC`, moneda USD) vive en un único archivo,
+  `src/lib/formatPrice.ts`; se importa desde ahí. Si se cambia el formato,
+  cambiarlo solo allí (también lo usa el correo al asesor, `src/lib/email.ts`).
 
 ## Trazabilidad
 

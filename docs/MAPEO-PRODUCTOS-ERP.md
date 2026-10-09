@@ -6,7 +6,7 @@ Fuente: resultados reales de las consultas sobre `stock_espejo` (bodega BG, prec
 
 - La web muestra **solo el precio PÚBLICO del ERP** (`stock_espejo.precio_publico`, **IVA incluido**). Los precios del catálogo/Excel son mayoristas y **no se usan**.
 - Estado de stock: existencia ≤ 0 → Agotado; > 0 y ≤ 5 → Pocas unidades; > 5 → Disponible.
-- **Combos = ETAPA 2 (todavía no se implementan).** Alcance: **todas las combinaciones válidas por familia** (9 en total; LUX-800 admite sus 4 combinaciones). Stock del combo = la **menor** existencia de sus dos piezas. Precio = **suma de los precios públicos de las dos piezas (IVA incluido)**; los descuentos los maneja el asesor y la tarjeta del combo dice 'Consulta nuestros descuentos por llevarte el combo'.
+- **Combos = ETAPA 2 (implementada el 08/10/2026; ver ADR-14 y ADR-15).** Alcance: **todas las combinaciones válidas por familia** (9 en total; LUX-800 admite sus 4 combinaciones). Stock del combo = la **menor** existencia de sus dos piezas. Precio = **suma de los precios públicos de las dos piezas (IVA incluido)**; los descuentos los maneja el asesor y la tarjeta del combo dice 'Consulta nuestros descuentos por llevarte el combo'.
 - **Sin precio = no se vende.** Un producto sin fila en `stock_espejo` o con precio 0 es un error de datos o un producto que aún no está en el ERP: no se agrega al carrito. Un producto **agotado** (con fila y precio, existencia <= 0) **sí** se puede agregar, con el aviso 'Consulta la disponibilidad con tu asesor'.
 - Los datos se actualizan **a mano** con `sync-stock.js` desde la red de la oficina.
 
@@ -56,7 +56,7 @@ Regla de familias: lavamanos y mueble solo se combinan si **comparten la referen
 | LUX-800 | `LAVLUX-800BLACK` | `MUEBLLUX-800SUNTH` | 12 | 12 | 12 | 416.61 | 479.10 |
 | LUMINA-1600 | `LAVLUMINA-1600BL` | `MUEBLLUMINA-1600DANI` | 12 | 6 | 6 | 694.47 | 798.64 |
 
-Cálculo: (precio lavamanos + precio mueble) × 1,15, con los precios públicos sin IVA del ERP. Con el redondeo por pieza (IVA por separado) el total puede diferir 1 centavo; el prompt de la etapa 2 define cuál se usa.
+Cálculo de referencia: (precio lavamanos + precio mueble) × 1,15, con los precios públicos sin IVA del ERP. **Lo que implementa el código** (`src/lib/combos.ts`) es sumar los precios públicos ya con IVA de cada pieza y redondear una sola vez al final; por eso el precio en vivo puede diferir hasta 1 centavo de esta tabla (ej. CONNON $544,45 vs $544,44). Manda el código.
 
 ### Notas de combos
 
@@ -64,7 +64,8 @@ Cálculo: (precio lavamanos + precio mueble) × 1,15, con los precios públicos 
 - Si falta una pieza en el ERP (sin fila o precio 0): el combo no tiene precio y **no se vende**. Si una pieza está agotada: el combo está agotado y **se puede agregar** con el aviso.
 - Si dos combos comparten una pieza (ej. el mismo mueble CONNON o LUX-800), el stock de cada combo **no descuenta** el del otro. Simplificación aceptada por ahora.
 - `MUEBLLUX-600SMOKE` llega con espacios al final desde el ERP: sin el `.trim()` en `sync-stock.js` el combo LUX-600 no encuentra su pieza.
-- Fotos: hay una foto por combo/versión en el catálogo (LUX-800: 2 de las 4 combinaciones). Las demás combinaciones usan la foto de la pieza o piden foto nueva.
+- Fotos: hay una foto por combo/versión en el catálogo (LUX-800: 2 de las 4 combinaciones). Implementado: 6 fotos del PDF en `public/images/combos/` (mapa `FOTOS_COMBINACION` en `src/data/combos.ts`, origen ~360 px, se ven suaves: pedir originales). CONNON blanco, LUX-800 BL+SUNTH y LUX-800 BLACK+HONEY usan la foto de la familia con la leyenda "Imagen referencial: el color puede variar".
+- Los skus de las piezas se declaran en `src/data/combos.ts`; si cambia un código en el ERP, cambiarlo ahí y en la tabla de arriba.
 
 ## Pendientes del catálogo (a corregir antes de publicar)
 

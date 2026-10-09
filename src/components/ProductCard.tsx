@@ -9,21 +9,13 @@ import Link from "next/link"; // componente para navegación sin recargar la pá
 import type { Product } from "@/data/products"; // importamos el tipo TypeScript para tener autocompletado y validación
 import type { StockInfo } from "@/lib/stock"; // solo el TIPO: no arrastra el cliente de servidor al navegador
 import AvisoSinPrecio from "@/components/AvisoSinPrecio"; // qué mostrar cuando el producto no tiene precio
+import { formatPrice } from "@/lib/formatPrice";
 
 // Definimos qué props (propiedades) recibe este componente
 type ProductCardProps = {
   product: Product; // un solo producto, con la forma que ya definimos en products.ts
   stock: StockInfo; // stock y precio del ERP (precio con IVA incluido; null = no se puede vender)
 };
-
-// Función auxiliar: formatea un precio a texto legible (ej: $25.00)
-function formatPrice(price: number): string {
-  // Intl.NumberFormat da formato de moneda correcto sin tener que armarlo a mano
-  return new Intl.NumberFormat("es-EC", {
-    style: "currency",
-    currency: "USD", // Ecuador usa USD como moneda oficial
-  }).format(price);
-}
 
 // Componente principal - recibe "product" desestructurado directamente de las props
 export default function ProductCard({ product, stock }: ProductCardProps) {

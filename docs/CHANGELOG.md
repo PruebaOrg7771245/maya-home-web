@@ -18,6 +18,58 @@ Formato de entrada:
 
 ---
 
+## 08/10/2026 - Etapa 2: combos lavamanos + mueble (9 combinaciones en 5 familias)
+- **Datos y lógica:** `src/data/combos.ts` (5 familias: LUX-600, FLUTE-800,
+  CONNON SX800, LUX-800, LUMINA-1600 = 9 combinaciones; cada pieza con sku del
+  ERP, `nombre` y `etiqueta` corta para el selector; textos solo del
+  catálogo/ERP) y `src/lib/combos.ts` (lógica pura: generar combinaciones,
+  id compuesto `<familia>__<skuLav>__<skuMueble>`, `calcularCombo`,
+  `precioDesde`, `fotoCombinacion`). Ver ADR-14 y ADR-15.
+- **Stock y precio del combo:** precio = suma de los públicos con IVA,
+  redondeada una vez al final; stock = mínimo de las dos piezas; sin pieza o
+  precio 0 = no vendible; agotado = se puede agregar (ADR-12/13). Una sola
+  llamada a `getStockPorSkus` por página (esa función no cambió).
+- **`POST /api/pedido`:** acepta items con id de producto o de combo; el
+  precio del combo siempre se recalcula en el servidor (id inválido o pieza de
+  otra familia = 400; sin precio = 400 con el nombre). El snapshot en
+  `pedidos.productos` suma `piezas: [{ sku, nombre }, { sku, nombre }]` (jsonb,
+  sin cambio de esquema SQL). El correo y el mensaje de WhatsApp muestran las
+  dos piezas bajo el combo.
+- **Interfaz (agente `front-end`):** pestaña "Combos" en el catálogo (5
+  tarjetas por familia con "Desde $X" y "Consulta nuestros descuentos por
+  llevarte el combo"), página `/combos/[familia]` con selectores de lavamanos y
+  mueble que cambian precio, stock y foto; el carrito muestra el combo con sus
+  dos piezas. "Todos" sigue mostrando solo productos. Decisiones visuales
+  nuevas pendientes de revisión: `<select>` nativo con borde `#D8D4CC`, texto
+  fijo sobre `#EFEDE7` cuando hay una sola pieza, botón deshabilitado en
+  neutros sin `opacity`, aviso "Esta combinación no está disponible para la
+  venta" en caja neutra, "Desde (IVA incluido)" apilado, pestaña Combos sin
+  acento.
+- **Fotos:** 6 fotos extraídas del PDF mayorista (págs. impresas 07 y 08),
+  recortadas a 800x600 en `public/images/combos/`; mapa único
+  `FOTOS_COMBINACION`. Tres combinaciones sin foto propia (CONNON blanco,
+  LUX-800 BL+SUNTH, LUX-800 BLACK+HONEY) usan la de la familia con la leyenda
+  "Imagen referencial: el color puede variar".
+- **Refactors:** `src/lib/umbralStock.ts` (`UMBRAL_POCO_STOCK = 5` y
+  `clasificarExistencia`, compartido por `stock.ts` y `combos.ts`) y
+  `src/lib/formatPrice.ts` (única función de formato; reemplazó las copias en
+  `ProductCard`, `productos/[id]`, `carrito`, `ComboCard`, `SelectorCombo` y
+  `email.ts`). Ver ADR-16. `tsconfig.json`: `allowImportingTsExtensions` para
+  que Node ejecute el test con imports `.ts`.
+- **Test:** `node scripts/test-combos.ts` (Node 24 corre TypeScript directo):
+  exige exactamente 9 combinaciones, ids ida y vuelta, casos de pieza
+  ausente / precio 0 / agotado / id manipulado, umbral, formato `$479,10` y
+  fotos. Test, lint, tsc y build OK. POST reales probados (combo válido 201,
+  precio manipulado ignorado, cruzado 400, pieza sin precio 400, agotado 201);
+  pedidos de prueba borrados y `stock_espejo` restaurado.
+- **Pendientes:** fotos de baja resolución (origen ~360 px de ancho; pedir
+  originales); canal "correo" con combos no probado de punta a punta (habría
+  enviado un correo real); sin pruebas visuales reales a 320 px en
+  dispositivo (solo simuladas en iframe); los precios en vivo pueden diferir
+  hasta 1 centavo de la tabla de `MAPEO-PRODUCTOS-ERP.md` (ej. CONNON $544,45
+  vs $544,44, por el redondeo único); el stock de combos que comparten pieza
+  no se descuenta entre sí (simplificación aceptada).
+
 ## 07/10/2026 - Etapa 1 de stock y precio reales (catálogo de 25 productos, espejo en Supabase)
 - **Catálogo:** `src/data/products.ts` pasó de 9 a 25 productos, todos con
   `sku` = código del ERP (mapeo en

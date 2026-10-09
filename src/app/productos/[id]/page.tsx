@@ -8,20 +8,12 @@ import { notFound } from "next/navigation"; // función especial que muestra la 
 import Link from "next/link";
 import { products } from "@/data/products";
 import ProductGallery from "@/components/ProductGallery";
+import { formatPrice } from "@/lib/formatPrice";
 import AddToCartButton from "@/components/AddToCartButton"; // nuevo botón interactivo
 import StockBadge from "@/components/StockBadge"; // nuevo badge de disponibilidad
 import AvisoSinPrecio from "@/components/AvisoSinPrecio"; // qué mostrar cuando el producto no tiene precio
 import { getStock } from "@/lib/stock"; // adaptador de stock y precio (ADR-1)
 
-
-// Formatea el precio igual que en ProductCard (el precio ya no puede ser null aquí:
-// los productos sin precio no muestran precio)
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("es-EC", {
-    style: "currency",
-    currency: "USD",
-  }).format(price);
-}
 
 // generateStaticParams le dice a Next.js, al momento de hacer el build,
 // TODAS las páginas de producto que existen - así se generan como HTML

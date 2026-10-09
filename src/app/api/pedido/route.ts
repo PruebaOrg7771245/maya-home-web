@@ -14,6 +14,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { products } from "@/data/products";
 import { getStockPorSkus, type StockStatus } from "@/lib/stock";
+import { calcularCombo, nombreCombinacion, parsearIdCombinacion, pareceIdCombo } from "@/lib/combos";
+import type { PiezaCombo } from "@/data/combos";
 import { validarIdentificacion } from "@/lib/identificacion";
 import { validarTelefono } from "@/lib/telefono";
 import { supabaseServidor } from "@/lib/supabase";
@@ -21,7 +23,9 @@ import { enviarCorreoAsesor } from "@/lib/email";
 
 // Forma esperada del cuerpo de la petición. El navegador solo manda el id
 // del producto y la cantidad - nunca el nombre ni el precio, esos los
-// busca el servidor (nombre en products.ts, precio en stock_espejo).
+// busca el servidor (nombre en products.ts o src/data/combos.ts, precio en
+// stock_espejo). El id puede ser de un producto normal o de un combo
+// ("<familia>__<sku lavamanos>__<sku mueble>", ver src/lib/combos.ts).
 type ItemPedido = { id: string; cantidad: number };
 
 // Fila que devuelve la función Postgres obtener_asesor_disponible() (ver
@@ -138,18 +142,36 @@ export async function POST(request: NextRequest) {
   // id y la cantidad. El nombre sale de products.ts y el precio público
   // (IVA incluido) del ERP, vía stock_espejo (src/lib/stock.ts).
 
-  // Paso 1: validar id y cantidad de cada item y buscar su producto.
-  const itemsValidados: Array<{
-    producto: (typeof products)[number];
-    cantidad: number;
-  }> = [];
+  // Paso 1: validar id y cantidad de cada item y resolver si es producto o combo.
+  type ItemValidado =
+    | { tipo: "producto"; producto: (typeof products)[number]; cantidad: number }
+    | { tipo: "combo"; combo: NonNullable<ReturnType<typeof parsearIdCombinacion>>; id: string; cantidad: number };
+  const itemsValidados: ItemValidado[] = [];
 
   for (const item of cuerpo.items) {
-    const producto = products.find((p) => p.id === item?.id);
+    const idItem = item?.id;
+
+    // Id con forma de combo: debe ser un combo válido y de UNA sola familia
+    if (typeof idItem === "string" && pareceIdCombo(idItem)) {
+      const combo = parsearIdCombinacion(idItem);
+      if (!combo) {
+        return NextResponse.json({ error: `Combo inválido: ${idItem}` }, { status: 400 });
+      }
+      if (!Number.isInteger(item.cantidad) || item.cantidad < 1) {
+        return NextResponse.json(
+          { error: `Cantidad inválida para ${nombreCombinacion(combo.familia)}` },
+          { status: 400 }
+        );
+      }
+      itemsValidados.push({ tipo: "combo", combo, id: idItem, cantidad: item.cantidad });
+      continue;
+    }
+
+    const producto = products.find((p) => p.id === idItem);
 
     if (!producto) {
       return NextResponse.json(
-        { error: `Producto no encontrado: ${String(item?.id)}` },
+        { error: `Producto no encontrado: ${String(idItem)}` },
         { status: 400 }
       );
     }
@@ -161,17 +183,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    itemsValidados.push({ producto, cantidad: item.cantidad });
+    itemsValidados.push({ tipo: "producto", producto, cantidad: item.cantidad });
   }
 
-  // Paso 2: stock y precio de TODOS los items con UNA sola consulta.
-  const skus = itemsValidados.flatMap(({ producto }) =>
-    producto.sku ? [producto.sku] : []
+  // Paso 2: stock y precio de TODOS los items (productos y piezas de combos)
+  // con UNA sola consulta.
+  const skus = itemsValidados.flatMap((it) =>
+    it.tipo === "combo"
+      ? [it.combo.lavamanos.sku, it.combo.mueble.sku]
+      : it.producto.sku
+        ? [it.producto.sku]
+        : []
   );
   const infoPorSku = await getStockPorSkus(skus);
 
-  // Paso 3: armar el snapshot. Un producto sin precio (sin sku, sin fila,
-  // precio 0 o error de lectura) rechaza el pedido completo. Un producto
+  // Paso 3: armar el snapshot. Un producto o combo sin precio (sin sku, sin
+  // fila, precio 0 o error de lectura) rechaza el pedido completo. Uno
   // agotado CON precio sí se acepta (se marca en el snapshot).
   const productosDelPedido: Array<{
     id: string;
@@ -179,9 +206,35 @@ export async function POST(request: NextRequest) {
     cantidad: number;
     precio: number; // precio público CON IVA por unidad
     stock: StockStatus; // estado de stock al momento del pedido
+    piezas?: Array<{ sku: string; nombre: string }>; // solo en combos: lavamanos y mueble
   }> = [];
 
-  for (const { producto, cantidad } of itemsValidados) {
+  for (const it of itemsValidados) {
+    if (it.tipo === "combo") {
+      const { familia, lavamanos, mueble } = it.combo;
+      // el precio del combo se recalcula SIEMPRE acá; nada del body cuenta
+      const calculo = calcularCombo({ lavamanos, mueble }, infoPorSku);
+      if (calculo.precio === null || calculo.status === "no_vendible") {
+        return NextResponse.json(
+          {
+            error: `El combo "${nombreCombinacion(familia)}" (${lavamanos.nombre} + ${mueble.nombre}) todavía no tiene precio confirmado`,
+          },
+          { status: 400 }
+        );
+      }
+      const piezas = [lavamanos, mueble].map(({ sku, nombre }: PiezaCombo) => ({ sku, nombre }));
+      productosDelPedido.push({
+        id: it.id,
+        nombre: nombreCombinacion(familia),
+        cantidad: it.cantidad,
+        precio: calculo.precio,
+        stock: calculo.status,
+        piezas,
+      });
+      continue;
+    }
+
+    const { producto, cantidad } = it;
     const info = producto.sku ? infoPorSku[producto.sku] : undefined;
 
     if (!info || info.precio === null || !(info.precio > 0)) {
@@ -360,6 +413,7 @@ export async function POST(request: NextRequest) {
               cantidad: p.cantidad,
               precio: p.precio,
               sinStock: p.stock === "out_of_stock",
+              piezas: p.piezas, // solo combos: el asesor ve lavamanos y mueble
             })),
             total,
           },

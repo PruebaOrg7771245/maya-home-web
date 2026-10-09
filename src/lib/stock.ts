@@ -23,6 +23,7 @@
 // componente "use client". Los componentes cliente reciben los datos por props.
 
 import { supabaseServidor } from "@/lib/supabase";
+import { clasificarExistencia } from "@/lib/umbralStock"; // umbral y clasificación compartidos con los combos
 
 // Los posibles estados de disponibilidad que puede mostrar la web
 export type StockStatus =
@@ -39,9 +40,6 @@ export type StockInfo = {
   precio: number | null; // precio_publico (IVA incluido); null si no hay fila o es 0
 };
 
-// Umbral de "pocas unidades": de 1 a 5 existencias inclusive
-const UMBRAL_POCO_STOCK = 5;
-
 // Resultado para productos sin sku (no se consulta nada)
 const SIN_SKU: StockInfo = { status: "coming_soon", quantity: null, precio: null };
 
@@ -54,14 +52,7 @@ function filaAStockInfo(fila: { existencia: number | string | null; precio_publi
   const existencia = Number(fila.existencia ?? 0);
   const precioPublico = Number(fila.precio_publico ?? 0);
 
-  let status: StockStatus;
-  if (existencia <= 0) {
-    status = "out_of_stock";
-  } else if (existencia <= UMBRAL_POCO_STOCK) {
-    status = "low_stock";
-  } else {
-    status = "in_stock";
-  }
+  const status: StockStatus = clasificarExistencia(existencia);
 
   return {
     status,
