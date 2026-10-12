@@ -1,22 +1,34 @@
 // src/components/CatalogoConFiltro.tsx
 //
 // Parte interactiva de la página /catalogo. Es un "client component" porque
-// depende del navegador (cuál categoría está seleccionada). La categoría vive
-// en la URL (?categoria=Combos), así el header y el pie pueden enlazar a una
-// pestaña concreta. El stock y el precio llegan YA resueltos por props desde
-// src/app/catalogo/page.tsx (server component) - este archivo nunca consulta
-// el stock por su cuenta (ADR-1).
+// depende del navegador: la categoría elegida y la búsqueda viajan en la URL
+// (?categoria=...&q=...), así se pueden compartir y el botón "atrás" las
+// recupera. El filtrado se hace AQUÍ, en el navegador, sobre los productos y
+// combos que ya llegaron: no hay consultas nuevas y lo que se escribe no se
+// guarda ni se envía a ningún sitio. El stock y el precio llegan YA resueltos
+// por props desde src/app/catalogo/page.tsx (server component) - este archivo
+// nunca consulta el stock por su cuenta (ADR-1).
 
 "use client"; // le dice a Next.js que este archivo se ejecuta en el navegador, no en el servidor
 
-import { Suspense, useMemo } from "react"; // Suspense: useSearchParams lo exige para que la página siga siendo estática (ISR)
-import { useSearchParams } from "next/navigation"; // lee ?categoria= de la URL
-import { products, categories } from "@/data/products"; // nuestros datos del catálogo
+import { Suspense, useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { useSearchParams } from "next/navigation"; // lee ?categoria= y ?q= de la URL
+import { products } from "@/data/products"; // nuestros datos del catálogo
+import { FAMILIAS_COMBO } from "@/data/combos"; // solo para armar el texto buscable de los combos
 import ProductCard from "@/components/ProductCard"; // tarjeta individual de producto
-import CategoryFilter from "@/components/CategoryFilter"; // filtro de categorías
+import MenuCategorias from "@/components/MenuCategorias"; // menú desplegable de categorías
+import { IconoLupa } from "@/components/BuscadorCabecera"; // lupa del campo
 import ComboCard, { type ComboCardData } from "@/components/ComboCard"; // tarjeta de una familia de combos
 import type { StockInfo } from "@/lib/stock"; // solo el TIPO: no arrastra el cliente de servidor al navegador
-import { PESTANA_COMBOS, PESTANA_TODOS, urlCatalogo } from "@/lib/catalogoUrl"; // nombres de pestañas y URL del catálogo
+import { PESTANA_COMBOS, PESTANA_TODOS, urlCatalogo } from "@/lib/catalogoUrl"; // nombres de categorías y URL del catálogo
+import { opcionesCategorias } from "@/lib/categorias";
+import {
+  LARGO_MAXIMO_CONSULTA,
+  coincide,
+  prepararConsulta,
+  textoBusquedaCombo,
+  textoBusquedaProducto,
+} from "@/lib/busqueda";
 
 type CatalogoConFiltroProps = {
   // stock y precio del ERP de cada producto, indexados por product.id
@@ -29,63 +41,160 @@ type CatalogoConFiltroProps = {
 // page.tsx arma una entrada por producto). Sin precio = no se puede vender.
 const STOCK_DESCONOCIDO: StockInfo = { status: "unknown", quantity: null, precio: null };
 
-// Categorías del filtro: las de los productos + "Combos" al final
-const categoriasConCombos = [...categories, PESTANA_COMBOS];
+// Opciones del menú de categorías (datos estáticos, se calculan una vez)
+const OPCIONES = opcionesCategorias();
+
+// Textos buscables, calculados una sola vez (id → texto sin tildes ni mayúsculas)
+const TEXTO_PRODUCTO = new Map(products.map((p) => [p.id, textoBusquedaProducto(p)]));
+const TEXTO_COMBO = new Map(FAMILIAS_COMBO.map((f) => [f.id, textoBusquedaCombo(f)]));
+
+// Espera tras la última tecla antes de reflejar la búsqueda en la URL
+const ESPERA_URL_MS = 250;
 
 type CatalogoProps = CatalogoConFiltroProps & {
-  activeCategory: string; // pestaña elegida
-  onChange: (categoria: string) => void; // se llama al elegir otra pestaña
+  categoria: string; // categoría activa ("Todos", una de los productos o "Combos")
+  texto: string; // lo escrito en el buscador
+  alEscribir: (valor: string) => void;
+  alLimpiar: () => void; // quita categoría y búsqueda
+  inputRef: RefObject<HTMLInputElement | null>;
 };
 
-// Parte visual del catálogo; no sabe de dónde sale la categoría activa
-function Catalogo({ stockPorId, combos, activeCategory, onChange }: CatalogoProps) {
-  // ¿Está elegida la pestaña de combos? Entonces el grid muestra familias, no productos
-  const verCombos = activeCategory === PESTANA_COMBOS;
+// Parte visual del catálogo; no sabe de dónde salen la categoría y el texto
+function Catalogo({ stockPorId, combos, categoria, texto, alEscribir, alLimpiar, inputRef }: CatalogoProps) {
+  const verCombos = categoria === PESTANA_COMBOS; // categoría "Combos": el grid muestra familias
+  const grupos = useMemo(() => prepararConsulta(texto), [texto]);
+  const hayConsulta = grupos.length > 0;
+  const hayFiltros = hayConsulta || categoria !== PESTANA_TODOS;
 
-  // useMemo evita recalcular el filtrado en cada render si "activeCategory" no cambió,
-  // mejora el rendimiento cuando el catálogo crezca a cientos de productos
-  const filteredProducts = useMemo(() => {
-    if (activeCategory === PESTANA_TODOS) {
-      return products; // sin filtro, mostramos todo el catálogo
-    }
-    // filter() devuelve solo los productos cuya categoría coincide con la seleccionada
-    return products.filter((p) => p.category === activeCategory);
-  }, [activeCategory]); // se vuelve a calcular solo cuando "activeCategory" cambia
+  // Productos: por categoría y por búsqueda (nada si la categoría es "Combos")
+  const productosFiltrados = useMemo(() => {
+    if (verCombos) return [];
+    return products.filter(
+      (p) =>
+        (categoria === PESTANA_TODOS || p.category === categoria) &&
+        coincide(TEXTO_PRODUCTO.get(p.id) ?? "", grupos)
+    );
+  }, [verCombos, categoria, grupos]);
+
+  // Combos: en la categoría "Combos" siempre; en "Todos" solo cuando se busca algo
+  // (sin búsqueda "Todos" muestra únicamente productos, como antes)
+  const combosFiltrados = useMemo(() => {
+    const incluir = verCombos || (categoria === PESTANA_TODOS && hayConsulta);
+    if (!incluir) return [];
+    return combos.filter((c) => coincide(TEXTO_COMBO.get(c.id) ?? "", grupos));
+  }, [verCombos, categoria, hayConsulta, combos, grupos]);
+
+  const total = productosFiltrados.length + combosFiltrados.length;
+  // Combos aparte bajo su propio título cuando se mezclan con productos (Todos + búsqueda)
+  const combosSeparados = !verCombos && combosFiltrados.length > 0;
 
   return (
-    // Quitamos el <header> que estaba aquí antes - ahora ese contenido
-    // (título, subtítulo) vive en el componente Header.tsx global.
-    // Esta página empieza directo con el contenido del catálogo.
     <main className="min-h-screen bg-[#EFEDE7]">
       <div className="mx-auto max-w-7xl px-6 py-8">
-        <CategoryFilter
-          categories={categoriasConCombos}
-          active={activeCategory}
-          onChange={onChange}
-        />
+        <h1 className="sr-only">Catálogo</h1>
 
-        {/* Mismo grid para productos y para combos (5 tarjetas, una por familia) */}
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {verCombos
-            ? combos.map((combo) => <ComboCard key={combo.id} combo={combo} />)
-            : filteredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  stock={stockPorId[product.id] ?? STOCK_DESCONOCIDO}
-                />
-              ))}
+        {/* Barra de herramientas: control de categoría + buscador. Alturas y anchos fijos
+            (h-11): no cambian de tamaño al escribir ni al cambiar de categoría. */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <MenuCategorias
+            variante="control"
+            etiqueta="Categoría"
+            opciones={OPCIONES}
+            activa={categoria}
+            q={texto}
+          />
+
+          <div className="relative min-w-0 flex-1">
+            <label htmlFor="buscar-catalogo" className="sr-only">
+              Buscar en el catálogo
+            </label>
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6862]">
+              <IconoLupa tamano={18} />
+            </span>
+            <input
+              ref={inputRef}
+              id="buscar-catalogo"
+              type="search"
+              value={texto}
+              onChange={(e) => alEscribir(e.target.value)}
+              maxLength={LARGO_MAXIMO_CONSULTA}
+              placeholder="Buscar por nombre, categoría o código"
+              autoComplete="off"
+              enterKeyHint="search"
+              className="h-11 w-full border border-[#D8D4CC] bg-white pl-10 pr-3 text-base text-[#232320] placeholder:text-[#6B6862] focus:border-[#A8562E] sm:text-sm [&::-webkit-search-cancel-button]:hidden"
+            />
+          </div>
         </div>
 
-        {!verCombos && filteredProducts.length === 0 && (
-          <p className="mt-12 text-center text-[#6B6862]">
-            No hay productos en esta categoría todavía.
+        {/* Número de resultados (anunciado por lectores de pantalla) y "Limpiar filtros".
+            min-h-11: la fila no cambia de alto aunque el botón aparezca o desaparezca. */}
+        <div className="mt-2 flex min-h-11 items-center justify-between gap-4 text-sm text-[#6B6862]">
+          <p role="status" aria-live="polite">
+            {total} {total === 1 ? "resultado" : "resultados"}
           </p>
+          {hayFiltros && (
+            <button
+              type="button"
+              onClick={alLimpiar}
+              className="min-h-11 px-1 text-[#A8562E] underline transition-colors hover:text-[#232320]"
+            >
+              Limpiar filtros
+            </button>
+          )}
+        </div>
+
+        {/* Mismo grid para productos y para combos */}
+        {!verCombos && productosFiltrados.length > 0 && (
+          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {productosFiltrados.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                stock={stockPorId[product.id] ?? STOCK_DESCONOCIDO}
+              />
+            ))}
+          </div>
         )}
 
-        {verCombos && combos.length === 0 && (
+        {combosFiltrados.length > 0 && (
+          <section className={combosSeparados ? "mt-10" : "mt-4"}>
+            {combosSeparados && (
+              <h2 className="mb-4 font-[var(--font-heading)] text-xl font-semibold text-[#232320]">
+                Combos
+              </h2>
+            )}
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {combosFiltrados.map((combo) => (
+                <ComboCard key={combo.id} combo={combo} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Estado vacío: con búsqueda, dice qué se buscó y ofrece ver todo el catálogo */}
+        {total === 0 && hayConsulta && (
+          <div className="mt-12 text-center">
+            <p className="break-words text-[#232320]">
+              No encontramos resultados para &ldquo;{texto.trim()}&rdquo;.
+            </p>
+            <p className="mt-2 text-sm text-[#6B6862]">
+              Revisa la ortografía, prueba con otra palabra o ve todo el catálogo.
+            </p>
+            <button
+              type="button"
+              onClick={alLimpiar}
+              className="mt-4 inline-flex min-h-11 items-center bg-[#232320] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#A8562E]"
+            >
+              Ver todo el catálogo
+            </button>
+          </div>
+        )}
+
+        {total === 0 && !hayConsulta && (
           <p className="mt-12 text-center text-[#6B6862]">
-            Todavía no hay combos disponibles. Vuelve pronto o consulta con tu asesor.
+            {verCombos
+              ? "Todavía no hay combos disponibles. Vuelve pronto o consulta con tu asesor."
+              : "No hay productos en esta categoría todavía."}
           </p>
         )}
       </div>
@@ -93,20 +202,57 @@ function Catalogo({ stockPorId, combos, activeCategory, onChange }: CatalogoProp
   );
 }
 
-// Lee la categoría de la URL y la cambia SIN recargar ni navegar: history.replaceState
-// actualiza la dirección (Next.js lo sincroniza con useSearchParams) y no llena el
-// historial con cada clic en una pestaña. Una categoría desconocida cae en "Todos".
+// Lee categoría y búsqueda de la URL y las actualiza SIN recargar ni navegar:
+// history.replaceState cambia la dirección (Next.js la sincroniza con useSearchParams)
+// y no llena el historial con cada tecla. Una categoría desconocida cae en "Todos".
+// (Elegir categoría en el menú es un enlace normal: sí queda en el historial.)
 function CatalogoConUrl(props: CatalogoConFiltroProps) {
   const searchParams = useSearchParams();
   const pedida = searchParams.get("categoria");
-  const activeCategory =
-    pedida !== null && categoriasConCombos.includes(pedida) ? pedida : PESTANA_TODOS;
+  const categoria =
+    pedida !== null && OPCIONES.some((o) => o.nombre === pedida) ? pedida : PESTANA_TODOS;
+  const qUrl = (searchParams.get("q") ?? "").slice(0, LARGO_MAXIMO_CONSULTA);
+
+  // Lo escrito vive en estado local (respuesta inmediata) y se copia a la URL con una pequeña espera
+  const [texto, setTexto] = useState(qUrl);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const espera = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // Si la URL cambia desde fuera (buscador de la cabecera, botón atrás, un enlace),
+  // se refleja en el campo; mientras se escribe en él, la URL no pisa lo tecleado.
+  useEffect(() => {
+    setTexto((actual) => (document.activeElement === inputRef.current ? actual : qUrl));
+  }, [qUrl]);
+
+  // Al salir de la página se cancela la copia pendiente a la URL
+  useEffect(() => () => clearTimeout(espera.current), []);
+
+  function alEscribir(valor: string) {
+    setTexto(valor);
+    clearTimeout(espera.current);
+    espera.current = setTimeout(() => {
+      // La categoría se lee de la URL en este momento (no de la variable): si cambió
+      // mientras se esperaba, no se pisa con la anterior.
+      const categoriaActual = new URLSearchParams(window.location.search).get("categoria") ?? PESTANA_TODOS;
+      window.history.replaceState(null, "", urlCatalogo(categoriaActual, valor));
+    }, ESPERA_URL_MS);
+  }
+
+  function alLimpiar() {
+    clearTimeout(espera.current);
+    setTexto("");
+    window.history.replaceState(null, "", urlCatalogo());
+    inputRef.current?.focus(); // el botón desaparece: el foco pasa al campo en vez de perderse
+  }
 
   return (
     <Catalogo
       {...props}
-      activeCategory={activeCategory}
-      onChange={(categoria) => window.history.replaceState(null, "", urlCatalogo(categoria))}
+      categoria={categoria}
+      texto={texto}
+      alEscribir={alEscribir}
+      alLimpiar={alLimpiar}
+      inputRef={inputRef}
     />
   );
 }
@@ -114,7 +260,18 @@ function CatalogoConUrl(props: CatalogoConFiltroProps) {
 export default function CatalogoConFiltro(props: CatalogoConFiltroProps) {
   // Mientras se lee la URL (y en el HTML estático) se ve el catálogo completo en "Todos"
   return (
-    <Suspense fallback={<Catalogo {...props} activeCategory={PESTANA_TODOS} onChange={() => {}} />}>
+    <Suspense
+      fallback={
+        <Catalogo
+          {...props}
+          categoria={PESTANA_TODOS}
+          texto=""
+          alEscribir={() => {}}
+          alLimpiar={() => {}}
+          inputRef={{ current: null }}
+        />
+      }
+    >
       <CatalogoConUrl {...props} />
     </Suspense>
   );

@@ -1,9 +1,10 @@
 // src/components/Header.tsx
 //
-// Encabezado global del sitio: logo + nombre a la izquierda, navegación
-// (Inicio, Catálogo, Combos) y carrito con su contador a la derecha. En móvil
-// la navegación se pliega detrás de un botón de menú (aria-expanded, se cierra
-// con Escape o al elegir un enlace).
+// Encabezado global del sitio: logo + nombre a la izquierda; navegación (Inicio,
+// menú desplegable "Catálogo" con las categorías, Combos), buscador y carrito con
+// su contador a la derecha. En móvil todo se pliega detrás de un botón de menú
+// (aria-expanded, se cierra con Escape o al elegir un enlace) y el buscador pasa
+// a ser un campo dentro de ese menú.
 "use client";  // necesita "use client": usa el carrito (useCart), el estado del menú y la ruta actual
 
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -12,27 +13,24 @@ import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCart } from "@/context/CartContext"; // hook para leer el estado del carrito
 import { sitio } from "@/data/sitio";
-import { PESTANA_COMBOS, urlCatalogo } from "@/lib/catalogoUrl";
+import { PESTANA_COMBOS, PESTANA_TODOS, urlCatalogo } from "@/lib/catalogoUrl";
+import type { OpcionCategoria } from "@/lib/categorias"; // solo el TIPO: las categorías llegan por props desde layout.tsx
+import MenuCategorias from "@/components/MenuCategorias";
+import { BuscadorEscritorio, FormBusqueda } from "@/components/BuscadorCabecera";
+import { claseEnlaceNav } from "@/components/estilosNav";
 
 type SeccionActiva = "inicio" | "catalogo" | "combos" | null;
 
-// Enlaces de la navegación. "Combos" lleva al catálogo con esa pestaña activa.
-const ENLACES: { id: Exclude<SeccionActiva, null>; texto: string; href: string }[] = [
-  { id: "inicio", texto: "Inicio", href: "/" },
-  { id: "catalogo", texto: "Catálogo", href: "/catalogo" },
-  { id: "combos", texto: "Combos", href: urlCatalogo(PESTANA_COMBOS) },
-];
-
-// Parte visual de la navegación (no lee la URL: recibe cuál sección está activa)
-function Navegacion({
-  activa,
-  abierto,
-  alElegir,
-}: {
+type NavegacionProps = {
   activa: SeccionActiva;
+  categoriaActiva: string | null; // categoría marcada en el menú (solo dentro de /catalogo)
+  opciones: OpcionCategoria[];
   abierto: boolean;
   alElegir: () => void;
-}) {
+};
+
+// Parte visual de la navegación (no lee la URL: recibe cuál sección está activa)
+function Navegacion({ activa, categoriaActiva, opciones, abierto, alElegir }: NavegacionProps) {
   return (
     // En móvil: panel a todo el ancho bajo la fila del logo, solo si está abierto.
     // Desde md: fila horizontal siempre visible.
@@ -41,46 +39,64 @@ function Navegacion({
       aria-label="Principal"
       className={`${abierto ? "block" : "hidden"} order-3 w-full border-t border-[#D8D4CC] pt-2 md:order-none md:flex md:w-auto md:border-t-0 md:pt-0`}
     >
-      <ul className="flex flex-col md:flex-row md:gap-8">
-        {ENLACES.map(({ id, texto, href }) => {
-          const esActivo = activa === id;
-          return (
-            <li key={id}>
-              <Link
-                href={href}
-                onClick={alElegir}
-                aria-current={esActivo ? "page" : undefined}
-                // Móvil: fila de 44 px con marca lateral. md: pestaña con línea inferior,
-                // igual que las pestañas del catálogo (CategoryFilter).
-                className={`flex min-h-11 items-center border-l-2 pl-3 text-sm transition-colors md:min-h-0 md:border-b-2 md:border-l-0 md:py-1 md:pl-0 ${
-                  esActivo
-                    ? "border-[#A8562E] font-medium text-[#232320]"
-                    : "border-transparent text-[#6B6862] hover:text-[#232320]"
-                }`}
-              >
-                {texto}
-              </Link>
-            </li>
-          );
-        })}
+      {/* Buscador: solo en el menú plegable móvil (en escritorio es la lupa de la cabecera) */}
+      <div className="py-2 md:hidden">
+        <FormBusqueda alEnviar={alElegir} />
+      </div>
+
+      <ul className="flex flex-col md:flex-row md:items-center md:gap-8">
+        <li>
+          <Link
+            href="/"
+            onClick={alElegir}
+            aria-current={activa === "inicio" ? "page" : undefined}
+            className={claseEnlaceNav(activa === "inicio")}
+          >
+            Inicio
+          </Link>
+        </li>
+        <li>
+          <MenuCategorias
+            variante="cabecera"
+            etiqueta="Catálogo"
+            opciones={opciones}
+            activa={categoriaActiva}
+            seccionActiva={activa === "catalogo"}
+            alElegir={alElegir}
+          />
+        </li>
+        <li>
+          <Link
+            href={urlCatalogo(PESTANA_COMBOS)}
+            onClick={alElegir}
+            aria-current={activa === "combos" ? "page" : undefined}
+            className={claseEnlaceNav(activa === "combos")}
+          >
+            Combos
+          </Link>
+        </li>
       </ul>
     </nav>
   );
 }
 
 // Calcula la sección activa con la ruta y ?categoria= (por eso va dentro de Suspense)
-function NavegacionConRuta(props: { abierto: boolean; alElegir: () => void }) {
+function NavegacionConRuta(props: Omit<NavegacionProps, "activa" | "categoriaActiva">) {
   const pathname = usePathname();
   const categoria = useSearchParams().get("categoria");
 
   let activa: SeccionActiva = null;
+  let categoriaActiva: string | null = null;
   if (pathname === "/") activa = "inicio";
-  else if (pathname === "/catalogo") activa = categoria === PESTANA_COMBOS ? "combos" : "catalogo";
+  else if (pathname === "/catalogo") {
+    activa = categoria === PESTANA_COMBOS ? "combos" : "catalogo";
+    categoriaActiva = props.opciones.some((o) => o.nombre === categoria) ? categoria : PESTANA_TODOS;
+  }
 
-  return <Navegacion activa={activa} {...props} />;
+  return <Navegacion activa={activa} categoriaActiva={categoriaActiva} {...props} />;
 }
 
-export default function Header() {
+export default function Header({ opciones }: { opciones: OpcionCategoria[] }) {
   const { totalItems } = useCart();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const botonMenu = useRef<HTMLButtonElement>(null);
@@ -89,7 +105,8 @@ export default function Header() {
   useEffect(() => {
     if (!menuAbierto) return;
     function alTeclear(e: KeyboardEvent) {
-      if (e.key === "Escape") {
+      // defaultPrevented: un desplegable abierto dentro del menú ya consumió este Escape
+      if (e.key === "Escape" && !e.defaultPrevented) {
         setMenuAbierto(false);
         botonMenu.current?.focus();
       }
@@ -132,6 +149,8 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-1 md:order-last">
+          <BuscadorEscritorio />
+
           <Link
             href="/carrito"
             onClick={cerrarMenu}
@@ -180,8 +199,18 @@ export default function Header() {
 
         {/* Suspense: useSearchParams lo exige para que las páginas sigan siendo estáticas.
             Mientras tanto se ve la misma navegación sin sección marcada. */}
-        <Suspense fallback={<Navegacion activa={null} abierto={menuAbierto} alElegir={cerrarMenu} />}>
-          <NavegacionConRuta abierto={menuAbierto} alElegir={cerrarMenu} />
+        <Suspense
+          fallback={
+            <Navegacion
+              activa={null}
+              categoriaActiva={null}
+              opciones={opciones}
+              abierto={menuAbierto}
+              alElegir={cerrarMenu}
+            />
+          }
+        >
+          <NavegacionConRuta opciones={opciones} abierto={menuAbierto} alElegir={cerrarMenu} />
         </Suspense>
       </div>
     </header>
