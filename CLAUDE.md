@@ -16,7 +16,9 @@ antes de asumir nada sobre el estado del proyecto.
   ADR correspondiente en DECISIONS.md). El `dev` sigue usando Turbopack sin
   problema.
 - `npm run lint` — ESLint 9 (flat config en `eslint.config.mjs`).
-- No hay framework de tests configurado.
+- No hay framework de tests configurado. La lógica pura tiene scripts sueltos
+  que corren con Node 22.18+ (ejecuta TypeScript directo):
+  `node scripts/test-combos.ts` y `node scripts/test-busqueda.ts`.
 
 **Ruta del proyecto:** `C:\dev\e-commercetest`. El proyecto vive fuera de
 OneDrive a propósito (dentro de OneDrive daba errores de build); no moverlo
@@ -33,20 +35,31 @@ de los pedidos), `NEXT_PUBLIC_ADVISOR_EMAIL` (sin uso actual),
 ```
 src/
   app/
-    layout.tsx            # fuentes, metadata, CartProvider + Header global
-    page.tsx              # "/" catálogo (server): lee stock y precio
+    layout.tsx            # fuentes, metadata, CartProvider + Header + Footer globales
+    page.tsx              # "/" portada TEMPORAL (se reemplaza en la fase 4)
+    catalogo/             # "/catalogo" catálogo (server): lee stock y precio
     productos/[id]/       # "/productos/:id" detalle de producto
+    combos/[familia]/     # "/combos/:familia" detalle de una familia de combos
     carrito/              # "/carrito" wizard de 3 pasos (WhatsApp o correo)
     api/pedido/           # POST: valida, calcula el total y guarda el pedido
-  components/             # Header, ProductCard, CatalogoConFiltro, CategoryFilter,
-                          # ProductGallery, AddToCartButton, StockBadge,
-                          # AvisoSinPrecio
+  components/             # Header, Footer, MenuCategorias, BuscadorCabecera,
+                          # CatalogoConFiltro, ProductCard, ComboCard,
+                          # SelectorCombo, ProductGallery, AddToCartButton,
+                          # StockBadge, AvisoSinPrecio, IconosSitio;
+                          # useDesplegable.ts (hook) y estilosNav.ts (clases)
   context/CartContext.tsx # estado del carrito (useCart)
   data/products.ts        # catálogo estático (25 productos, sin precios)
+  data/combos.ts          # familias de combos lavamanos + mueble (sin precios)
+  data/sitio.ts           # datos del sitio: marca, contacto, redes (ver abajo)
   lib/stock.ts            # stock y precio (getStock, getStockPorSkus)
+  lib/catalogoUrl.ts      # urlCatalogo() y nombres de categoría "Todos"/"Combos"
+  lib/categorias.ts       # categorías con su cantidad (menú desplegable)
+  lib/busqueda.ts         # lógica pura del buscador (sin React ni red)
+  lib/combos.ts           # lógica de combos (combinaciones, precio, stock)
   lib/supabase.ts         # cliente de servidor (import "server-only")
   lib/email.ts            # correo al asesor (Resend)
 public/images/            # logos (brand/) e imágenes de productos
+scripts/                  # pruebas de lógica pura (test-combos, test-busqueda)
 docs/                     # CHANGELOG, DECISIONS (ADRs), REQUIREMENTS-STOCK
 .claude/agents/           # agentes de proyecto (versionados)
 ```
@@ -72,10 +85,48 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
   "Próximamente"; con sku sin precio: "No disponible por ahora", ambos vía
   `AvisoSinPrecio`). Agotado con precio = se puede agregar, con el aviso
   "Consulta la disponibilidad con tu asesor".
-- **`/` (`src/app/page.tsx`)** — server component con `revalidate = 60`: pide
-  stock y precio de todo el catálogo con `getStockPorSkus` y se los pasa a
-  `CatalogoConFiltro` (client component), que filtra por categoría en el
-  navegador.
+- **`/` (`src/app/page.tsx`)** — portada temporal: título, descripción de
+  `sitio.ts` y botón a `/catalogo`. Se reemplaza en la fase 4.
+- **`/catalogo` (`src/app/catalogo/page.tsx`)** — server component con
+  `revalidate = 60` (ISR): pide stock y precio de todo el catálogo y de las
+  piezas de los combos con UNA sola `getStockPorSkus` y se los pasa a
+  `CatalogoConFiltro` (client component), que filtra en el navegador.
+  La categoría (`?categoria=`) y la búsqueda (`?q=`) viajan en la URL:
+  elegir categoría es un enlace normal; escribir actualiza la URL con
+  `history.replaceState` tras 250 ms. `useSearchParams` va dentro de
+  `Suspense` para que la página siga estática: el HTML estático trae el
+  catálogo completo y el filtro se aplica al hidratar. "Todos" muestra solo
+  productos; con una búsqueda activa también los combos que coinciden. La
+  URL del catálogo se arma siempre con `urlCatalogo()` (`lib/catalogoUrl.ts`).
+- **Buscador (`lib/busqueda.ts`):** filtra en el navegador sobre lo ya
+  cargado, sin consultas nuevas; lo que escribe la persona no se guarda ni se
+  envía a ningún sitio. Sin distinguir mayúsculas ni tildes, varias palabras
+  = todas deben coincidir, el plural prueba el singular y hay un sinónimo
+  (`lavabo` → `lavamanos`, ver `SINONIMOS`). Productos: nombre, categoría,
+  descripción y sku; combos: nombre de la familia, nombre y etiqueta de cada
+  pieza y la palabra "combo".
+- **Menú de categorías:** `MenuCategorias` (enlaces a
+  `/catalogo?categoria=...` con la cantidad de cada una) se usa en la
+  cabecera (botón "Catálogo"; en móvil, dentro del menú plegable) y en
+  `/catalogo` (control "Categoría"). Los desplegables comparten
+  `useDesplegable` (aria-expanded/controls, Escape, clic fuera, flechas).
+  `opcionesCategorias()` se calcula en `layout.tsx` (servidor) y llega a
+  `Header` por props, para no meter los productos en el bundle de todas las
+  páginas.
+- **Datos del sitio (`src/data/sitio.ts`):** marca, empresa, contacto, redes y
+  WhatsApp (se construye con `NEXT_PUBLIC_ADVISOR_PHONE`, sin número copiado).
+  Regla: un campo `null` NO se muestra (sin enlaces muertos ni relleno);
+  hoy `urlPrivacidad` es `null` porque la página no existe. Cabecera, pie y
+  portada leen de ahí; no repetir esos datos en otros componentes.
+- **Cabecera y pie:** `Header` (navegación Inicio / Catálogo / Combos, lupa
+  de búsqueda, carrito con contador; menú plegable accesible en móvil) y
+  `Footer` (marca, categorías, contacto, redes solo con iconos SVG inline).
+  Reglas globales en `globals.css`: foco visible con el acento (en
+  `@layer base`) y `prefers-reduced-motion` respetado.
+- **Combos:** `data/combos.ts` define las familias (lavamanos + mueble, solo
+  se combinan dentro de la misma familia); `lib/combos.ts` calcula
+  combinaciones, precio y stock; `/combos/[familia]` es ISR (`revalidate =
+  60`) y su selector (`SelectorCombo`) es cliente.
 - **`/productos/[id]`** — server component, prerenderizado con
   `generateStaticParams` + `revalidate = 60` (ISR). Llama a `getStock()`
   para un producto; sin precio no muestra precio ni botón de compra.

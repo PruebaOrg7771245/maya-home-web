@@ -14,6 +14,10 @@ Formato:
 - Estado: vigente / superada (con fecha en formato DD/MM/YYYY si cambia).
 ```
 
+Regla: en "Alternativas descartadas" solo se anotan opciones que el cliente o
+el desarrollador evaluaron de verdad. No se inventan para llenar la sección;
+si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
+
 ---
 
 ## ADR-1: Stock detrás de un adaptador (`src/lib/stock.ts`)
@@ -413,3 +417,73 @@ Formato:
 - **Consecuencia:** cambiar el formato de precio o el umbral es tocar un solo
   archivo. La nota de `CLAUDE.md` sobre `formatPrice` duplicado ya no aplica.
 - **Estado:** vigente (08/10/2026).
+
+## ADR-17: Catálogo en `/catalogo`, portada temporal en `/` y datos del sitio en `sitio.ts`
+- **Contexto:** el sitio solo tenía el catálogo en `/`, y se necesita una
+  portada propia, cabecera/pie con datos de contacto y redes, y un lugar único
+  donde cambiar esos datos.
+- **Decisión:** el catálogo pasó a `/catalogo` (server component, mismo
+  `revalidate = 60`, una sola consulta `getStockPorSkus` para productos y
+  combos). `/` es una portada temporal (título, descripción, botón al catálogo)
+  que se reemplaza en la fase 4. Todos los datos del sitio (nombre, empresa,
+  contacto, redes, `urlPrivacidad`) viven en `src/data/sitio.ts` y los leen
+  Header, Footer y portada. **Regla: un campo `null` no se muestra** (ni enlace
+  muerto, ni `#`, ni relleno); activarlo es poner el valor real. El WhatsApp de
+  `sitio.ts` se construye con `NEXT_PUBLIC_ADVISOR_PHONE`, la misma variable que
+  usa el carrito, así que el número se cambia en un solo lugar. Las URLs del
+  catálogo salen de `urlCatalogo()` (`src/lib/catalogoUrl.ts`), no se escriben
+  a mano.
+- **Alternativas descartadas:** repetir los datos en cada componente (se
+  desincronizan) y poner enlaces `#` donde falte un dato (enlaces muertos).
+- **Consecuencia:** `urlPrivacidad` está en `null` porque la página no existe;
+  el enlace del pie aparece solo cuando se cree. Cualquier enlace viejo a `/`
+  como catálogo ahora lleva a la portada.
+- **Estado:** vigente (12/10/2026). Portada provisoria hasta la fase 4.
+
+## ADR-18: Categoría y búsqueda en la URL, filtrado solo en el navegador
+- **Contexto:** al agregar un buscador al catálogo había que decidir dónde vive
+  el estado, si se consulta al servidor y qué pasa con lo que escribe la
+  persona, sin perder el catálogo estático con ISR.
+- **Decisión:** la categoría (`?categoria=`) y el texto (`?q=`) viajan en la
+  URL, así se pueden compartir y el botón "atrás" las recupera. El filtrado
+  (`src/lib/busqueda.ts`, lógica pura) corre en el navegador sobre los
+  productos y combos que ya llegaron: sin consultas nuevas y **sin guardar ni
+  enviar lo que busca el usuario**. Elegir categoría es un enlace normal (queda
+  en el historial); al escribir, la URL se actualiza con
+  `history.replaceState` tras 250 ms de espera, para no llenar el historial con
+  cada tecla. `useSearchParams` va dentro de `Suspense`: el HTML estático trae
+  el catálogo completo y el filtro se aplica al hidratar. Una categoría
+  desconocida cae en "Todos". La consulta se limita a 80 caracteres.
+- **Consecuencia:** hasta hidratar se ve "Todos" completo y luego se aplica el
+  filtro. Si el catálogo crece mucho, filtrar en el cliente deja de convenir.
+- **Pendientes:**
+  - Confirmar con el cliente el sinónimo `lavabo` -> `lavamanos`.
+  - Confirmar el comportamiento de los combos dentro de "Todos" cuando hay
+    búsqueda activa (hoy aparecen bajo un título "Combos"; sin búsqueda,
+    "Todos" muestra solo productos).
+- **Estado:** vigente (12/10/2026).
+
+## ADR-19: Menú desplegable de categorías accesible y compartido (`useDesplegable`) en vez de pestañas
+- **Contexto:** las pestañas (`CategoryFilter`) se reemplazaron porque el
+  cliente pidió las categorías en un menú desplegable con buscador (ADR-13 ya
+  había tenido que desplazar la pestaña activa en móvil), y la cabecera
+  también necesitaba entrar al catálogo por categoría.
+- **Decisión:** un menú desplegable con la cantidad por categoría
+  (`MenuCategorias.tsx`), usado como botón "Catálogo" en la cabecera (en móvil
+  dentro del menú plegable) y como control "Categoría" en `/catalogo`. El
+  comportamiento (botón con `aria-expanded`, Escape, clic fuera, `focusin`
+  en vez de `blur` porque Safari no da foco a los enlaces al hacer clic, flechas
+  arriba/abajo/Inicio/Fin) está en el hook `useDesplegable`, que también usa la
+  lupa de la cabecera. Las categorías con cantidades se calculan en
+  `layout.tsx` (servidor, `src/lib/categorias.ts`) y llegan a `Header` por
+  props, para no meter el catálogo de productos en el bundle de todas las
+  páginas. Estilo según `maya-home-design-system`: panel blanco con borde de
+  1px y sin sombra, control de ancho fijo, chevron que gira solo con
+  `motion-safe`.
+- **Alternativas:** ninguna evaluada; el menú desplegable fue petición
+  explícita del cliente (reemplaza las pestañas).
+- **Consecuencia:** una sola implementación de teclado y cierre para los tres
+  paneles; un cambio de comportamiento se hace en `useDesplegable`. Se eliminó
+  `CategoryFilter.tsx`; el comentario de ADR-13 sobre el auto-scroll de la
+  pestaña activa ya no aplica.
+- **Estado:** vigente (12/10/2026).

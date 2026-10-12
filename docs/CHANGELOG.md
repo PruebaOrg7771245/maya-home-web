@@ -18,6 +18,61 @@ Formato de entrada:
 
 ---
 
+## 12/10/2026 - Fase 2: menú de categorías y buscador del catálogo
+- **Menú en vez de pestañas:** `CategoryFilter.tsx` se eliminó. Ahora hay un
+  menú desplegable de categorías con la cantidad por categoría: botón
+  "Catálogo" en la cabecera (en móvil, dentro del menú plegable) y control
+  "Categoría" en `/catalogo`. Piezas nuevas: `MenuCategorias.tsx`,
+  `useDesplegable.ts` (Escape, clic fuera, `focusin` en vez de `blur` por
+  Safari, flechas/Inicio/Fin), `estilosNav.ts` y `src/lib/categorias.ts`
+  (se calcula en `layout.tsx` y llega a `Header` por props, para no meter los
+  productos en el bundle de todas las páginas). Ver ADR-19.
+- **Búsqueda:** `src/lib/busqueda.ts` (lógica pura): sin distinguir
+  mayúsculas ni tildes, varias palabras = todas deben coincidir, el plural
+  prueba el singular, sinónimo `lavabo` -> `lavamanos`. En productos busca por
+  nombre, categoría, descripción y sku; en combos por familia, nombre y
+  etiqueta de cada pieza y la palabra "combo". En "Todos" con búsqueda activa,
+  los combos que coinciden salen bajo el título "Combos"; sin búsqueda, "Todos"
+  sigue mostrando solo productos. Hay contador de resultados, "Limpiar
+  filtros" y estado vacío con "Ver todo el catálogo". Lupa en la cabecera
+  (panel con campo en escritorio, campo en el menú plegable en móvil) que lleva
+  a `/catalogo?q=`.
+- **URL y privacidad:** categoría (`?categoria=`) y búsqueda (`?q=`) viajan en
+  la URL; el filtrado es solo en el navegador, sin consultas nuevas ni guardar
+  lo escrito. La página sigue estática con ISR. Ver ADR-18.
+- **Diseño (`maya-home-design-system`):** panel de menú blanco con borde de 1px
+  y sin sombra; control de ancho fijo; botón de búsqueda negro con hover
+  acento; "Limpiar filtros" subrayado en acento; el chevron gira solo con
+  `motion-safe`.
+- **Pruebas:** `node scripts/test-busqueda.ts` (15 pruebas, verificadas OK al
+  registrar esto). Revisión manual en Chrome a 320/375/768/1280 px (sin scroll
+  horizontal), teclado y reduced-motion (reportado por quien hizo el cambio).
+- **Pendientes:** el sinónimo `lavabo` -> `lavamanos` es decisión por confirmar
+  con el cliente (y si hacen falta más sinónimos); el cambio está sin commit.
+
+## 12/10/2026 - Fase 1: estructura del sitio (catálogo en /catalogo, cabecera, pie, datos del sitio)
+- **Rutas:** el catálogo se movió de `/` a `/catalogo` (mismo `revalidate = 60`
+  y una sola consulta de stock). `/` es ahora una portada **temporal** (título,
+  descripción y botón al catálogo), a reemplazar en la fase 4. Se actualizaron
+  los enlaces internos (carrito, ficha de producto) y la ficha de combo vuelve
+  a `/catalogo?categoria=Combos`. Ver ADR-17.
+- **Datos del sitio:** `src/data/sitio.ts` concentra nombre, empresa,
+  descripción, ubicación, envíos, teléfono, correo, redes y `urlPrivacidad`; el
+  enlace de WhatsApp se arma con `NEXT_PUBLIC_ADVISOR_PHONE`. Regla: un campo
+  `null` no se muestra (sin enlaces muertos). `urlPrivacidad` está en `null`
+  porque la página no existe.
+- **Cabecera y pie:** cabecera con navegación y menú plegable móvil accesible
+  (`aria-expanded`, `aria-controls`); nuevo `Footer.tsx` en columnas con redes
+  solo como iconos SVG inline (`IconosSitio.tsx`) y franja legal "© año
+  Comercial Maya".
+- **Global:** en `globals.css`, foco visible con el acento (en `@layer base`,
+  para que las utilidades de Tailwind lo puedan sobreescribir) y
+  `prefers-reduced-motion`. `src/lib/catalogoUrl.ts` con las constantes y
+  `urlCatalogo()`.
+- **Pendientes:** página de privacidad (hasta entonces `urlPrivacidad` queda en
+  `null` y el enlace no aparece); portada definitiva en la fase 4. Esta fase ya
+  está en el commit `2968d7b`; el registro se hizo después.
+
 ## 08/10/2026 - Etapa 2: combos lavamanos + mueble (9 combinaciones en 5 familias)
 - **Datos y lógica:** `src/data/combos.ts` (5 familias: LUX-600, FLUTE-800,
   CONNON SX800, LUX-800, LUMINA-1600 = 9 combinaciones; cada pieza con sku del

@@ -23,6 +23,9 @@ constancia de lo que otro agente o el usuario ya hizo.
    entre varias alternativas, se estableció un patrón, se descartó algo),
    agregá o actualizá un ADR en `docs/DECISIONS.md` siguiendo el formato
    existente (Contexto / Decisión / Alternativas descartadas / Estado).
+   En "Alternativas descartadas" solo van opciones que el cliente o el
+   desarrollador evaluaron de verdad. No inventes alternativas para llenar
+   la sección; si no hubo, escribí que ninguna se evaluó y por qué.
 5. Si el cambio deja algo pendiente relacionado con la integración de stock
    externo, actualizá también `docs/REQUIREMENTS-STOCK.md`.
 
