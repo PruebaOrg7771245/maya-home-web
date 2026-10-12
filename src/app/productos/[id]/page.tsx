@@ -63,7 +63,7 @@ export default async function ProductoPage({
   return (
     <main className="min-h-screen bg-[#EFEDE7]">
       <div className="border-b border-[#D8D4CC] bg-white px-6 py-3">
-        <Link href="/" className="text-sm text-[#6B6862] hover:text-[#232320]">
+        <Link href="/catalogo" className="text-sm text-[#6B6862] hover:text-[#232320]">
           ← Volver al catálogo
         </Link>
       </div>

@@ -1,18 +1,22 @@
 // src/components/CatalogoConFiltro.tsx
 //
-// Parte interactiva de la página principal. Es un "client component" porque
-// maneja estado en el navegador (cuál categoría está seleccionada). El stock
-// y el precio llegan YA resueltos por props desde src/app/page.tsx (server
-// component) - este archivo nunca consulta el stock por su cuenta (ADR-1).
+// Parte interactiva de la página /catalogo. Es un "client component" porque
+// depende del navegador (cuál categoría está seleccionada). La categoría vive
+// en la URL (?categoria=Combos), así el header y el pie pueden enlazar a una
+// pestaña concreta. El stock y el precio llegan YA resueltos por props desde
+// src/app/catalogo/page.tsx (server component) - este archivo nunca consulta
+// el stock por su cuenta (ADR-1).
 
 "use client"; // le dice a Next.js que este archivo se ejecuta en el navegador, no en el servidor
 
-import { useState, useMemo } from "react"; // hooks de React para manejar estado y cálculos memorizados
+import { Suspense, useMemo } from "react"; // Suspense: useSearchParams lo exige para que la página siga siendo estática (ISR)
+import { useSearchParams } from "next/navigation"; // lee ?categoria= de la URL
 import { products, categories } from "@/data/products"; // nuestros datos del catálogo
 import ProductCard from "@/components/ProductCard"; // tarjeta individual de producto
 import CategoryFilter from "@/components/CategoryFilter"; // filtro de categorías
 import ComboCard, { type ComboCardData } from "@/components/ComboCard"; // tarjeta de una familia de combos
 import type { StockInfo } from "@/lib/stock"; // solo el TIPO: no arrastra el cliente de servidor al navegador
+import { PESTANA_COMBOS, PESTANA_TODOS, urlCatalogo } from "@/lib/catalogoUrl"; // nombres de pestañas y URL del catálogo
 
 type CatalogoConFiltroProps = {
   // stock y precio del ERP de cada producto, indexados por product.id
@@ -21,28 +25,27 @@ type CatalogoConFiltroProps = {
   combos: ComboCardData[];
 };
 
-// Nombre de la pestaña de combos. Va al final de las categorías; "Todos" NO
-// incluye combos (solo productos).
-const PESTANA_COMBOS = "Combos";
-
 // Respaldo por si algún producto no llegara en el mapa (no debería pasar:
 // page.tsx arma una entrada por producto). Sin precio = no se puede vender.
 const STOCK_DESCONOCIDO: StockInfo = { status: "unknown", quantity: null, precio: null };
 
-export default function CatalogoConFiltro({ stockPorId, combos }: CatalogoConFiltroProps) {
-  // Estado que guarda qué categoría está seleccionada actualmente. Empieza en "Todos".
-  const [activeCategory, setActiveCategory] = useState("Todos");
+// Categorías del filtro: las de los productos + "Combos" al final
+const categoriasConCombos = [...categories, PESTANA_COMBOS];
 
+type CatalogoProps = CatalogoConFiltroProps & {
+  activeCategory: string; // pestaña elegida
+  onChange: (categoria: string) => void; // se llama al elegir otra pestaña
+};
+
+// Parte visual del catálogo; no sabe de dónde sale la categoría activa
+function Catalogo({ stockPorId, combos, activeCategory, onChange }: CatalogoProps) {
   // ¿Está elegida la pestaña de combos? Entonces el grid muestra familias, no productos
   const verCombos = activeCategory === PESTANA_COMBOS;
-
-  // Categorías del filtro: las de los productos + "Combos" al final
-  const categoriasConCombos = useMemo(() => [...categories, PESTANA_COMBOS], []);
 
   // useMemo evita recalcular el filtrado en cada render si "activeCategory" no cambió,
   // mejora el rendimiento cuando el catálogo crezca a cientos de productos
   const filteredProducts = useMemo(() => {
-    if (activeCategory === "Todos") {
+    if (activeCategory === PESTANA_TODOS) {
       return products; // sin filtro, mostramos todo el catálogo
     }
     // filter() devuelve solo los productos cuya categoría coincide con la seleccionada
@@ -58,7 +61,7 @@ export default function CatalogoConFiltro({ stockPorId, combos }: CatalogoConFil
         <CategoryFilter
           categories={categoriasConCombos}
           active={activeCategory}
-          onChange={setActiveCategory}
+          onChange={onChange}
         />
 
         {/* Mismo grid para productos y para combos (5 tarjetas, una por familia) */}
@@ -87,5 +90,32 @@ export default function CatalogoConFiltro({ stockPorId, combos }: CatalogoConFil
         )}
       </div>
     </main>
+  );
+}
+
+// Lee la categoría de la URL y la cambia SIN recargar ni navegar: history.replaceState
+// actualiza la dirección (Next.js lo sincroniza con useSearchParams) y no llena el
+// historial con cada clic en una pestaña. Una categoría desconocida cae en "Todos".
+function CatalogoConUrl(props: CatalogoConFiltroProps) {
+  const searchParams = useSearchParams();
+  const pedida = searchParams.get("categoria");
+  const activeCategory =
+    pedida !== null && categoriasConCombos.includes(pedida) ? pedida : PESTANA_TODOS;
+
+  return (
+    <Catalogo
+      {...props}
+      activeCategory={activeCategory}
+      onChange={(categoria) => window.history.replaceState(null, "", urlCatalogo(categoria))}
+    />
+  );
+}
+
+export default function CatalogoConFiltro(props: CatalogoConFiltroProps) {
+  // Mientras se lee la URL (y en el HTML estático) se ve el catálogo completo en "Todos"
+  return (
+    <Suspense fallback={<Catalogo {...props} activeCategory={PESTANA_TODOS} onChange={() => {}} />}>
+      <CatalogoConUrl {...props} />
+    </Suspense>
   );
 }

@@ -230,7 +230,7 @@ export default function CarritoPage() {
     return (
       <main className="flex min-h-[60vh] flex-col items-center justify-center bg-[#EFEDE7] px-6 text-center">
         <p className="text-lg text-[#232320]">Tu carrito está vacío.</p>
-        <Link href="/" className="mt-4 text-sm text-[#A8562E] underline">
+        <Link href="/catalogo" className="mt-4 text-sm text-[#A8562E] underline">
           Ver catálogo
         </Link>
       </main>
@@ -260,7 +260,7 @@ export default function CarritoPage() {
             )}
           </p>
           <Link
-            href="/"
+            href="/catalogo"
             className="mt-6 inline-block bg-[#232320] px-6 py-3 text-sm font-medium text-white hover:bg-[#A8562E]"
           >
             Volver al catálogo
@@ -277,7 +277,7 @@ export default function CarritoPage() {
           sepa que el logo del header cumple esa función. Se mantiene visible
           en los 3 pasos para que el cliente nunca quede sin salida. */}
       <div className="border-b border-[#D8D4CC] bg-white px-6 py-3">
-        <Link href="/" className="text-sm text-[#6B6862] hover:text-[#232320]">
+        <Link href="/catalogo" className="text-sm text-[#6B6862] hover:text-[#232320]">
           ← Volver al catálogo
         </Link>
       </div>

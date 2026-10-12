@@ -1,46 +1,28 @@
 // src/app/page.tsx
 //
-// Página principal del catálogo. Es un "server component" (sin "use client"):
-// aquí se consulta el stock y el precio reales de TODOS los productos con
-// UNA sola llamada a getStockPorSkus(), y se pasan por props al componente
-// cliente CatalogoConFiltro, que conserva el filtro interactivo por categoría.
+// Portada TEMPORAL del sitio ("/"): título, una frase y un botón al catálogo.
+// Se reemplaza en la fase 4. El catálogo real vive en /catalogo.
 
-import { products } from "@/data/products";
-import CatalogoConFiltro from "@/components/CatalogoConFiltro";
-import { getStockPorSkus, type StockInfo } from "@/lib/stock";
-import { FAMILIAS_COMBO } from "@/data/combos";
-import { precioDesde, vistaCombinaciones } from "@/lib/combos";
+import Link from "next/link";
+import { sitio } from "@/data/sitio";
 
-// Igual que productos/[id]: la página se puede regenerar como máximo cada 60
-// segundos, para no mostrar stock/precio de hace días. Recordar que la tabla
-// stock_espejo solo se actualiza cuando alguien corre sync-stock.js a mano.
-export const revalidate = 60;
-
-export default async function HomePage() {
-  // Solo los productos con sku se consultan; el resto queda como "coming_soon"
-  const skusProductos = products.flatMap((p) => (p.sku ? [p.sku] : []));
-  // Piezas de todos los combos: van en la MISMA consulta (una sola para toda la página)
-  const skusCombos = FAMILIAS_COMBO.flatMap((f) => [
-    ...f.lavamanos.map((p) => p.sku),
-    ...f.muebles.map((p) => p.sku),
-  ]);
-  const stockPorSku = await getStockPorSkus([...new Set([...skusProductos, ...skusCombos])]); // UNA sola consulta
-
-  // Armamos el mapa por id de producto (lo que usa el componente cliente)
-  const sinSku: StockInfo = { status: "coming_soon", quantity: null, precio: null };
-  const stockPorId: Record<string, StockInfo> = {};
-  for (const product of products) {
-    stockPorId[product.id] = product.sku ? stockPorSku[product.sku] ?? sinSku : sinSku;
-  }
-
-  // Una tarjeta por familia: "Desde $X" = menor precio entre sus combinaciones vendibles
-  const combos = FAMILIAS_COMBO.map((familia) => ({
-    id: familia.id,
-    nombre: familia.nombre,
-    descripcion: familia.descripcion,
-    imagen: familia.imagen,
-    desde: precioDesde(vistaCombinaciones(familia, stockPorSku)), // null = ninguna combinación se vende
-  }));
-
-  return <CatalogoConFiltro stockPorId={stockPorId} combos={combos} />;
+export default function PortadaPage() {
+  return (
+    <main className="flex min-h-[60vh] items-center bg-[#EFEDE7] px-6 py-16">
+      <div className="mx-auto w-full max-w-3xl">
+        <h1 className="break-words font-[var(--font-heading)] text-4xl font-bold text-[#232320]">
+          {sitio.nombre}
+        </h1>
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-[#6B6862]">
+          {sitio.descripcion}
+        </p>
+        <Link
+          href="/catalogo"
+          className="mt-8 inline-flex min-h-11 items-center bg-[#232320] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#A8562E]"
+        >
+          Ver catálogo
+        </Link>
+      </div>
+    </main>
+  );
 }

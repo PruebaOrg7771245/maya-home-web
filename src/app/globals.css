@@ -22,3 +22,26 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/* Foco de teclado visible en todo el sitio, con el color de acento. Va en
+   @layer base para que las utilidades de Tailwind (ej. focus-visible:outline-*
+   en CategoryFilter) puedan seguir sobreescribiéndolo. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid #A8562E;
+    outline-offset: 2px;
+  }
+}
+
+/* Respeta prefers-reduced-motion: sin transiciones, animaciones ni scroll suave
+   (incluye el zoom de imagen de ProductCard) para quien pidió menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

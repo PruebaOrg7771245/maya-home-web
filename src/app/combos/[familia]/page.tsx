@@ -12,6 +12,7 @@ import { FAMILIAS_COMBO } from "@/data/combos";
 import { vistaCombinaciones } from "@/lib/combos";
 import { getStockPorSkus } from "@/lib/stock"; // adaptador de stock y precio (ADR-1); solo servidor
 import SelectorCombo from "@/components/SelectorCombo";
+import { PESTANA_COMBOS, urlCatalogo } from "@/lib/catalogoUrl";
 
 // Se generan de antemano las páginas de todas las familias (HTML estático)
 export async function generateStaticParams() {
@@ -50,7 +51,7 @@ export default async function ComboPage({
     <main className="min-h-screen bg-[#EFEDE7]">
       <div className="border-b border-[#D8D4CC] bg-white px-6 py-3">
         <Link
-          href="/"
+          href={urlCatalogo(PESTANA_COMBOS)} // vuelve a la pestaña de combos del catálogo
           className="text-sm text-[#6B6862] hover:text-[#232320] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8562E]"
         >
           ← Volver al catálogo

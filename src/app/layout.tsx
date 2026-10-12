@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Archivo, Inter } from "next/font/google"; // importamos las 2 fuentes que sí vamos a usar (quitamos Geist)
 import "./globals.css";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { CartProvider } from "@/context/CartContext"; // importamos el proveedor del carrito
 
 // Fuente para títulos - Archivo, en pesos semi-bold y bold
@@ -39,6 +40,7 @@ export default function RootLayout({
         <CartProvider>
           <Header />
           {children}
+          <Footer />
         </CartProvider>
       </body>
     </html>
