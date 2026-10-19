@@ -13,6 +13,13 @@ import AddToCartButton from "@/components/AddToCartButton"; // nuevo botón inte
 import StockBadge from "@/components/StockBadge"; // nuevo badge de disponibilidad
 import AvisoSinPrecio from "@/components/AvisoSinPrecio"; // qué mostrar cuando el producto no tiene precio
 import { getStock } from "@/lib/stock"; // adaptador de stock y precio (ADR-1)
+import {
+  caracteristicasProducto,
+  detallesProducto,
+  filasEspecificaciones,
+  fotosProducto,
+} from "@/lib/fichaProducto"; // bloques de la ficha y fotos (con placeholder)
+import Image from "next/image";
 
 
 // generateStaticParams le dice a Next.js, al momento de hacer el build,
@@ -60,6 +67,14 @@ export default async function ProductoPage({
   const precio = stock.precio;
   const agotado = stock.status === "out_of_stock";
 
+  // Bloques de información: cada uno aparece SOLO si tiene contenido (no se muestran
+  // títulos vacíos ni "pendiente"). "Medidas" es la primera fila de la tabla.
+  const fotos = fotosProducto(product.images);
+  const descripcion = product.description.trim();
+  const filas = filasEspecificaciones(product);
+  const caracteristicas = caracteristicasProducto(product.caracteristicas);
+  const detalles = detallesProducto(product.detalles);
+
   return (
     <main className="min-h-screen bg-[#EFEDE7]">
       <div className="border-b border-[#D8D4CC] bg-white px-6 py-3">
@@ -70,9 +85,10 @@ export default async function ProductoPage({
 
       <div className="mx-auto max-w-5xl px-6 py-10">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
-          <ProductGallery images={product.images} productName={product.name} />
+          <ProductGallery images={fotos} productName={product.name} />
 
-          <div>
+          {/* min-w-0: un texto largo no debe ensanchar la columna del grid (scroll horizontal a 320 px) */}
+          <div className="min-w-0">
             <p className="text-sm text-[#6B6862]">
               {product.subcategory ?? product.category}
               {product.brand && ` · ${product.brand}`}
@@ -89,23 +105,17 @@ export default async function ProductoPage({
               {precio !== null ? <StockBadge stock={stock} /> : <AvisoSinPrecio stock={stock} />}
             </div>
 
-            <p className="mt-4 text-base leading-relaxed text-[#6B6862]">
-              {product.description}
-            </p>
-
-            <div className="mt-6">
-              <p className="text-sm font-medium text-[#232320]">Formatos disponibles</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {product.variants.map((variant) => (
-                  <span
-                    key={variant.value}
-                    className="border border-[#D8D4CC] bg-white px-3 py-1 text-sm text-[#232320]"
-                  >
-                    {variant.value}
-                  </span>
-                ))}
-              </div>
-            </div>
+            {/* Descripción: va ANTES del precio */}
+            {descripcion && (
+              <section aria-labelledby="titulo-descripcion" className="mt-6">
+                <h2 id="titulo-descripcion" className="sr-only">
+                  Descripción
+                </h2>
+                <p className="break-words text-base leading-relaxed text-[#6B6862]">
+                  {descripcion}
+                </p>
+              </section>
+            )}
 
             {/* Precio y botón de compra solo si el producto tiene precio */}
             {precio !== null && (
@@ -124,14 +134,84 @@ export default async function ProductoPage({
                 <AddToCartButton
                   id={product.id}
                   name={product.name}
-                  image={product.images[0]}
+                  image={fotos[0]}
                   price={precio}
                   agotado={agotado}
                 />
               </>
             )}
+
           </div>
         </div>
+
+        {/* Bloques a ancho completo, cada uno solo si tiene contenido */}
+        {caracteristicas.length > 0 && (
+          <section aria-labelledby="titulo-caracteristicas" className="mt-12 border-t border-[#D8D4CC] pt-8">
+            <h2 id="titulo-caracteristicas" className="font-[var(--font-heading)] text-xl font-semibold text-[#232320]">
+              Características
+            </h2>
+            <ul className="mt-4 grid gap-x-10 gap-y-3 md:grid-cols-2">
+              {caracteristicas.map((c) => (
+                <li key={c} className="flex gap-3 break-words text-base leading-relaxed text-[#232320]">
+                  {/* Marca cuadrada (sin radios) en acento: único punto de color del bloque */}
+                  <span aria-hidden="true" className="mt-2.5 h-1.5 w-1.5 shrink-0 bg-[#A8562E]" />
+                  <span className="min-w-0">{c}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {filas.length > 0 && (
+          <section aria-labelledby="titulo-especificaciones" className="mt-12 border-t border-[#D8D4CC] pt-8">
+            <h2 id="titulo-especificaciones" className="font-[var(--font-heading)] text-xl font-semibold text-[#232320]">
+              Especificaciones
+            </h2>
+            {/* Tabla a ancho completo: etiqueta a la izquierda, valor a la derecha */}
+            <dl className="mt-4 border border-[#D8D4CC] bg-white">
+              {filas.map((fila) => (
+                <div
+                  key={fila.etiqueta}
+                  className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-4 border-t border-[#D8D4CC] px-4 py-3 text-sm first:border-t-0"
+                >
+                  <dt className="break-words text-[#6B6862]">{fila.etiqueta}</dt>
+                  <dd className="break-words text-[#232320]">{fila.valor}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
+
+        {detalles.length > 0 && (
+          <section aria-labelledby="titulo-detalles" className="mt-12 border-t border-[#D8D4CC] pt-8">
+            <h2 id="titulo-detalles" className="font-[var(--font-heading)] text-xl font-semibold text-[#232320]">
+              Detalles del producto
+            </h2>
+            <ul className="mt-4 flex flex-col gap-6">
+              {detalles.map((d) => (
+                <li key={d.src}>
+                  {/* Enlace a la imagen completa en pestaña nueva (para leerla en móvil). Sin zoom ni lightbox. */}
+                  <a
+                    href={d.src}
+                    target="_blank"
+                    rel="noopener"
+                    aria-label={`Ver imagen completa: ${d.alt}`}
+                    className="block border border-[#D8D4CC] bg-white motion-safe:transition-colors hover:border-[#A8562E]"
+                  >
+                    <Image
+                      src={d.src}
+                      alt={d.alt}
+                      width={d.width}
+                      height={d.height}
+                      sizes="(max-width: 1023px) calc(100vw - 50px), 974px"
+                      className="h-auto w-full"
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     </main>
   );

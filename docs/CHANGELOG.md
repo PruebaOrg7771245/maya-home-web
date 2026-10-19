@@ -18,6 +18,28 @@ Formato de entrada:
 
 ---
 
+## 13/10/2026 - Fase 3b: rediseño de la ficha de producto (modelo: sanitario 168W)
+- **Galería:** `ProductGallery` pasa de `object-cover` a `object-contain` (foto
+  principal y miniaturas): ya no se recorta ninguna foto. Fondo piedra, marco
+  4:3 y teclado/táctil sin cambios.
+- **Datos:** `Product` gana `caracteristicas?: string[]` y `detalles?:
+  ProductDetalle[]` (`{ src, alt, width, height }`). Solo el 168W los usa: la
+  galería queda con la foto principal y el collage (`-2`) y la infografía
+  (`-3`) pasan a `detalles`. Archivos renombrados a `sanitario-168w-2.jpeg` y
+  `-3.jpeg`. Ver ADR-20.
+- **Ficha (`/productos/[id]`), orden nuevo para todos:** categoría, nombre,
+  stock, descripción (sin título visible), precio y botón. Debajo, a ancho
+  completo y solo si hay contenido: Características (2 columnas desde `md`),
+  Especificaciones y Detalles del producto (imágenes en su proporción real,
+  cada una enlaza a la imagen completa en pestaña nueva).
+- **Lógica:** `src/lib/fichaProducto.ts` (`caracteristicasProducto`,
+  `detallesProducto`, descartan lo vacío o inválido); `scripts/test-ficha.ts`
+  con 4 pruebas nuevas (11 en total).
+- Verificado: lint, `tsc --noEmit`, build y los 3 scripts. **No** se revisó en
+  navegador a 320/375/1280 px.
+- **Pendiente:** confirmar la unidad de la "conexión de 1/2" del 168W (hay un
+  TODO en el código; no se publicó); revisión visual a 320/375/1280 px.
+
 ## 12/10/2026 - Fase 2: menú de categorías y buscador del catálogo
 - **Menú en vez de pestañas:** `CategoryFilter.tsx` se eliminó. Ahora hay un
   menú desplegable de categorías con la cantidad por categoría: botón

@@ -9,6 +9,7 @@ import { existsSync } from "node:fs";
 import { FAMILIAS_COMBO, FOTOS_COMBINACION } from "../src/data/combos.ts";
 import {
   calcularCombo,
+  detallePieza,
   generarCombinaciones,
   generarTodasLasCombinaciones,
   parsearIdCombinacion,
@@ -146,5 +147,23 @@ assert.deepEqual(referenciales, [
 ]);
 const sinPropia = FAMILIAS_COMBO.flatMap((f) => vistaCombinaciones(f, mapa)).find((v) => v.imagenReferencial)!;
 assert.ok(sinPropia.imagen.startsWith("/images/combos/"));
+
+// 14) Detalle de pieza (página del combo): medidas y título salen solo del nombre ya cargado
+assert.deepEqual(detallePieza({ sku: "X", nombre: "Lavamanos LUX-600 · 60x48 cm · blanco", etiqueta: "Blanco" }), {
+  titulo: "Lavamanos LUX-600 · blanco",
+  medidas: "60x48 cm",
+});
+assert.deepEqual(detallePieza({ sku: "X", nombre: "Mueble sin formato", etiqueta: "x" }), {
+  titulo: "Mueble sin formato",
+  medidas: null,
+});
+// toda pieza real de data/combos.ts trae medidas reconocibles (y el título no las repite)
+for (const f of FAMILIAS_COMBO) {
+  for (const pieza of [...f.lavamanos, ...f.muebles]) {
+    const { titulo, medidas } = detallePieza(pieza);
+    assert.ok(medidas && /\d/.test(medidas), `sin medidas reconocibles: ${pieza.nombre}`);
+    assert.ok(pieza.nombre.includes(medidas) && !titulo.includes(medidas), `título repite medidas: ${pieza.nombre}`);
+  }
+}
 
 console.log("OK: todas las comprobaciones pasaron");

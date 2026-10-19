@@ -10,6 +10,7 @@ import type { Product } from "@/data/products"; // importamos el tipo TypeScript
 import type { StockInfo } from "@/lib/stock"; // solo el TIPO: no arrastra el cliente de servidor al navegador
 import AvisoSinPrecio from "@/components/AvisoSinPrecio"; // qué mostrar cuando el producto no tiene precio
 import { formatPrice } from "@/lib/formatPrice";
+import { fotosProducto } from "@/lib/fichaProducto"; // foto principal (placeholder si el producto no tiene ninguna)
 
 // Definimos qué props (propiedades) recibe este componente
 type ProductCardProps = {
@@ -31,7 +32,7 @@ export default function ProductCard({ product, stock }: ProductCardProps) {
       {/* Contenedor de la imagen con proporción fija para que el grid quede alineado */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#EFEDE7]">
         <Image
-          src={product.images[0]} // usamos la primera imagen del arreglo como foto principal
+          src={fotosProducto(product.images)[0]} // la primera foto es la principal (placeholder si no hay ninguna)
           alt={product.name} // texto alternativo para accesibilidad y SEO
           fill // hace que la imagen llene el contenedor padre (que tiene position: relative)
           sizes="(max-width: 768px) 50vw, 25vw" // ayuda a Next.js a servir el tamaño de imagen correcto según pantalla

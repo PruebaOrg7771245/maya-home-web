@@ -16,7 +16,18 @@
 //   versión final. Los saunas no tienen foto y usan placeholder.jpg.
 // - Los comentarios "TODO" marcan datos en duda del catálogo/ERP: se dejaron
 //   en blanco a propósito hasta confirmarlos.
+//
+// Cómo añadir datos a la ficha (/productos/[id]) - cada bloque se muestra SOLO si tiene datos:
+// - Descripción: el campo "description" ("" = sin bloque).
+// - Especificaciones: la tabla junta "medidas" (de variants), los campos opcionales
+//   "especificaciones" y las demás variants.
+// - Fotos: el arreglo "images" (la primera es la principal; con más de una salen miniaturas).
 
+// Una variante o dato propio del producto (ej. { attribute: "medidas", value: "500 x 350 x 120 mm" }).
+// En la ficha del producto (/productos/[id]) se muestra como una fila de la tabla
+// "Especificaciones": la de attribute "medidas" va PRIMERA con la etiqueta "Medidas";
+// las demás (material, accionamiento, potencia, color, funciones, vidrio...) llevan como
+// etiqueta el attribute con la primera letra en mayúscula. Ver src/lib/fichaProducto.ts.
 export type ProductVariant = {
   attribute: string;
   value: string;
@@ -27,17 +38,52 @@ export type ProductPrices = {
   mayorista: number | null;
 };
 
+// Una fila de la tabla "Especificaciones" de la ficha, escrita tal como se quiere ver.
+export type ProductSpec = {
+  etiqueta: string; // nombre del dato, ej. "Garantía"
+  valor: string; // su valor, ej. "12 meses"
+};
+
 export type Product = {
   id: string;
   name: string;
   category: string;
   subcategory?: string;
+  // Texto del bloque "Descripción" de la ficha. Con "" el bloque no se muestra.
   description: string;
+  // Fotos del producto. La PRIMERA es la principal (tarjeta del catálogo y ficha); si hay más
+  // de una, la ficha muestra miniaturas debajo de la foto principal. Con [] se usa el placeholder.
+  // Para añadir fotos: copiar el archivo a public/images/products/ y agregar su ruta al arreglo.
   images: string[];
+  // Datos del producto que hoy ya existen. El que tenga attribute "medidas" es la fila "Medidas"
+  // de la ficha (no se migró a especificaciones; siguen aquí).
   variants: ProductVariant[];
   prices: ProductPrices;
   brand?: string;
   sku?: string; // código del producto en el ERP (stock_espejo) - es la clave para enlazar stock y precio público
+  // OPCIONAL. Filas EXTRA de la tabla "Especificaciones" de la ficha (garantía, instalación,
+  // dimensiones del empaque, etc.). Solo datos confirmados: no se escribe nada que no esté
+  // en el catálogo o el ERP. Se muestran después de "Medidas" y antes de las demás variants;
+  // si una etiqueta coincide con la de una variante (sin importar mayúsculas ni tildes) gana
+  // la de aquí. Para las medidas NO usar este campo: van en variants (attribute "medidas").
+  // Si un producto no la tiene, simplemente no se agregan filas. Ejemplo:
+  //   especificaciones: [{ etiqueta: "Garantía", valor: "12 meses" }],
+  especificaciones?: ProductSpec[];
+  // OPCIONAL. Lista del bloque "Características" de la ficha (una frase por elemento).
+  // Solo datos confirmados. Si no existe o está vacía, el bloque no se muestra.
+  caracteristicas?: string[];
+  // OPCIONAL. Imágenes anchas del bloque "Detalles del producto" (collage de vistas,
+  // infografía...). Se muestran una bajo otra, a ancho completo y sin recortar. Aparte de
+  // src y alt llevan width y height (px del archivo) para reservar el espacio y evitar saltos.
+  // Si no existe o está vacío, el bloque no se muestra.
+  detalles?: ProductDetalle[];
+};
+
+export type ProductDetalle = {
+  src: string; // ruta en public/, ej. "/images/products/x-2.jpeg"
+  alt: string; // descripción breve de lo que muestra la imagen
+  width: number; // ancho real del archivo en px
+  height: number; // alto real del archivo en px
 };
 
 export const products: Product[] = [
@@ -137,8 +183,34 @@ export const products: Product[] = [
     id: "sanitario-168w",
     name: "Sanitario 168W",
     category: "Sanitarios",
-    description: "Sanitario cerámico de una pieza, diseño compacto, acabado blanco.",
+    description:
+      "Sanitario de cerámica smart de lujo, de diseño estético que facilita la limpieza. Con conexión de bidet, descarga con sensor, cierre automático del asiento y control remoto.",
     images: ["/images/products/sanitario-168w.jpg"],
+    // TODO: falta confirmar la unidad de la "conexión de 1/2" (¿pulgadas?) antes de añadirla
+    // a caracteristicas o especificaciones. No se escribe hasta confirmarla.
+    caracteristicas: [
+      "Cierre automático del asiento con sensor hidráulico que evita el golpe fuerte",
+      "Descarga con sensor",
+      "Bidet controlado con el botón del costado izquierdo y con el control remoto",
+      "Doble flujo de agua para mejor evacuación",
+      "Aro del asiento con 3 niveles de temperatura",
+      "Control remoto que maneja diferentes funciones",
+      "Incluye anillo de cera",
+    ],
+    detalles: [
+      {
+        src: "/images/products/sanitario-168w-2.jpeg",
+        alt: "Sanitario 168W: vistas del producto y detalles de sus funciones",
+        width: 1536,
+        height: 1024,
+      },
+      {
+        src: "/images/products/sanitario-168w-3.jpeg",
+        alt: "Sanitario 168W: infografía de sus funciones",
+        width: 1227,
+        height: 1282,
+      },
+    ],
     variants: [{ attribute: "medidas", value: "680 x 340 x 465 mm" }],
     prices: { minorista: null, mayorista: null },
     sku: "168W",

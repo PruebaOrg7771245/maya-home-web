@@ -18,7 +18,8 @@ antes de asumir nada sobre el estado del proyecto.
 - `npm run lint` — ESLint 9 (flat config en `eslint.config.mjs`).
 - No hay framework de tests configurado. La lógica pura tiene scripts sueltos
   que corren con Node 22.18+ (ejecuta TypeScript directo):
-  `node scripts/test-combos.ts` y `node scripts/test-busqueda.ts`.
+  `node scripts/test-combos.ts`, `node scripts/test-busqueda.ts` y
+  `node scripts/test-ficha.ts`.
 
 **Ruta del proyecto:** `C:\dev\e-commercetest`. El proyecto vive fuera de
 OneDrive a propósito (dentro de OneDrive daba errores de build); no moverlo
@@ -48,18 +49,20 @@ src/
                           # StockBadge, AvisoSinPrecio, IconosSitio;
                           # useDesplegable.ts (hook) y estilosNav.ts (clases)
   context/CartContext.tsx # estado del carrito (useCart)
-  data/products.ts        # catálogo estático (25 productos, sin precios)
+  data/products.ts        # catálogo estático (25 productos, sin precios; campos
+                          # opcionales caracteristicas y detalles para la ficha)
   data/combos.ts          # familias de combos lavamanos + mueble (sin precios)
   data/sitio.ts           # datos del sitio: marca, contacto, redes (ver abajo)
   lib/stock.ts            # stock y precio (getStock, getStockPorSkus)
   lib/catalogoUrl.ts      # urlCatalogo() y nombres de categoría "Todos"/"Combos"
   lib/categorias.ts       # categorías con su cantidad (menú desplegable)
   lib/busqueda.ts         # lógica pura del buscador (sin React ni red)
+  lib/fichaProducto.ts    # lógica pura de la ficha (especificaciones, fotos, bloques)
   lib/combos.ts           # lógica de combos (combinaciones, precio, stock)
   lib/supabase.ts         # cliente de servidor (import "server-only")
   lib/email.ts            # correo al asesor (Resend)
 public/images/            # logos (brand/) e imágenes de productos
-scripts/                  # pruebas de lógica pura (test-combos, test-busqueda)
+scripts/                  # pruebas de lógica pura (test-combos, test-busqueda, test-ficha)
 docs/                     # CHANGELOG, DECISIONS (ADRs), REQUIREMENTS-STOCK
 .claude/agents/           # agentes de proyecto (versionados)
 ```
@@ -130,6 +133,11 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
 - **`/productos/[id]`** — server component, prerenderizado con
   `generateStaticParams` + `revalidate = 60` (ISR). Llama a `getStock()`
   para un producto; sin precio no muestra precio ni botón de compra.
+  Orden de la ficha: columna derecha = categoría, nombre, stock, descripción,
+  precio y botón; debajo, a ancho completo y solo si hay contenido:
+  Características, Especificaciones y Detalles del producto (imágenes
+  `detalles` con enlace a la imagen completa). `ProductGallery` usa
+  `object-contain`: nunca recorta una foto (ADR-20).
 - **`POST /api/pedido`** — valida, calcula el total en el servidor con el
   precio del ERP (una consulta `getStockPorSkus`) y guarda en `pedidos` un
   snapshot `{ id, nombre, cantidad, precio, stock }`. Rechaza productos sin

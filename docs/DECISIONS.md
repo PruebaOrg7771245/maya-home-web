@@ -487,3 +487,28 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
   `CategoryFilter.tsx`; el comentario de ADR-13 sobre el auto-scroll de la
   pestaña activa ya no aplica.
 - **Estado:** vigente (12/10/2026).
+
+## ADR-20: Ficha de producto con bloques opcionales y fotos completas (`object-contain`)
+- **Contexto:** las fotos del 168W (collage de vistas 1536x1024 e infografía
+  1227x1282) eran ilegibles como miniaturas de la galería, y `object-cover`
+  las recortaba (~11% de ancho el collage, ~28% de alto la infografía, con
+  texto cortado).
+- **Decisión:** la galería usa `object-contain` (nunca se recorta una foto).
+  Las imágenes informativas van en un campo opcional `detalles` (`{ src, alt,
+  width, height }`) y se muestran bajo la ficha, una tras otra, en su
+  proporción real, cada una como enlace a la imagen completa en pestaña nueva.
+  Junto a `caracteristicas?` son opcionales: si faltan o son inválidos
+  (`lib/fichaProducto.ts`), el bloque no se muestra. Orden de la ficha: la
+  descripción va antes del precio. `width` y `height` son una desviación
+  deliberada del pedido original `{ src, alt }`: reservan el espacio y evitan
+  saltos de diseño al cargar.
+- **Alternativas descartadas:**
+  - Mantener `object-cover`: recortaba y cortaba texto.
+  - Detalles como miniaturas dentro de la galería: ilegibles.
+  - Lightbox/zoom: pospuesto, las fotos del catálogo son de baja resolución.
+  - Solo `{ src, alt }`: la página saltaría al cargar.
+- **Consecuencia:** otros productos adoptan los bloques con solo añadir los
+  campos. Con `object-contain` puede quedar fondo piedra visible alrededor de
+  fotos que no son 4:3. Sin zoom, el detalle depende de abrir la imagen
+  completa.
+- **Estado:** vigente (13/10/2026). Pendiente revisión visual a 320/375/1280 px.

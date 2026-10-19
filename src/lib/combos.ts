@@ -52,6 +52,19 @@ export function idCombinacion(
   return [familia.id, lavamanos.sku, mueble.sku].join(SEPARADOR_ID);
 }
 
+// Detalle de una pieza para la página del combo, SOLO con lo que ya está en su `nombre`
+// (data/combos.ts): el nombre es "<pieza> <familia> · <medidas> · <color o acabado>",
+// ej. "Lavamanos LUX-600 · 60x48 cm · blanco". Las medidas son el 2.º segmento, y solo se
+// aceptan si traen algún número. Sin medidas reconocibles: medidas = null y el nombre queda
+// tal cual (la ficha no muestra la fila). Al añadir piezas hay que respetar ese formato.
+export function detallePieza(pieza: PiezaCombo): { titulo: string; medidas: string | null } {
+  const partes = pieza.nombre.split(" · ").map((parte) => parte.trim());
+  const medidas = partes.length >= 2 && /\d/.test(partes[1]) ? partes[1] : null;
+  if (medidas === null) return { titulo: pieza.nombre, medidas: null };
+  // El título es el nombre sin el segmento de medidas (las medidas se muestran aparte)
+  return { titulo: partes.filter((_, i) => i !== 1).join(" · "), medidas };
+}
+
 // Todas las parejas lavamanos × mueble de UNA familia (nunca mezcla familias)
 export function generarCombinaciones(familia: FamiliaCombo): Combinacion[] {
   const combinaciones: Combinacion[] = [];

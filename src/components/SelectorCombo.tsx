@@ -13,7 +13,7 @@
 import { useId, useState } from "react";
 import Image from "next/image";
 import type { FamiliaCombo, PiezaCombo } from "@/data/combos"; // solo los TIPOS
-import { idCombinacion, nombreCombinacion, type CombinacionVista } from "@/lib/combos";
+import { detallePieza, idCombinacion, nombreCombinacion, type CombinacionVista } from "@/lib/combos";
 import type { StockInfo } from "@/lib/stock"; // solo el TIPO: no arrastra el cliente de servidor al navegador
 import StockBadge from "@/components/StockBadge";
 import AddToCartButton from "@/components/AddToCartButton";
@@ -193,6 +193,37 @@ export default function SelectorCombo({ familia, combinaciones }: SelectorComboP
             Consulta nuestros descuentos por llevarte el combo
           </p>
         </div>
+
+        {/* Piezas de la combinación elegida con sus medidas (salen del nombre de cada pieza en
+            data/combos.ts; sin medidas reconocibles no se muestra la fila). Cambia con la selección. */}
+        <section aria-labelledby="titulo-piezas" className="mt-8 border-t border-[#D8D4CC] pt-6">
+          <h2
+            id="titulo-piezas"
+            className="font-[var(--font-heading)] text-lg font-semibold text-[#232320]"
+          >
+            Piezas del combo
+          </h2>
+          <ul className="mt-3 space-y-3">
+            {[
+              { tipo: "Lavamanos", pieza: lavamanos },
+              { tipo: "Mueble", pieza: mueble },
+            ].map(({ tipo, pieza }) => {
+              const { titulo, medidas } = detallePieza(pieza);
+              return (
+                <li key={pieza.sku} className="border border-[#D8D4CC] bg-white px-4 py-3">
+                  <p className="text-xs text-[#6B6862]">{tipo}</p>
+                  <p className="mt-1 break-words text-sm font-medium text-[#232320]">{titulo}</p>
+                  {medidas && (
+                    <dl className="mt-2 grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-4 border-t border-[#D8D4CC] pt-2 text-sm">
+                      <dt className="text-[#6B6862]">Medidas</dt>
+                      <dd className="break-words text-[#232320]">{medidas}</dd>
+                    </dl>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       </div>
     </div>
   );
