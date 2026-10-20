@@ -134,14 +134,13 @@ for (const f of FAMILIAS_COMBO) {
   assert.ok(existsSync(new URL(`../public${f.imagen}`, import.meta.url)), `falta la foto de la familia ${f.id}`);
   assert.ok(!f.imagen.includes("placeholder"));
 }
-// 6 fotos propias; las otras 3 combinaciones usan la de la familia y quedan marcadas como referenciales
-assert.equal(Object.keys(FOTOS_COMBINACION).length, 6);
+// 7 fotos propias; las otras 2 combinaciones usan la de la familia y quedan marcadas como referenciales
+assert.equal(Object.keys(FOTOS_COMBINACION).length, 7);
 const referenciales = FAMILIAS_COMBO.flatMap((f) => vistaCombinaciones(f, mapa))
   .filter((v) => v.imagenReferencial)
   .map((v) => v.id)
   .sort();
 assert.deepEqual(referenciales, [
-  "connon-sx800__LAVCONNONSX800BL__MUEBLCONNOSX-800SMOK",
   "lux-800__LAVLUX-800BLACK__MUEBLLUX-800HONEY",
   "lux-800__LAVLUX-800BL__MUEBLLUX-800SUNTH",
 ]);
