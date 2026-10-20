@@ -69,6 +69,44 @@ prueba("'lavabo' encuentra los lavamanos (sinónimo)", () => {
   assert.deepEqual(buscarProductos("lavabo"), buscarProductos("lavamanos"));
 });
 
+prueba("'inodoro', 'taza' y 'wc' (y sus plurales) encuentran todos los sanitarios", () => {
+  const sanitarios = products.filter((p) => p.category === "Sanitarios").map((p) => p.id);
+  assert.ok(sanitarios.length > 0);
+  for (const termino of ["inodoro", "Inodoros", "taza", "WC", "sanitario"]) {
+    assert.deepEqual(buscarProductos(termino), sanitarios, termino);
+  }
+  assert.deepEqual(buscarProductos("inodoro blanco"), buscarProductos("sanitario blanco")); // con otra palabra
+});
+
+prueba("'lavabo' y 'lavatorio' encuentran los lavamanos, productos y combos", () => {
+  const lavamanos = products.filter((p) => p.category === "Lavamanos").map((p) => p.id);
+  assert.ok(lavamanos.length > 0);
+  for (const termino of ["lavabo", "lavatorio", "lavamanos"]) {
+    assert.deepEqual(buscarProductos(termino), lavamanos, termino);
+    assert.deepEqual(buscarCombos(termino), buscarCombos("lavamanos"), termino);
+  }
+  assert.ok(buscarCombos("lavabo").length > 0);
+});
+
+prueba("'secamanos' = 'secador de manos' y 'jabonera' = 'dispensador de jabón' (términos de varias palabras)", () => {
+  const secadores = products.filter((p) => p.category === "Secadores de manos").map((p) => p.id);
+  const dispensadores = products.filter((p) => p.category === "Dispensadores de jabón").map((p) => p.id);
+  // la descripción de otros productos (p. ej. un espejo que incluye secador) también cuenta
+  const incluye = (ids: string[], esperados: string[]) => esperados.every((id) => ids.includes(id));
+  assert.ok(incluye(buscarProductos("secamanos"), secadores));
+  assert.deepEqual(buscarProductos("secamanos"), buscarProductos("secador de manos"));
+  assert.ok(incluye(buscarProductos("jabonera"), dispensadores));
+  assert.deepEqual(buscarProductos("jabonera"), buscarProductos("dispensador de jabón"));
+  assert.deepEqual(buscarProductos("Secador de manos blanco"), buscarProductos("secamanos blanco"));
+});
+
+prueba("una palabra sin sentido sigue devolviendo 0 (y los sinónimos no ensanchan de más)", () => {
+  assert.equal(buscarProductos("qwertyxyz").length, 0);
+  assert.equal(buscarCombos("qwertyxyz").length, 0);
+  assert.equal(buscarProductos("inodoro qwertyxyz").length, 0);
+  assert.equal(buscarProductos("taza").length, buscarProductos("sanitario").length); // no trae lavamanos ni otros
+});
+
 prueba("plural: 'sanitarios' encuentra lo mismo que 'sanitario'", () => {
   assert.deepEqual(buscarProductos("sanitarios"), buscarProductos("sanitario"));
 });

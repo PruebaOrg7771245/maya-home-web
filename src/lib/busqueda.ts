@@ -11,13 +11,25 @@
 // - Una palabra coincide si está contenida en el texto ("sanit" encuentra
 //   "sanitario"). Una palabra en plural también prueba su singular
 //   ("sanitarios" encuentra "Sanitario SD-1001").
-// - Sinónimos de uso común (ver SINONIMOS).
+// - Sinónimos de uso común, en ambos sentidos (ver GRUPOS_SINONIMOS).
 
-// Palabras que la gente usa como sinónimo de un término del catálogo.
-// Clave y valores sin tildes ni mayúsculas.
-const SINONIMOS: Record<string, string[]> = {
-  lavabo: ["lavamanos"],
-};
+// Sinónimos reales del oficio, en UN solo sitio. Cada grupo es una lista de
+// términos equivalentes (sin tildes ni mayúsculas): buscar cualquiera de ellos
+// encuentra los productos que contengan cualquiera de los otros. Un término puede
+// tener varias palabras ("secador de manos"). Solo equivalencias que un cliente
+// usaría de verdad; ante la duda, no se agrega.
+const GRUPOS_SINONIMOS: string[][] = [
+  ["inodoro", "taza", "wc", "sanitario"],
+  ["lavamanos", "lavabo", "lavatorio"],
+  ["secador de manos", "secamanos"],
+  ["dispensador de jabon", "jabonera"],
+];
+
+// término → los demás términos de su grupo (se arma una vez al cargar el módulo)
+const SINONIMOS = new Map<string, string[]>(
+  GRUPOS_SINONIMOS.flatMap((grupo) => grupo.map((t) => [t, grupo.filter((o) => o !== t)] as const))
+);
+const MAX_PALABRAS_SINONIMO = Math.max(...[...SINONIMOS.keys()].map((t) => t.split(" ").length));
 
 // Largo máximo de la consulta (campo y URL): evita consultas absurdas
 export const LARGO_MAXIMO_CONSULTA = 80;
@@ -34,21 +46,34 @@ export function normalizar(texto: string): string {
 // Una palabra de la consulta con sus alternativas: basta que coincida UNA de ellas
 export type GrupoBusqueda = string[];
 
-// Convierte lo escrito en grupos de alternativas, una por palabra.
+// Convierte lo escrito en grupos de alternativas, una por palabra (o una por
+// término de varias palabras que sea sinónimo, como "secador de manos").
 // Devuelve [] si no hay nada que buscar (vacío o solo espacios).
 export function prepararConsulta(consulta: string): GrupoBusqueda[] {
-  return normalizar(consulta)
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((palabra) => {
-      const singular = palabra.length > 3 && palabra.endsWith("s") ? palabra.slice(0, -1) : null;
-      const alternativas = [palabra];
-      if (singular) alternativas.push(singular);
-      for (const base of alternativas.slice()) {
-        alternativas.push(...(SINONIMOS[base] ?? []));
-      }
-      return alternativas;
-    });
+  const palabras = normalizar(consulta).split(/\s+/).filter(Boolean);
+  const grupos: GrupoBusqueda[] = [];
+  for (let i = 0; i < palabras.length; ) {
+    // primero se prueba el término más largo que empiece aquí ("secador de manos")
+    let frase: string | null = null;
+    for (let n = Math.min(MAX_PALABRAS_SINONIMO, palabras.length - i); n >= 2 && !frase; n--) {
+      const candidata = palabras.slice(i, i + n).join(" ");
+      if (SINONIMOS.has(candidata)) frase = candidata;
+    }
+    if (frase) {
+      grupos.push([frase, ...(SINONIMOS.get(frase) ?? [])]);
+      i += frase.split(" ").length;
+      continue;
+    }
+    const palabra = palabras[i++];
+    const singular = palabra.length > 3 && palabra.endsWith("s") ? palabra.slice(0, -1) : null;
+    const alternativas = [palabra];
+    if (singular) alternativas.push(singular);
+    for (const base of alternativas.slice()) {
+      alternativas.push(...(SINONIMOS.get(base) ?? []));
+    }
+    grupos.push(alternativas);
+  }
+  return grupos;
 }
 
 // ¿El texto (ya normalizado) cumple TODAS las palabras de la consulta?
