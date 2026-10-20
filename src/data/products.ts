@@ -433,7 +433,7 @@ export const products: Product[] = [
     name: "Sauna 120×100×200 (vidrio 6 mm)",
     category: "Saunas",
     description: "",
-    images: ["/images/products/placeholder.jpg"],
+    images: ["/images/products/sauna-120x100x200.jpg", "/images/products/sauna-120x100x200-2.jpg", "/images/products/sauna-120x100x200-3.jpg", "/images/products/sauna-120x100x200-4.jpg"],
     variants: [
       { attribute: "medidas", value: "120 x 100 x 200" },
       { attribute: "vidrio", value: "6 mm" },
@@ -448,7 +448,7 @@ export const products: Product[] = [
     name: "Sauna 135×110×210 (vidrio 8 mm)",
     category: "Saunas",
     description: "",
-    images: ["/images/products/placeholder.jpg"],
+    images: ["/images/products/sauna-135x110x210.jpg", "/images/products/sauna-135x110x210-2.jpg", "/images/products/sauna-135x110x210-3.jpg", "/images/products/sauna-135x110x210-4.jpg"],
     variants: [
       { attribute: "medidas", value: "135 x 110 x 210" },
       { attribute: "vidrio", value: "8 mm" },
