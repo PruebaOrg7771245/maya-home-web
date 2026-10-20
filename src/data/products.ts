@@ -94,8 +94,21 @@ export const products: Product[] = [
     id: "lavamanos-9636m001",
     name: "Lavamanos Rectangular Negro 9636 M-001",
     category: "Lavamanos",
-    description: "Lavamanos cerámico de sobreponer, acabado negro mate, línea rectangular minimalista.",
+    description:
+      "Lavabo de cerámica tipo vessel, rectangular, para instalar sobre mesón.",
     images: ["/images/products/lavamanos-9636m001.jpg"],
+    caracteristicas: [
+      "Lavabo de cerámica tipo vessel, de instalación sobre mesón",
+      "Modelo rectangular",
+      "Se recomienda desagüe con rebosadero",
+      "Se combina con grifería alta",
+    ],
+    especificaciones: [
+      { etiqueta: "Medidas", valor: "50 x 35 x 12 cm" },
+      { etiqueta: "Material", valor: "Cerámica" },
+      { etiqueta: "Instalación", valor: "Sobre mesón" },
+      { etiqueta: "Color", valor: "Negro" },
+    ],
     variants: [{ attribute: "medidas", value: "500 x 350 x 120 mm" }],
     prices: { minorista: null, mayorista: null },
     sku: "9636M001",
@@ -104,8 +117,21 @@ export const products: Product[] = [
     id: "lavamanos-9636",
     name: "Lavamanos Rectangular Blanco 9636",
     category: "Lavamanos",
-    description: "Lavamanos cerámico de sobreponer, acabado blanco, línea rectangular minimalista.",
+    description:
+      "Lavabo de cerámica tipo vessel, rectangular, para instalar sobre mesón.",
     images: ["/images/products/lavamanos-9636.jpg"],
+    caracteristicas: [
+      "Lavabo de cerámica tipo vessel, de instalación sobre mesón",
+      "Modelo rectangular",
+      "Se recomienda desagüe con rebosadero",
+      "Se combina con grifería alta",
+    ],
+    especificaciones: [
+      { etiqueta: "Medidas", valor: "50 x 35 x 12 cm" },
+      { etiqueta: "Material", valor: "Cerámica" },
+      { etiqueta: "Instalación", valor: "Sobre mesón" },
+      { etiqueta: "Color", valor: "Blanco" },
+    ],
     variants: [{ attribute: "medidas", value: "500 x 350 x 120 mm" }],
     prices: { minorista: null, mayorista: null },
     sku: "9636",
@@ -116,8 +142,20 @@ export const products: Product[] = [
     category: "Lavamanos", // categoría del filtro
     // Nota interna: en el ERP figura como "LAV BAJO TOPE BLANCO" ("bajo tope" = bajo encimera). NO mostrar al cliente.
     description:
-      "Lavamanos bajo encimera, acabado blanco. Se instala por debajo de la encimera y deja la superficie libre y fácil de limpiar. Incluye rebosadero.", // texto visible, tomado del PDF
+      "Lavabo de cerámica rectangular para instalar incrustado bajo mesón.", // texto visible, tomado del PDF
     images: ["/images/products/lavamanos-4243.jpg"], // foto principal
+    caracteristicas: [
+      "Lavabo de cerámica de instalación incrustada bajo mesón",
+      "Modelo rectangular",
+      "Se recomienda desagüe con rebosadero",
+      "Se combina con grifería baja",
+    ],
+    especificaciones: [
+      { etiqueta: "Medidas", valor: "60,5 x 39 x 19 cm" },
+      { etiqueta: "Material", valor: "Cerámica" },
+      { etiqueta: "Instalación", valor: "Incrustada bajo mesón" },
+      { etiqueta: "Color", valor: "Blanco" },
+    ],
     variants: [{ attribute: "medidas", value: "605 x 390 x 190 mm" }], // equivale a 60,5 x 39 x 19 cm del PDF
     prices: { minorista: null, mayorista: null }, // el precio viene del ERP, no de este archivo
     sku: "4243", // código del ERP (coincide exacto con stock_espejo)
@@ -126,8 +164,21 @@ export const products: Product[] = [
     id: "lavamanos-b191",
     name: "Lavamanos de Pedestal B-191",
     category: "Lavamanos",
-    description: "Lavamanos cerámico de pedestal (columna), acabado blanco.",
+    description:
+      "Lavabo de cerámica con pedestal, de cuerpo completo e instalación al piso.",
     images: ["/images/products/lavamanos-b191.jpg"],
+    caracteristicas: [
+      "Lavabo de cerámica de cuerpo completo (pedestal), de instalación al piso",
+      "Desagüe normal a la pared",
+      "Se recomienda con grifería alta o baja",
+      "Se combina con desagüe con rebosadero",
+    ],
+    especificaciones: [
+      { etiqueta: "Medidas", valor: "42 x 42 x 83 cm" },
+      { etiqueta: "Material", valor: "Cerámica" },
+      { etiqueta: "Instalación", valor: "Al piso" },
+      { etiqueta: "Color", valor: "Blanco" },
+    ],
     variants: [{ attribute: "medidas", value: "420 x 420 x 830 mm" }],
     prices: { minorista: null, mayorista: null },
     sku: "B-191",
@@ -138,20 +189,48 @@ export const products: Product[] = [
   // ==========================================
   {
     id: "sanitario-sd1001",
-    name: "Sanitario SD-1001",
+    name: "Inodoro con bidet · blanco",
     category: "Sanitarios",
-    description: "Sanitario cerámico de una pieza, acabado blanco.",
+    description:
+      "Sanitario de cerámica de lujo con bidet de doble chorro, asiento hidráulico y doble flujo de agua.",
     images: ["/images/products/sanitario-sd1001.jpg"],
+    caracteristicas: [
+      "Sanitario de cerámica de lujo, totalmente estético, que facilita la limpieza",
+      "Conexión 1/2 por la parte posterior",
+      "Asiento hidráulico que impide el golpe fuerte de cierre",
+      "Descarga completa al costado izquierdo y medio tanque a la base",
+      "Viene con conexión de bidet de doble chorro, que se controla con un botón al costado derecho",
+      "Doble flujo de agua para mejor evacuación",
+      "Viene con anillo de cera",
+    ],
+    especificaciones: [
+      { etiqueta: "Material", valor: "Cerámica" },
+      { etiqueta: "Color", valor: "Blanco" },
+    ],
     variants: [{ attribute: "medidas", value: "695 x 390 x 500 mm" }],
     prices: { minorista: null, mayorista: null },
     sku: "SD-1001",
   },
   {
     id: "sanitario-sd1001-mb",
-    name: "Sanitario SD-1001 MB",
+    name: "Inodoro con bidet · negro mate",
     category: "Sanitarios",
-    description: "Sanitario cerámico de una pieza, acabado negro mate.",
+    description:
+      "Sanitario de cerámica de lujo con bidet de doble chorro, asiento hidráulico y doble flujo de agua.",
     images: ["/images/products/sanitario-sd1001-mb.jpg"],
+    caracteristicas: [
+      "Sanitario de cerámica de lujo, totalmente estético, que facilita la limpieza",
+      "Conexión 1/2 por la parte posterior",
+      "Asiento hidráulico que impide el golpe fuerte de cierre",
+      "Descarga completa al costado izquierdo y medio tanque a la base",
+      "Viene con conexión de bidet de doble chorro, que se controla con un botón al costado derecho",
+      "Doble flujo de agua para mejor evacuación",
+      "Viene con anillo de cera",
+    ],
+    especificaciones: [
+      { etiqueta: "Material", valor: "Cerámica" },
+      { etiqueta: "Color", valor: "Negro" },
+    ],
     variants: [{ attribute: "medidas", value: "695 x 390 x 500 mm" }],
     prices: { minorista: null, mayorista: null },
     sku: "SD-1001MB",
@@ -162,8 +241,21 @@ export const products: Product[] = [
     id: "sanitario-717",
     name: "Sanitario 717",
     category: "Sanitarios",
-    description: "Sanitario cerámico de una pieza, acabado blanco.",
+    description:
+      "Sanitario de cerámica de lujo, de diseño estético que facilita la limpieza, con asiento hidráulico, descarga superior y doble flujo de agua.",
     images: ["/images/products/sanitario-717.jpg"],
+    caracteristicas: [
+      "Sanitario de cerámica de lujo, totalmente estético, que facilita la limpieza",
+      "Conexión 1/2 por la parte posterior",
+      "Asiento hidráulico que impide el golpe fuerte de cierre",
+      "Descarga superior",
+      "Doble flujo de agua para mejor evacuación",
+      "Viene con anillo de cera",
+    ],
+    especificaciones: [
+      { etiqueta: "Material", valor: "Cerámica" },
+      { etiqueta: "Color", valor: "Blanco" },
+    ],
     variants: [{ attribute: "medidas", value: "660 x 420 x 665 mm" }],
     prices: { minorista: null, mayorista: null },
     sku: "717",
@@ -173,8 +265,21 @@ export const products: Product[] = [
     id: "sanitario-717-mb",
     name: "Sanitario 717 MB",
     category: "Sanitarios",
-    description: "Sanitario cerámico de una pieza, acabado negro mate.",
+    description:
+      "Sanitario de cerámica de lujo, de diseño estético que facilita la limpieza, con asiento hidráulico, descarga superior y doble flujo de agua.",
     images: ["/images/products/sanitario-717-mb.jpg"],
+    caracteristicas: [
+      "Sanitario de cerámica de lujo, totalmente estético, que facilita la limpieza",
+      "Conexión 1/2 por la parte posterior",
+      "Asiento hidráulico que impide el golpe fuerte de cierre",
+      "Descarga superior",
+      "Doble flujo de agua para mejor evacuación",
+      "Viene con anillo de cera",
+    ],
+    especificaciones: [
+      { etiqueta: "Material", valor: "Cerámica" },
+      { etiqueta: "Color", valor: "Negro" },
+    ],
     variants: [{ attribute: "medidas", value: "660 x 420 x 665 mm" }],
     prices: { minorista: null, mayorista: null },
     sku: "717-MB",
@@ -186,17 +291,8 @@ export const products: Product[] = [
     description:
       "Sanitario de cerámica smart de lujo, de diseño estético que facilita la limpieza. Con conexión de bidet, descarga con sensor, cierre automático del asiento y control remoto.",
     images: ["/images/products/sanitario-168w.jpg"],
-    // TODO: falta confirmar la unidad de la "conexión de 1/2" (¿pulgadas?) antes de añadirla
-    // a caracteristicas o especificaciones. No se escribe hasta confirmarla.
-    caracteristicas: [
-      "Cierre automático del asiento con sensor hidráulico que evita el golpe fuerte",
-      "Descarga con sensor",
-      "Bidet controlado con el botón del costado izquierdo y con el control remoto",
-      "Doble flujo de agua para mejor evacuación",
-      "Aro del asiento con 3 niveles de temperatura",
-      "Control remoto que maneja diferentes funciones",
-      "Incluye anillo de cera",
-    ],
+    // TODO: la característica "Conexión 1/2 por la parte posterior" viene tal cual de
+    // fichas-productos.json; falta confirmar la unidad de ese "1/2" (¿pulgadas?).
     detalles: [
       {
         src: "/images/products/sanitario-168w-2.jpeg",
@@ -210,6 +306,21 @@ export const products: Product[] = [
         width: 1227,
         height: 1282,
       },
+    ],
+    caracteristicas: [
+      "Conexión 1/2 por la parte posterior",
+      "Cierre automático del asiento con sensor hidráulico que evita el golpe fuerte",
+      "Descarga con sensor",
+      "Bidet controlado con el botón del costado izquierdo y con el control remoto",
+      "Doble flujo de agua para mejor evacuación",
+      "Aro del asiento con 3 niveles de temperatura",
+      "Control remoto que maneja diferentes funciones",
+      "Incluye anillo de cera",
+    ],
+    especificaciones: [
+      { etiqueta: "Medidas", valor: "680 x 340 x 465 mm" },
+      { etiqueta: "Material", valor: "Cerámica" },
+      { etiqueta: "Color", valor: "Blanco" },
     ],
     variants: [{ attribute: "medidas", value: "680 x 340 x 465 mm" }],
     prices: { minorista: null, mayorista: null },
@@ -226,6 +337,15 @@ export const products: Product[] = [
     description:
       "Dispensador de jabón manual de plástico, con depósito interno y recarga interna con apertura de llave.",
     images: ["/images/products/dispensador-jabon-manual-blanco.jpg"],
+    caracteristicas: [
+      "Dispensador de jabón manual de plástico",
+      "Depósito interno",
+      "Recarga interna con apertura de llave",
+    ],
+    especificaciones: [
+      { etiqueta: "Material", valor: "Plástico" },
+      { etiqueta: "Color", valor: "Blanco" },
+    ],
     variants: [
       { attribute: "accionamiento", value: "Manual" },
       { attribute: "material", value: "Plástico blanco" },
@@ -238,8 +358,18 @@ export const products: Product[] = [
     name: "Dispensador de jabón manual · acero antimanchas",
     category: "Dispensadores de jabón",
     description:
-      "Dispensador de jabón manual de acero antimanchas inoxidable, con depósito interno y recarga superior con apertura de llave.",
+      "Dispensador de jabón manual de acero inoxidable antivandálico, con depósito interno y recarga superior con apertura de llave.",
     images: ["/images/products/dispensador-jabon-manual-acero.jpg"],
+    caracteristicas: [
+      "Dispensador de jabón manual",
+      "Acero inoxidable antivandálico",
+      "Depósito interno",
+      "Recarga superior con apertura de llave",
+    ],
+    especificaciones: [
+      { etiqueta: "Color", valor: "Gris" },
+      { etiqueta: "Material", valor: "Acero inoxidable antivandálico" },
+    ],
     variants: [
       { attribute: "accionamiento", value: "Manual" },
       { attribute: "material", value: "Acero antimanchas" },
@@ -252,8 +382,19 @@ export const products: Product[] = [
     name: "Dispensador de jabón automático · blanco",
     category: "Dispensadores de jabón",
     description:
-      "Dispensador de jabón de plástico, eléctrico o a pilas (4 pilas AA). Dos velocidades de salida del jabón, control de distancia del sensor y recarga por apertura superior con llave.",
+      "Dispensador de jabón de plástico, eléctrico o a pilas, con 2 velocidades de caída del jabón y control de la distancia del sensor.",
     images: ["/images/products/dispensador-jabon-automatico-blanco.jpg"],
+    caracteristicas: [
+      "Dispensador de jabón de plástico, eléctrico o a pilas (4 pilas AA)",
+      "2 velocidades para la caída del jabón",
+      "Control para la distancia del sensor",
+      "Recarga mediante apertura superior con llave",
+    ],
+    especificaciones: [
+      { etiqueta: "Material", valor: "Plástico" },
+      { etiqueta: "Color", valor: "Blanco" },
+      { etiqueta: "Alimentación", valor: "Eléctrico o 4 pilas AA" },
+    ],
     variants: [
       { attribute: "accionamiento", value: "Automático" },
       { attribute: "material", value: "Plástico blanco" },
@@ -266,8 +407,20 @@ export const products: Product[] = [
     name: "Dispensador de jabón automático · acero antimanchas",
     category: "Dispensadores de jabón",
     description:
-      "Dispensador de jabón de acero antimanchas inoxidable, eléctrico o a pilas (4 pilas AA). Dos velocidades de salida del jabón, control de distancia del sensor y recarga por apertura superior con llave.",
+      "Dispensador de jabón de acero inoxidable antivandálico, eléctrico o a pilas, con 2 velocidades de caída del jabón y control de la distancia del sensor.",
     images: ["/images/products/dispensador-jabon-automatico-acero.jpg"],
+    caracteristicas: [
+      "Dispensador de jabón eléctrico o a pilas (4 pilas AA)",
+      "Acero inoxidable antivandálico",
+      "2 velocidades para la caída del jabón",
+      "Control para la distancia del sensor",
+      "Recarga mediante apertura superior con llave",
+    ],
+    especificaciones: [
+      { etiqueta: "Color", valor: "Gris" },
+      { etiqueta: "Alimentación", valor: "Eléctrico o 4 pilas AA" },
+      { etiqueta: "Material", valor: "Acero inoxidable antivandálico" },
+    ],
     variants: [
       { attribute: "accionamiento", value: "Automático" },
       { attribute: "material", value: "Acero antimanchas" },
@@ -283,8 +436,17 @@ export const products: Product[] = [
     id: "dispensador-papel-blanco",
     name: "Dispensador de papel blanco (papel rectangular)",
     category: "Dispensadores de papel",
-    description: "Dispensador de papel manual de plástico, para recarga de papel rectangular.",
+    description:
+      "Dispensador de papel manual de plástico para papel rectangular.",
     images: ["/images/products/dispensador-papel-blanco.jpg"],
+    caracteristicas: [
+      "Dispensador de papel manual de plástico",
+      "Recarga de papel rectangular",
+    ],
+    especificaciones: [
+      { etiqueta: "Material", valor: "Plástico" },
+      { etiqueta: "Color", valor: "Blanco" },
+    ],
     variants: [
       { attribute: "accionamiento", value: "Manual" },
       { attribute: "material", value: "Plástico blanco" },
@@ -296,8 +458,17 @@ export const products: Product[] = [
     id: "dispensador-papel-manual-blanco",
     name: "Dispensador de papel manual blanco (rollo)",
     category: "Dispensadores de papel",
-    description: "Dispensador de papel manual de plástico, para recarga de papel en rollo.",
+    description:
+      "Dispensador de papel manual de plástico para papel redondo.",
     images: ["/images/products/dispensador-papel-manual-blanco.jpg"],
+    caracteristicas: [
+      "Dispensador de papel manual de plástico",
+      "Recarga de papel redondo",
+    ],
+    especificaciones: [
+      { etiqueta: "Material", valor: "Plástico" },
+      { etiqueta: "Color", valor: "Blanco" },
+    ],
     variants: [
       { attribute: "accionamiento", value: "Manual" },
       { attribute: "material", value: "Plástico blanco" },
@@ -312,8 +483,18 @@ export const products: Product[] = [
     id: "dispensador-papel-manual-acero",
     name: "Dispensador de papel manual · acero antimanchas",
     category: "Dispensadores de papel",
-    description: "Dispensador de papel manual para recarga de papel rectangular.",
+    description:
+      "Dispensador de papel manual de acero inoxidable antivandálico para papel rectangular.",
     images: ["/images/products/dispensador-papel-manual-acero.jpg"],
+    caracteristicas: [
+      "Dispensador de papel manual",
+      "Acero inoxidable antivandálico",
+      "Recarga de papel rectangular",
+    ],
+    especificaciones: [
+      { etiqueta: "Color", valor: "Gris" },
+      { etiqueta: "Material", valor: "Acero inoxidable antivandálico" },
+    ],
     variants: [{ attribute: "accionamiento", value: "Manual" }],
     prices: { minorista: null, mayorista: null },
     sku: "KW-7370GUNGREY",
@@ -323,8 +504,21 @@ export const products: Product[] = [
     name: "Dispensador automático de papel · acero antimanchas",
     category: "Dispensadores de papel",
     description:
-      "Dispensador de papel eléctrico o a pilas (4 pilas D), para rollos de 20 × 21 cm. Control interno del largo del papel, botón de encendido/apagado y panel digital frontal.",
+      "Dispensador de papel eléctrico o a pilas (4 pilas D), de acero inoxidable antivandálico, para papel redondo de 20x21 cm, con control del largo del papel y panel digital frontal.",
     images: ["/images/products/dispensador-papel-automatico-acero.jpg"],
+    caracteristicas: [
+      "Dispensador de papel eléctrico o a pilas (4 pilas D)",
+      "Acero inoxidable antivandálico",
+      "Recarga de papel redondo de 20x21 cm",
+      "Control interno para el largo del papel",
+      "Control de encendido y apagado",
+      "Panel digital frontal para su uso",
+    ],
+    especificaciones: [
+      { etiqueta: "Color", valor: "Gris" },
+      { etiqueta: "Alimentación", valor: "Eléctrico o 4 pilas D" },
+      { etiqueta: "Material", valor: "Acero inoxidable antivandálico" },
+    ],
     variants: [
       { attribute: "accionamiento", value: "Automático" },
       { attribute: "material", value: "Acero antimanchas" },
@@ -341,8 +535,18 @@ export const products: Product[] = [
     name: "Secador de manos pequeño · blanco",
     category: "Secadores de manos",
     description:
-      "Secador de manos eléctrico de 700 W (110 V), con opción de aire caliente o frío y control de distancia del sensor.",
+      "Secador de manos eléctrico de 110 V y 700 W, con opción de aire caliente o frío y control de la distancia del sensor.",
     images: ["/images/products/secador-manos-pequeno-blanco.jpg"],
+    caracteristicas: [
+      "Secador de manos eléctrico",
+      "Opción de aire caliente o frío",
+      "Control para el sensor de distancia",
+    ],
+    especificaciones: [
+      { etiqueta: "Alimentación", valor: "110 V" },
+      { etiqueta: "Potencia", valor: "700 W" },
+      { etiqueta: "Color", valor: "Blanco" },
+    ],
     variants: [
       { attribute: "potencia", value: "700 W (110 V)" },
       { attribute: "color", value: "Blanco" },
@@ -357,8 +561,20 @@ export const products: Product[] = [
     name: "Secador de manos mediano",
     category: "Secadores de manos",
     description:
-      "Secador de manos eléctrico de 1800 W (110 V), con opción de aire caliente o frío y control de distancia del sensor.",
+      "Secador de manos eléctrico de acero inoxidable antivandálico, de 110 V y 1800 W, con opción de aire caliente o frío y control de la distancia del sensor.",
     images: ["/images/products/secador-manos-mediano.jpg"],
+    caracteristicas: [
+      "Secador de manos eléctrico",
+      "Acero inoxidable antivandálico",
+      "Opción de aire caliente o frío",
+      "Control para el sensor de distancia",
+    ],
+    especificaciones: [
+      { etiqueta: "Alimentación", valor: "110 V" },
+      { etiqueta: "Potencia", valor: "1800 W" },
+      { etiqueta: "Color", valor: "Gris" },
+      { etiqueta: "Material", valor: "Acero inoxidable antivandálico" },
+    ],
     variants: [
       { attribute: "potencia", value: "1800 W (110 V)" },
       { attribute: "material", value: "Acero antimanchas" },
@@ -371,8 +587,22 @@ export const products: Product[] = [
     name: "Secador de manos grande · blanco",
     category: "Secadores de manos",
     description:
-      "Secador de manos eléctrico de 1650 W (110 V, 60 Hz), con encendido/apagado, aire caliente o frío y potencia alta/baja. Incluye tanque para recoger el agua y ducto de limpieza.",
+      "Secador de manos eléctrico de 110 V y 1650 W, con aire caliente o frío, control de potencia alta o baja, tanque para descarga de agua y ducto de limpieza.",
     images: ["/images/products/secador-manos-grande-blanco.jpg"],
+    caracteristicas: [
+      "Secador de manos eléctrico",
+      "Control de encendido y apagado",
+      "Opción de aire caliente o frío",
+      "Control de potencia alta o baja",
+      "Tanque para descarga de agua",
+      "Ducto de limpieza",
+    ],
+    especificaciones: [
+      { etiqueta: "Alimentación", valor: "110 V" },
+      { etiqueta: "Potencia", valor: "1650 W" },
+      { etiqueta: "Frecuencia", valor: "60 Hz" },
+      { etiqueta: "Color", valor: "Blanco" },
+    ],
     variants: [
       { attribute: "potencia", value: "1650 W (110 V)" },
       { attribute: "color", value: "Blanco" },
@@ -385,8 +615,24 @@ export const products: Product[] = [
     name: "Secador de manos grande · acero antimanchas",
     category: "Secadores de manos",
     description:
-      "Secador de manos eléctrico de 1650 W (110 V, 60 Hz), con encendido/apagado, aire caliente o frío y potencia alta/baja. Incluye tanque para recoger el agua y ducto de limpieza.",
+      "Secador de manos eléctrico de acero inoxidable antivandálico, de 110 V y 1650 W, con aire caliente o frío, control de potencia alta o baja, tanque para descarga de agua y ducto de limpieza.",
     images: ["/images/products/secador-manos-grande-acero.jpg"],
+    caracteristicas: [
+      "Secador de manos eléctrico",
+      "Acero inoxidable antivandálico",
+      "Control de encendido y apagado",
+      "Opción de aire caliente o frío",
+      "Control de potencia alta o baja",
+      "Tanque para descarga de agua",
+      "Ducto de limpieza",
+    ],
+    especificaciones: [
+      { etiqueta: "Alimentación", valor: "110 V" },
+      { etiqueta: "Potencia", valor: "1650 W" },
+      { etiqueta: "Frecuencia", valor: "60 Hz" },
+      { etiqueta: "Color", valor: "Gris" },
+      { etiqueta: "Material", valor: "Acero inoxidable antivandálico" },
+    ],
     variants: [
       { attribute: "potencia", value: "1650 W (110 V)" },
       { attribute: "material", value: "Acero antimanchas" },
@@ -405,18 +651,37 @@ export const products: Product[] = [
     name: "Espejo 3 en 1",
     category: "Accesorios",
     description:
-      "Espejo con luz LED que integra tres módulos: dispensador de jabón eléctrico o a pilas (4 pilas AA), secador de manos eléctrico con sensor y espacio interno para recarga de papel rectangular.",
+      "Espejo de 75 x 110 cm con luz LED, que integra secador de manos con sensor, dispensador de jabón y espacio para recarga de papel rectangular.",
     images: ["/images/products/espejo-3-en-1.jpg"],
+    caracteristicas: [
+      "Espejo con luz LED",
+      "Espacio interno para recarga de papel rectangular",
+      "Secador de manos eléctrico con sensor",
+      "Dispensador de jabón eléctrico o a pilas (4 pilas AA)",
+    ],
+    especificaciones: [
+      { etiqueta: "Medidas", valor: "75 x 110 cm" },
+      { etiqueta: "Color", valor: "Blanco" },
+    ],
     variants: [{ attribute: "funciones", value: "Jabón · secador · dispensador de papel" }],
     prices: { minorista: null, mayorista: null },
     sku: "KW-3005",
   },
   {
     id: "barra-apoyo-acero",
-    name: "Barra de apoyo · acero antimanchas",
+    name: "Barra de seguridad · acero antimanchas",
     category: "Accesorios",
-    description: "Barra de seguridad de acero antimanchas inoxidable de 60 cm de largo.",
+    description:
+      "Barra de seguridad de acero inoxidable de 60 cm.",
     images: ["/images/products/barra-apoyo-acero.jpg"],
+    caracteristicas: [
+      "Barra de seguridad de acero inoxidable de 60 cm",
+    ],
+    especificaciones: [
+      { etiqueta: "Medidas", valor: "60 cm" },
+      { etiqueta: "Material", valor: "Acero inoxidable" },
+      { etiqueta: "Color", valor: "Gris" },
+    ],
     variants: [{ attribute: "medidas", value: "60 cm de largo" }],
     prices: { minorista: null, mayorista: null },
     sku: "KW-7501GUNGREY",
@@ -430,10 +695,28 @@ export const products: Product[] = [
     // TODO: nombre provisional tomado del ERP; falta nombre comercial, foto,
     // descripción y confirmar la unidad de las medidas (¿cm?).
     id: "sauna-120x100x200",
-    name: "Sauna 120×100×200 (vidrio 6 mm)",
+    name: "Sauna · 120 × 100 × 200 cm",
     category: "Saunas",
-    description: "",
+    description:
+      "Sauna para 2 personas de cicuta canadiense, con calefactores de nano carbono de ultra baja EMF, temperatura regulable de 30 a 65 °C y temporizador de 5 a 60 minutos.",
     images: ["/images/products/sauna-120x100x200.jpg", "/images/products/sauna-120x100x200-2.jpg", "/images/products/sauna-120x100x200-3.jpg", "/images/products/sauna-120x100x200-4.jpg"],
+    caracteristicas: [
+      "Calefactores de nano carbono de ultra baja EMF",
+      "Temperatura regulable de 30 a 65 °C",
+      "Temporizador de 5 a 60 minutos",
+      "Capacidad para 2 personas",
+    ],
+    especificaciones: [
+      { etiqueta: "Medidas", valor: "1200 x 1000 x 2000 mm (ancho x fondo x alto)" },
+      { etiqueta: "Capacidad", valor: "2 personas" },
+      { etiqueta: "Potencia", valor: "1,9 kW" },
+      { etiqueta: "Voltaje", valor: "220-240 V ~ 1N 50-60 Hz, enchufe de 10 A" },
+      { etiqueta: "Material principal", valor: "Cicuta canadiense" },
+      { etiqueta: "Fuente de calor", valor: "Nano carbono de ultra baja EMF" },
+      { etiqueta: "Rango de temperatura", valor: "30 - 65 °C" },
+      { etiqueta: "Temporizador", valor: "5 - 60 minutos" },
+      { etiqueta: "Vidrio", valor: "6 mm" },
+    ],
     variants: [
       { attribute: "medidas", value: "120 x 100 x 200" },
       { attribute: "vidrio", value: "6 mm" },
@@ -445,10 +728,34 @@ export const products: Product[] = [
     // TODO: igual que el sauna anterior (nombre provisional, foto, descripción
     // y unidad de las medidas).
     id: "sauna-135x110x210",
-    name: "Sauna 135×110×210 (vidrio 8 mm)",
+    name: "Sauna infrarrojo de espectro completo · 135 × 110 × 210 cm",
     category: "Saunas",
-    description: "",
+    description:
+      "Sauna infrarrojo de espectro completo para 2 personas, con control por Wi-Fi, audio Bluetooth, iluminación ambiental y sistema táctil inteligente.",
     images: ["/images/products/sauna-135x110x210.jpg", "/images/products/sauna-135x110x210-2.jpg", "/images/products/sauna-135x110x210-3.jpg", "/images/products/sauna-135x110x210-4.jpg"],
+    caracteristicas: [
+      "Sauna infrarrojo lejano de baja EMF",
+      "Calefactores infrarrojos de espectro completo",
+      "Sistema de control remoto por Wi-Fi",
+      "Audio Bluetooth (altavoces de resonancia)",
+      "Iluminación ambiental superior de luz cálida",
+      "Iluminación ambiental de luz cálida en el asiento",
+      "Portavasos fijo",
+      "Generador de iones negativos",
+      "Desinfección por ozono",
+      "Respaldo ergonómico",
+      "Sistema táctil inteligente",
+    ],
+    especificaciones: [
+      { etiqueta: "Medidas", valor: "1350 x 1100 x 2100 mm" },
+      { etiqueta: "Capacidad", valor: "2 personas (cómodamente)" },
+      { etiqueta: "Potencia", valor: "2,4 kW" },
+      { etiqueta: "Voltaje", valor: "230 V 1N~ 50-60 Hz / 240 V 2~ 50-60 Hz" },
+      { etiqueta: "Voltaje personalizable", valor: "120 V 1N~ 50-60 Hz" },
+      { etiqueta: "Madera interior", valor: "Abeto finlandés" },
+      { etiqueta: "Madera exterior", valor: "Enchapado de roble de ingeniería" },
+      { etiqueta: "Vidrio", valor: "Transparente, 8 mm" },
+    ],
     variants: [
       { attribute: "medidas", value: "135 x 110 x 210" },
       { attribute: "vidrio", value: "8 mm" },

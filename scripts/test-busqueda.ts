@@ -90,8 +90,8 @@ prueba("por sku (sin importar mayúsculas)", () => {
 
 prueba("por categoría y por descripción", () => {
   assert.ok(buscarProductos("secadores").length > 0); // categoría "Secadores de manos"
-  assert.ok(buscarProductos("cerámico").length > 0); // texto de la descripción
-  assert.deepEqual(buscarProductos("ceramico"), buscarProductos("cerámico"));
+  assert.ok(buscarProductos("cerámica").length > 0); // texto de la descripción
+  assert.deepEqual(buscarProductos("ceramica"), buscarProductos("cerámica"));
 });
 
 // ---------- sin resultados ----------

@@ -7,6 +7,7 @@
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { products } from "../src/data/products.ts";
+import { normalizar } from "../src/lib/busqueda.ts";
 import {
   caracteristicasProducto,
   detallesProducto,
@@ -27,22 +28,39 @@ const producto = (id: string) => products.find((p) => p.id === id)!;
 
 // ---------- especificaciones ----------
 prueba("'medidas' de variants es la fila 'Medidas', primera", () => {
+  // la fila "Medidas" sale de variants (500 x 350 x 120 mm); la del JSON (en cm) se descarta por repetida
   assert.deepEqual(filasEspecificaciones(producto("lavamanos-9636")), [
     { etiqueta: "Medidas", valor: "500 x 350 x 120 mm" },
+    { etiqueta: "Material", valor: "Cerámica" },
+    { etiqueta: "Instalación", valor: "Sobre mesón" },
+    { etiqueta: "Color", valor: "Blanco" },
   ]);
 });
 
 prueba("las demás variants son filas con la etiqueta en mayúscula inicial", () => {
-  const filas = filasEspecificaciones(producto("sauna-120x100x200"));
+  const filas = filasEspecificaciones({
+    variants: [
+      { attribute: "medidas", value: "120 x 100 x 200" },
+      { attribute: "vidrio", value: "6 mm" },
+    ],
+  });
   assert.deepEqual(filas, [
     { etiqueta: "Medidas", valor: "120 x 100 x 200" },
     { etiqueta: "Vidrio", valor: "6 mm" },
   ]);
   // sin "medidas": solo las demás variants, en el orden en que están escritas
-  assert.deepEqual(filasEspecificaciones(producto("dispensador-jabon-manual-blanco")), [
-    { etiqueta: "Accionamiento", valor: "Manual" },
-    { etiqueta: "Material", valor: "Plástico blanco" },
-  ]);
+  assert.deepEqual(
+    filasEspecificaciones({
+      variants: [
+        { attribute: "accionamiento", value: "Manual" },
+        { attribute: "material", value: "Plástico blanco" },
+      ],
+    }),
+    [
+      { etiqueta: "Accionamiento", valor: "Manual" },
+      { etiqueta: "Material", valor: "Plástico blanco" },
+    ]
+  );
 });
 
 prueba("'especificaciones' van entre Medidas y las demás variants; no se repite una etiqueta", () => {
@@ -118,11 +136,11 @@ prueba("detalles: se descartan los que no tienen ruta o medidas; sin datos, []",
   assert.deepEqual(detallesProducto(undefined), []);
 });
 
-prueba("168W: foto principal sola; 7 características; 2 detalles con medidas reales", () => {
+prueba("168W: foto principal sola; 8 características; 2 detalles con medidas reales", () => {
   const p = producto("sanitario-168w");
   assert.deepEqual(p.images, ["/images/products/sanitario-168w.jpg"]);
-  assert.equal(caracteristicasProducto(p.caracteristicas).length, 7);
-  assert.ok(!(p.caracteristicas ?? []).some((c) => c.includes("1/2")), "conexión de 1/2 sin confirmar");
+  assert.equal(caracteristicasProducto(p.caracteristicas).length, 8);
+  assert.equal(p.caracteristicas?.[0], "Conexión 1/2 por la parte posterior"); // tal cual del JSON (unidad sin confirmar)
   const detalles = detallesProducto(p.detalles);
   assert.equal(detalles.length, 2);
   for (const d of detalles) {
@@ -133,10 +151,46 @@ prueba("168W: foto principal sola; 7 características; 2 detalles con medidas re
   assert.deepEqual([detalles[1].width, detalles[1].height], [1227, 1282]);
 });
 
-prueba("ningún otro producto tiene características ni detalles", () => {
+prueba("solo el 168W tiene imágenes de detalle", () => {
   for (const p of products.filter((p) => p.id !== "sanitario-168w")) {
-    assert.equal(caracteristicasProducto(p.caracteristicas).length, 0, p.id);
     assert.equal(detallesProducto(p.detalles).length, 0, p.id);
+  }
+});
+
+// ---------- contenido de las fichas (viene de fichas-productos.json) ----------
+const sinRepetidos = (textos: string[]) =>
+  new Set(textos.map((t) => normalizar(t))).size === textos.length;
+
+prueba("los 25 productos tienen descripción no vacía", () => {
+  assert.equal(products.length, 25);
+  for (const p of products) assert.ok(p.description.trim() !== "", `${p.id}: sin descripción`);
+});
+
+prueba("características y especificaciones: sin textos vacíos ni repetidos", () => {
+  for (const p of products) {
+    const car = p.caracteristicas ?? [];
+    const esp = p.especificaciones ?? [];
+    assert.ok(car.length > 0 && esp.length > 0, `${p.id}: faltan características o especificaciones`);
+    assert.ok(car.every((c) => c.trim() !== ""), `${p.id}: característica vacía`);
+    assert.ok(esp.every((e) => e.etiqueta.trim() !== "" && e.valor.trim() !== ""), `${p.id}: especificación vacía`);
+    assert.ok(sinRepetidos(car), `${p.id}: características repetidas`);
+    assert.ok(sinRepetidos(esp.map((e) => e.etiqueta)), `${p.id}: etiquetas repetidas`);
+    // la tabla que se ve en la ficha tampoco repite etiquetas
+    const filas = filasEspecificaciones(p).map((f) => f.etiqueta);
+    assert.ok(sinRepetidos(filas), `${p.id}: filas repetidas en la tabla`);
+  }
+});
+
+prueba("los 5 nombres cambiados coinciden con el JSON", () => {
+  const esperados: Record<string, string> = {
+    "SD-1001": "Inodoro con bidet · blanco",
+    "SD-1001MB": "Inodoro con bidet · negro mate",
+    "KW-7501GUNGREY": "Barra de seguridad · acero antimanchas",
+    "SN96129-1200": "Sauna · 120 × 100 × 200 cm",
+    "SN96137-1350": "Sauna infrarrojo de espectro completo · 135 × 110 × 210 cm",
+  };
+  for (const [sku, nombre] of Object.entries(esperados)) {
+    assert.equal(products.find((p) => p.sku === sku)?.name, nombre, sku);
   }
 });
 
