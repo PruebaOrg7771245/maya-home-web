@@ -183,8 +183,8 @@ prueba("características y especificaciones: sin textos vacíos ni repetidos", (
 
 prueba("los 5 nombres cambiados coinciden con el JSON", () => {
   const esperados: Record<string, string> = {
-    "SD-1001": "Inodoro con bidet · blanco",
-    "SD-1001MB": "Inodoro con bidet · negro mate",
+    "SD-1001": "Sanitario SD-1001 con bidet · blanco",
+    "SD-1001MB": "Sanitario SD-1001 con bidet · negro mate",
     "KW-7501GUNGREY": "Barra de seguridad · acero antimanchas",
     "SN96129-1200": "Sauna · 120 × 100 × 200 cm",
     "SN96137-1350": "Sauna infrarrojo de espectro completo · 135 × 110 × 210 cm",

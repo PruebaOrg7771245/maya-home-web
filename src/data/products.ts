@@ -189,7 +189,7 @@ export const products: Product[] = [
   // ==========================================
   {
     id: "sanitario-sd1001",
-    name: "Inodoro con bidet · blanco",
+    name: "Sanitario SD-1001 con bidet · blanco",
     category: "Sanitarios",
     description:
       "Sanitario de cerámica de lujo con bidet de doble chorro, asiento hidráulico y doble flujo de agua.",
@@ -213,7 +213,7 @@ export const products: Product[] = [
   },
   {
     id: "sanitario-sd1001-mb",
-    name: "Inodoro con bidet · negro mate",
+    name: "Sanitario SD-1001 con bidet · negro mate",
     category: "Sanitarios",
     description:
       "Sanitario de cerámica de lujo con bidet de doble chorro, asiento hidráulico y doble flujo de agua.",
@@ -291,8 +291,6 @@ export const products: Product[] = [
     description:
       "Sanitario de cerámica smart de lujo, de diseño estético que facilita la limpieza. Con conexión de bidet, descarga con sensor, cierre automático del asiento y control remoto.",
     images: ["/images/products/sanitario-168w.jpg"],
-    // TODO: la característica "Conexión 1/2 por la parte posterior" viene tal cual de
-    // fichas-productos.json; falta confirmar la unidad de ese "1/2" (¿pulgadas?).
     detalles: [
       {
         src: "/images/products/sanitario-168w-2.jpeg",
@@ -718,7 +716,7 @@ export const products: Product[] = [
       { etiqueta: "Vidrio", valor: "6 mm" },
     ],
     variants: [
-      { attribute: "medidas", value: "120 x 100 x 200" },
+      { attribute: "medidas", value: "1200 x 1000 x 2000 mm (ancho x fondo x alto)" },
       { attribute: "vidrio", value: "6 mm" },
     ],
     prices: { minorista: null, mayorista: null },
@@ -757,7 +755,7 @@ export const products: Product[] = [
       { etiqueta: "Vidrio", valor: "Transparente, 8 mm" },
     ],
     variants: [
-      { attribute: "medidas", value: "135 x 110 x 210" },
+      { attribute: "medidas", value: "1350 x 1100 x 2100 mm" },
       { attribute: "vidrio", value: "8 mm" },
     ],
     prices: { minorista: null, mayorista: null },

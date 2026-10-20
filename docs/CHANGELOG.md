@@ -18,6 +18,50 @@ Formato de entrada:
 
 ---
 
+## 20/10/2026 - Fichas completas de los 25 productos, nombres, fotos principales y fotos de los saunas
+- **Fichas (ADR-21 y 22):** los 25 productos tienen descripción, características
+  y especificaciones, tomadas de una hoja de Excel (vía JSON, fuera del repo) y
+  emparejadas por `sku`. La tabla de especificaciones se arma en
+  `filasEspecificaciones()` (`lib/fichaProducto.ts`): "Medidas" primero (de
+  `variants`), luego las especificaciones y al final el resto de `variants`,
+  sin filas repetidas. La ficha ya no tiene el bloque "Formatos disponibles".
+- **Nombres (ADR-23):** cambiaron solo 5: los dos sanitarios SD-1001 (blanco y
+  negro mate), la barra de seguridad KW-7501GUNGREY y los dos saunas. El resto
+  conserva su nombre.
+- **Galería (ADR-24):** primera versión sin galería de varias fotos, salvo los
+  dos saunas. Las fotos extra de los demás productos quedan fuera del repo, en
+  `C:\Dev\fotos-extras-pendientes`, para añadirlas después.
+- **Fotos principales (ADR-25):** mejoradas y unificadas: 4:3, máximo 1600 px
+  de ancho y menos de 1 MB; las PNG con transparencia se aplanan sobre blanco.
+- **Saunas:** fotos nuevas para los dos (4 por sauna en `public/images/products/`:
+  `sauna-120x100x200` y `sauna-135x110x210`, con sufijos `-2` a `-4`).
+- **Pendientes antes de publicar (no son cambios hechos):** datos por confirmar
+  del Excel (ADR-26) y política de privacidad, consentimiento y aviso legal
+  (ADR-27).
+
+## 20/10/2026 - Foto de combo, "Volver al catálogo" con filtro y más sinónimos en el buscador
+- **Foto del combo CONNON SX800 blanco:** `public/images/combos/connon-sx800-blanco.jpg`
+  (original 1536x1024 extendida a 4:3 con fondo blanco, 1536x1152, ~94 KB).
+  Entrada nueva en `FOTOS_COMBINACION` (`src/data/combos.ts`) para
+  `connon-sx800__LAVCONNONSX800BL__MUEBLCONNOSX-800SMOK`; deja de ser imagen
+  referencial. `scripts/test-combos.ts`: fotos propias 6 -> 7, referenciales 3 -> 2.
+- **Fix "Volver al catálogo":** el enlace de las fichas iba fijo a `/catalogo`
+  (producto) o `?categoria=Combos` (combo) y perdía filtro y búsqueda. Nuevos
+  `VolverAlCatalogo.tsx` y `lib/origenCatalogo.ts` (origen en memoria del
+  módulo, sin `sessionStorage`): si se llegó desde el catálogo hace
+  `router.back()` (mismo filtro, búsqueda y scroll, sin ensuciar el historial);
+  si no, va al catálogo filtrado por la categoría del producto (o Combos).
+  `CatalogoConFiltro` anota el origen con `onClickCapture`. Sin cambios
+  visuales; el catálogo sigue estático con ISR. Prueba nueva en `test-busqueda.ts`.
+- **Sinónimos del buscador (`lib/busqueda.ts`):** `GRUPOS_SINONIMOS` simétricos
+  en un solo sitio: inodoro=taza=wc=sanitario; lavamanos=lavabo=lavatorio;
+  secador de manos=secamanos; dispensador de jabón=jabonera (el menos exacto).
+  Admite términos de varias palabras (seguidas). Reemplaza el sinónimo único
+  `lavabo` -> `lavamanos`. Orden de resultados, aspecto y `?q=` sin cambios.
+  inodoro/taza/wc -> 5 sanitarios (antes 0); lavatorio -> 4 productos + 5
+  combos; secamanos/jabonera -> 5. `test-busqueda.ts` ampliado (20 pruebas).
+  Ver ADR-28.
+
 ## 13/10/2026 - Fase 3b: rediseño de la ficha de producto (modelo: sanitario 168W)
 - **Galería:** `ProductGallery` pasa de `object-cover` a `object-contain` (foto
   principal y miniaturas): ya no se recorta ninguna foto. Fondo piedra, marco

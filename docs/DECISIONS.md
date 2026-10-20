@@ -512,3 +512,96 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
   fotos que no son 4:3. Sin zoom, el detalle depende de abrir la imagen
   completa.
 - **Estado:** vigente (13/10/2026). Pendiente revisión visual a 320/375/1280 px.
+
+## ADR-21: Las fichas salen de una hoja de Excel (vía JSON), emparejadas por sku
+- **Contexto:** los 25 productos necesitaban descripción, características y
+  especificaciones.
+- **Decisión:** esos tres datos salen de una hoja de Excel que pasó por un
+  JSON y se emparejan por `sku` (código del ERP). Los textos se copian tal
+  cual, con su unidad (ej. "2,4 kW", "1350 x 1100 x 2100 mm"); si el JSON y la
+  web difieren en la descripción, gana el JSON. El campo "verificado" del
+  Excel NO se guarda en la web: la lista de datos pendientes de confirmar vive
+  en el Excel (ver ADR-26). El JSON queda fuera del repo.
+- **Alternativas descartadas:** ninguna se evaluó.
+- **Estado:** vigente (20/10/2026).
+
+## ADR-22: Tabla de especificaciones derivada de variants; sin "Formatos disponibles" en la ficha
+- **Contexto:** la ficha tiene que mostrar las medidas, las especificaciones
+  del Excel y los datos que ya estaban en `variants`, sin repetir filas.
+- **Decisión:** `filasEspecificaciones()` (`lib/fichaProducto.ts`) arma la
+  tabla en este orden: "Medidas" primero, tomada de `variants`; luego las
+  `especificaciones`; al final el resto de `variants`. Si dos filas tienen la
+  misma etiqueta (sin importar mayúsculas ni tildes), gana la primera. Por eso
+  las `variants` de medidas mandan sobre la fila "Medidas" del JSON. En los dos
+  saunas el valor de `variants` "medidas" se cambió por el texto del JSON con
+  unidad ("1200 x 1000 x 2000 mm (ancho x fondo x alto)" y "1350 x 1100 x 2100
+  mm"). En los otros productos las medidas de `variants` no se tocaron (el JSON
+  las trae en cm en 4 lavamanos; mismos números). La ficha ya no tiene un
+  bloque "Formatos disponibles": esa información va en la tabla.
+- **Alternativas descartadas:** ninguna se evaluó.
+- **Consecuencia:** la fila "Medidas" del JSON queda oculta cuando el producto
+  tiene `variants` de medidas. El comentario de `ProductCard` aún habla de
+  "formatos": la tarjeta del catálogo sigue mostrando los valores de `variants`
+  (no se decidió nada sobre ella).
+- **Estado:** vigente (20/10/2026).
+
+## ADR-23: Solo cambian 5 nombres; los demás conservan el actual
+- **Contexto:** el JSON trae un nombre para cada producto y difiere del de la
+  web en varios.
+- **Decisión:** solo cambiaron 5 nombres: SD-1001 ("Sanitario SD-1001 con bidet
+  · blanco"), SD-1001MB ("Sanitario SD-1001 con bidet · negro mate"),
+  KW-7501GUNGREY ("Barra de seguridad · acero antimanchas") y los dos saunas
+  ("Sauna · 120 × 100 × 200 cm" y "Sauna infrarrojo de espectro completo · 135
+  × 110 × 210 cm"). El resto conserva su nombre actual, que en sanitarios y
+  lavamanos incluye el código del modelo. Los nombres del JSON que no se
+  aplicaron quedan sin cambios (ej. "Inodoro inteligente · blanco" para el
+  168W).
+- **Alternativas descartadas:** ninguna se evaluó.
+- **Estado:** vigente (20/10/2026).
+
+## ADR-24: Primera versión pública sin galería de varias fotos (salvo los dos saunas)
+- **Contexto:** hay fotos extra de varios productos.
+- **Decisión:** la primera versión pública no lleva galería de varias fotos,
+  salvo los dos saunas (que ya la tienen). Las fotos extra de los demás
+  productos quedan fuera del repo, en `C:\Dev\fotos-extras-pendientes`, para
+  añadirlas después.
+- **Alternativas descartadas:** ninguna se evaluó.
+- **Estado:** vigente (20/10/2026). Pendiente añadir esas fotos.
+
+## ADR-25: Formato de las fotos principales
+- **Decisión:** las fotos principales son 4:3, de máximo 1600 px de ancho y
+  menos de 1 MB cada una. Las PNG con transparencia se aplanan sobre blanco.
+- **Alternativas descartadas:** ninguna se evaluó.
+- **Estado:** vigente (20/10/2026).
+
+## ADR-26: Datos pendientes de confirmar antes de publicar
+- **Contexto:** algunas especificaciones del Excel están marcadas como no
+  verificadas. Se muestran igual (la web no distingue, ver ADR-21).
+- **Pendientes:** voltaje del sauna de 135 (hoy se muestran las dos opciones);
+  medidas del 168W; vidrio del sauna de 120; material "antivandálico" de 6
+  productos (los dispensadores de acero, 4, y los secadores mediano y grande
+  de acero).
+- **Alternativas descartadas:** ninguna se evaluó.
+- **Estado:** pendiente de confirmar, antes de publicar (20/10/2026).
+
+## ADR-27: Pendientes legales antes de publicar
+- **Contexto:** la web funciona como catálogo con pedido por asesor y recoge
+  datos personales en el formulario del carrito.
+- **Pendientes:** política de privacidad (hoy `urlPrivacidad` es `null` en
+  `sitio.ts`), consentimiento en el formulario y un aviso legal corto.
+- **Alternativas descartadas:** ninguna se evaluó.
+- **Estado:** pendiente, antes de publicar (20/10/2026).
+
+## ADR-28: Sinónimos del buscador como grupos simétricos en un solo sitio
+- **Contexto:** el catálogo usa "sanitario" pero la gente busca "inodoro",
+  "taza" o "wc" (0 resultados); lo mismo con lavatorio, secamanos y jabonera.
+  Antes había un único sinónimo `lavabo` -> `lavamanos` (ADR-18).
+- **Decisión:** `GRUPOS_SINONIMOS` en `lib/busqueda.ts`: cada grupo es una lista
+  de términos equivalentes en ambos sentidos (inodoro=taza=wc=sanitario;
+  lavamanos=lavabo=lavatorio; secador de manos=secamanos; dispensador de
+  jabón=jabonera). Los términos pueden tener varias palabras (deben ir
+  seguidas). "Jabonera" es el equivalente menos exacto; se aceptó igual.
+- **Alternativas descartadas:** lista unidireccional con una sola clave
+  (término buscado -> término del catálogo): obliga a repetir entradas para
+  cubrir todos los sentidos y se desordena al crecer. No se evaluó otra.
+- **Estado:** vigente (20/10/2026). Los grupos siguen por confirmar con el cliente.
