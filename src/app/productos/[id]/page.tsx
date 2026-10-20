@@ -5,7 +5,8 @@
 // ej: /productos/betonhome-pearl, /productos/tessino-black, etc.
 
 import { notFound } from "next/navigation"; // función especial que muestra la página 404 de Next.js
-import Link from "next/link";
+import VolverAlCatalogo from "@/components/VolverAlCatalogo"; // "atrás" al mismo filtro del catálogo
+import { urlCatalogo } from "@/lib/catalogoUrl";
 import { products } from "@/data/products";
 import ProductGallery from "@/components/ProductGallery";
 import { formatPrice } from "@/lib/formatPrice";
@@ -78,9 +79,10 @@ export default async function ProductoPage({
   return (
     <main className="min-h-screen bg-[#EFEDE7]">
       <div className="border-b border-[#D8D4CC] bg-white px-6 py-3">
-        <Link href="/catalogo" className="text-sm text-[#6B6862] hover:text-[#232320]">
-          ← Volver al catálogo
-        </Link>
+        <VolverAlCatalogo
+          hrefPorDefecto={urlCatalogo(product.category)} // sin historial: catálogo de la categoría del producto
+          className="text-sm text-[#6B6862] hover:text-[#232320]"
+        />
       </div>
 
       <div className="mx-auto max-w-5xl px-6 py-10">

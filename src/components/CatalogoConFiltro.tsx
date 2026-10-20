@@ -22,6 +22,7 @@ import ComboCard, { type ComboCardData } from "@/components/ComboCard"; // tarje
 import type { StockInfo } from "@/lib/stock"; // solo el TIPO: no arrastra el cliente de servidor al navegador
 import { PESTANA_COMBOS, PESTANA_TODOS, urlCatalogo } from "@/lib/catalogoUrl"; // nombres de categorías y URL del catálogo
 import { opcionesCategorias } from "@/lib/categorias";
+import { guardarOrigen } from "@/lib/origenCatalogo"; // recuerda el filtro al abrir una ficha
 import {
   LARGO_MAXIMO_CONSULTA,
   coincide,
@@ -89,7 +90,15 @@ function Catalogo({ stockPorId, combos, categoria, texto, alEscribir, alLimpiar,
   const combosSeparados = !verCombos && combosFiltrados.length > 0;
 
   return (
-    <main className="min-h-screen bg-[#EFEDE7]">
+    <main
+      className="min-h-screen bg-[#EFEDE7]"
+      // Al abrir una ficha (producto o combo) se anota desde qué filtro se salió,
+      // para que "Volver al catálogo" de la ficha regrese al mismo filtro
+      onClickCapture={(e) => {
+        const enlace = (e.target as Element).closest<HTMLAnchorElement>('a[href^="/productos/"], a[href^="/combos/"]');
+        if (enlace) guardarOrigen({ url: window.location.pathname + window.location.search, destino: enlace.pathname });
+      }}
+    >
       <div className="mx-auto max-w-7xl px-6 py-8">
         <h1 className="sr-only">Catálogo</h1>
 

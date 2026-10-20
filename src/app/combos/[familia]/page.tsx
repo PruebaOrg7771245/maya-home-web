@@ -7,7 +7,7 @@
 // que se encarga de elegir lavamanos y mueble.
 
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import VolverAlCatalogo from "@/components/VolverAlCatalogo"; // "atrás" al mismo filtro del catálogo
 import { FAMILIAS_COMBO } from "@/data/combos";
 import { vistaCombinaciones } from "@/lib/combos";
 import { getStockPorSkus } from "@/lib/stock"; // adaptador de stock y precio (ADR-1); solo servidor
@@ -50,12 +50,10 @@ export default async function ComboPage({
   return (
     <main className="min-h-screen bg-[#EFEDE7]">
       <div className="border-b border-[#D8D4CC] bg-white px-6 py-3">
-        <Link
-          href={urlCatalogo(PESTANA_COMBOS)} // vuelve a la pestaña de combos del catálogo
+        <VolverAlCatalogo
+          hrefPorDefecto={urlCatalogo(PESTANA_COMBOS)} // sin historial: la categoría de combos del catálogo
           className="text-sm text-[#6B6862] hover:text-[#232320] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8562E]"
-        >
-          ← Volver al catálogo
-        </Link>
+        />
       </div>
 
       <div className="mx-auto max-w-5xl px-6 py-10">

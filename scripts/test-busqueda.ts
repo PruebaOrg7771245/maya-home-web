@@ -15,6 +15,7 @@ import {
   textoBusquedaProducto,
 } from "../src/lib/busqueda.ts";
 import { urlCatalogo } from "../src/lib/catalogoUrl.ts";
+import { debeVolverAtras } from "../src/lib/origenCatalogo.ts";
 
 // Ids de los productos que cumplen la consulta
 function buscarProductos(consulta: string): string[] {
@@ -132,6 +133,13 @@ prueba("urlCatalogo: categoría y búsqueda en la URL", () => {
   const url = new URL("http://x" + urlCatalogo("Dispensadores de jabón", "sanitário blanco"));
   assert.equal(url.searchParams.get("categoria"), "Dispensadores de jabón");
   assert.equal(url.searchParams.get("q"), "sanitário blanco");
+});
+
+prueba("volver al catálogo: atrás solo si la ficha se abrió desde el catálogo", () => {
+  const origen = { url: "/catalogo?categoria=Combos", destino: "/productos/x" };
+  assert.equal(debeVolverAtras(origen, "/productos/x"), true);
+  assert.equal(debeVolverAtras(origen, "/productos/y"), false); // otra ficha: no es la que se abrió desde el catálogo
+  assert.equal(debeVolverAtras(null, "/productos/x"), false); // entrada directa
 });
 
 console.log(`\n${pruebas} pruebas ok`);
