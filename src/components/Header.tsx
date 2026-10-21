@@ -143,7 +143,7 @@ export default function Header({ opciones }: { opciones: OpcionCategoria[] }) {
                 Ajustar cuando el cliente confirme cómo quiere describirse.
                 Oculto en pantallas muy angostas (320 px) para que quepan los botones. */}
             <p className="mt-1 hidden text-xs text-[#6B6862] min-[400px]:block">
-              Sanitarios y acabados para el hogar
+               Accesorios  y acabados para el hogar
             </p>
           </div>
         </Link>
