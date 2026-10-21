@@ -7,6 +7,7 @@
 
 import { products } from "@/data/products";
 import CatalogoConFiltro from "@/components/CatalogoConFiltro";
+import BotonWhatsApp from "@/components/BotonWhatsApp";
 import { getStockPorSkus, type StockInfo } from "@/lib/stock";
 import { FAMILIAS_COMBO } from "@/data/combos";
 import { precioDesde, vistaCombinaciones } from "@/lib/combos";
@@ -42,5 +43,10 @@ export default async function CatalogoPage() {
     desde: precioDesde(vistaCombinaciones(familia, stockPorSku)), // null = ninguna combinación se vende
   }));
 
-  return <CatalogoConFiltro stockPorId={stockPorId} combos={combos} />;
+  return (
+    <>
+      <CatalogoConFiltro stockPorId={stockPorId} combos={combos} />
+      <BotonWhatsApp />
+    </>
+  );
 }

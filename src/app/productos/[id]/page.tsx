@@ -22,6 +22,7 @@ import {
   fotosProducto,
 } from "@/lib/fichaProducto"; // bloques de la ficha y fotos (con placeholder)
 import Image from "next/image";
+import BotonWhatsApp from "@/components/BotonWhatsApp";
 
 
 // generateStaticParams le dice a Next.js, al momento de hacer el build,
@@ -220,6 +221,7 @@ export default async function ProductoPage({
           </section>
         )}
       </div>
+      <BotonWhatsApp producto={product.name} />
     </main>
   );
 }

@@ -12,6 +12,7 @@ import { FAMILIAS_COMBO } from "@/data/combos";
 import { vistaCombinaciones } from "@/lib/combos";
 import { getStockPorSkus } from "@/lib/stock"; // adaptador de stock y precio (ADR-1); solo servidor
 import SelectorCombo from "@/components/SelectorCombo";
+import BotonWhatsApp from "@/components/BotonWhatsApp";
 import { PESTANA_COMBOS, urlCatalogo } from "@/lib/catalogoUrl";
 
 // Se generan de antemano las páginas de todas las familias (HTML estático)
@@ -72,6 +73,7 @@ export default async function ComboPage({
           <SelectorCombo familia={familia} combinaciones={combinaciones} />
         </div>
       </div>
+      <BotonWhatsApp producto={familia.nombre} />
     </main>
   );
 }

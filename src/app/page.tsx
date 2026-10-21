@@ -5,6 +5,7 @@
 
 import Link from "next/link";
 import { sitio } from "@/data/sitio";
+import BotonWhatsApp from "@/components/BotonWhatsApp";
 
 export default function PortadaPage() {
   return (
@@ -23,6 +24,7 @@ export default function PortadaPage() {
           Ver catálogo
         </Link>
       </div>
+      <BotonWhatsApp />
     </main>
   );
 }
