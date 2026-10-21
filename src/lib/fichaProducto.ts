@@ -77,6 +77,12 @@ export function detallesProducto(detalles?: DetalleFicha[]): DetalleFicha[] {
   );
 }
 
+// ¿La imagen de detalle es vertical (alto mayor que el ancho en más de un 20 %)? Esas se
+// muestran con altura máxima para que no ocupen más de una pantalla en escritorio.
+export function esDetalleVertical(d: { width: number; height: number }): boolean {
+  return d.height > d.width * 1.2;
+}
+
 // Fotos a mostrar: las del producto o, si no hay ninguna, el placeholder
 export function fotosProducto(images: string[]): string[] {
   const fotos = images.filter((ruta) => ruta.trim() !== "");

@@ -290,7 +290,11 @@ export const products: Product[] = [
     category: "Sanitarios",
     description:
       "Sanitario de cerámica smart de lujo, de diseño estético que facilita la limpieza. Con conexión de bidet, descarga con sensor, cierre automático del asiento y control remoto.",
-    images: ["/images/products/sanitario-168w.jpg"],
+    images: [
+      "/images/products/sanitario-168w.jpg",
+      "/images/products/sanitario-168w-2.jpeg",
+      "/images/products/sanitario-168w-3.jpeg",
+    ],
     detalles: [
       {
         src: "/images/products/sanitario-168w-2.jpeg",
@@ -698,6 +702,11 @@ export const products: Product[] = [
     description:
       "Sauna para 2 personas de cicuta canadiense, con calefactores de nano carbono de ultra baja EMF, temperatura regulable de 30 a 65 °C y temporizador de 5 a 60 minutos.",
     images: ["/images/products/sauna-120x100x200.jpg", "/images/products/sauna-120x100x200-2.jpg", "/images/products/sauna-120x100x200-3.jpg", "/images/products/sauna-120x100x200-4.jpg"],
+    detalles: [
+      { src: "/images/products/sauna-120x100x200-2.jpg", alt: "Sauna en perspectiva, con la puerta de vidrio y el interior iluminado en rojo", width: 1024, height: 1536 },
+      { src: "/images/products/sauna-120x100x200-3.jpg", alt: "Interior del sauna visto de frente, con banco y paneles", width: 1024, height: 1536 },
+      { src: "/images/products/sauna-120x100x200-4.jpg", alt: "Sauna visto desde arriba, con el interior abierto", width: 1536, height: 1024 },
+    ],
     caracteristicas: [
       "Calefactores de nano carbono de ultra baja EMF",
       "Temperatura regulable de 30 a 65 °C",
@@ -731,6 +740,11 @@ export const products: Product[] = [
     description:
       "Sauna infrarrojo de espectro completo para 2 personas, con control por Wi-Fi, audio Bluetooth, iluminación ambiental y sistema táctil inteligente.",
     images: ["/images/products/sauna-135x110x210.jpg", "/images/products/sauna-135x110x210-2.jpg", "/images/products/sauna-135x110x210-3.jpg", "/images/products/sauna-135x110x210-4.jpg"],
+    detalles: [
+      { src: "/images/products/sauna-135x110x210-2.jpg", alt: "Sauna en perspectiva, con puerta de vidrio y esquinas curvas", width: 1536, height: 1024 },
+      { src: "/images/products/sauna-135x110x210-3.jpg", alt: "Sauna en una sala con piso de madera y ventanales de estilo japonés", width: 1280, height: 677 },
+      { src: "/images/products/sauna-135x110x210-4.jpg", alt: "Sauna en un baño con ventana hacia un bosque", width: 1280, height: 658 },
+    ],
     caracteristicas: [
       "Sauna infrarrojo lejano de baja EMF",
       "Calefactores infrarrojos de espectro completo",

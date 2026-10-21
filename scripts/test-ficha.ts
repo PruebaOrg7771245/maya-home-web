@@ -11,6 +11,7 @@ import { normalizar } from "../src/lib/busqueda.ts";
 import {
   caracteristicasProducto,
   detallesProducto,
+  esDetalleVertical,
   IMAGEN_PLACEHOLDER,
   esPlaceholder,
   filasEspecificaciones,
@@ -136,9 +137,13 @@ prueba("detalles: se descartan los que no tienen ruta o medidas; sin datos, []",
   assert.deepEqual(detallesProducto(undefined), []);
 });
 
-prueba("168W: foto principal sola; 8 características; 2 detalles con medidas reales", () => {
+prueba("168W: galería con principal + 2 fotos; 8 características; 2 detalles con medidas reales", () => {
   const p = producto("sanitario-168w");
-  assert.deepEqual(p.images, ["/images/products/sanitario-168w.jpg"]);
+  assert.deepEqual(p.images, [
+    "/images/products/sanitario-168w.jpg",
+    "/images/products/sanitario-168w-2.jpeg",
+    "/images/products/sanitario-168w-3.jpeg",
+  ]);
   assert.equal(caracteristicasProducto(p.caracteristicas).length, 8);
   assert.equal(p.caracteristicas?.[0], "Conexión 1/2 por la parte posterior"); // tal cual del JSON (unidad sin confirmar)
   const detalles = detallesProducto(p.detalles);
@@ -151,10 +156,32 @@ prueba("168W: foto principal sola; 8 características; 2 detalles con medidas re
   assert.deepEqual([detalles[1].width, detalles[1].height], [1227, 1282]);
 });
 
-prueba("solo el 168W tiene imágenes de detalle", () => {
-  for (const p of products.filter((p) => p.id !== "sanitario-168w")) {
-    assert.equal(detallesProducto(p.detalles).length, 0, p.id);
+prueba("solo el 168W y los dos saunas tienen imágenes de detalle", () => {
+  const conDetalles = ["sanitario-168w", "sauna-120x100x200", "sauna-135x110x210"];
+  for (const p of products) {
+    assert.equal(detallesProducto(p.detalles).length > 0, conDetalles.includes(p.id), p.id);
   }
+});
+
+prueba("catálogo real: todo detalle tiene ruta existente, alt y width/height enteros positivos", () => {
+  for (const p of products) {
+    const crudos = p.detalles ?? [];
+    assert.equal(detallesProducto(crudos).length, crudos.length, `${p.id}: detalle inválido`);
+    for (const d of crudos) {
+      assert.ok(Number.isInteger(d.width) && d.width > 0, `${p.id}: width de ${d.src}`);
+      assert.ok(Number.isInteger(d.height) && d.height > 0, `${p.id}: height de ${d.src}`);
+      assert.ok(d.alt.trim() !== "", `${p.id}: alt de ${d.src}`);
+      assert.ok(existsSync(new URL(`../public${d.src}`, import.meta.url)), `falta ${d.src} (${p.id})`);
+    }
+  }
+});
+
+prueba("esDetalleVertical: solo si el alto supera el ancho en más de un 20 %", () => {
+  assert.equal(esDetalleVertical({ width: 1024, height: 1536 }), true);
+  assert.equal(esDetalleVertical({ width: 1536, height: 1024 }), false);
+  assert.equal(esDetalleVertical({ width: 1227, height: 1282 }), false); // infografía 168W
+  assert.equal(esDetalleVertical({ width: 1000, height: 1200 }), false); // justo 20 %: no
+  assert.equal(esDetalleVertical({ width: 1000, height: 1201 }), true);
 });
 
 // ---------- contenido de las fichas (viene de fichas-productos.json) ----------

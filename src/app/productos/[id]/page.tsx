@@ -17,6 +17,7 @@ import { getStock } from "@/lib/stock"; // adaptador de stock y precio (ADR-1)
 import {
   caracteristicasProducto,
   detallesProducto,
+  esDetalleVertical,
   filasEspecificaciones,
   fotosProducto,
 } from "@/lib/fichaProducto"; // bloques de la ficha y fotos (con placeholder)
@@ -206,7 +207,11 @@ export default async function ProductoPage({
                       width={d.width}
                       height={d.height}
                       sizes="(max-width: 1023px) calc(100vw - 50px), 974px"
-                      className="h-auto w-full"
+                      className={
+                        esDetalleVertical(d)
+                          ? "h-auto max-h-[80vh] w-full object-contain"
+                          : "h-auto w-full"
+                      }
                     />
                   </a>
                 </li>
