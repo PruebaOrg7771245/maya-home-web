@@ -775,6 +775,78 @@ export const products: Product[] = [
     prices: { minorista: null, mayorista: null },
     sku: "SN96137-1350",
   },
+
+  // ==========================================
+  // CATEGORÍA: PÉRGOLAS
+  // (sin foto todavía: usan placeholder.jpg)
+  // ==========================================
+  {
+    id: "pergola-3x4",
+    name: "Pérgola de aluminio premium · 3 × 4 m",
+    category: "Pérgolas",
+    description:
+      "Pérgola de aluminio premium de 3 x 4 m, con cubierta de policarbonato y malla anti insectos.",
+    images: [], // sin foto todavía: se usa el placeholder
+    caracteristicas: [
+      "Estructura de aluminio",
+      "Cubierta de policarbonato",
+      "Malla anti insectos",
+    ],
+    especificaciones: [
+      { etiqueta: "Medidas", valor: "3 x 4 m" },
+      { etiqueta: "Estructura", valor: "Aluminio" },
+      { etiqueta: "Cubierta", valor: "Policarbonato" },
+    ],
+    variants: [],
+    prices: { minorista: null, mayorista: null },
+    sku: "SHELTERTENT",
+  },
+  {
+    id: "pergola-3x3",
+    name: "Pérgola de aluminio premium · 3 × 3 m",
+    category: "Pérgolas",
+    description:
+      "Pérgola de aluminio premium de 3 x 3 m, con cubierta de policarbonato y malla anti insectos.",
+    images: [], // sin foto todavía: se usa el placeholder
+    caracteristicas: [
+      "Estructura de aluminio",
+      "Cubierta de policarbonato",
+      "Malla anti insectos",
+    ],
+    especificaciones: [
+      { etiqueta: "Medidas", valor: "3 x 3 m" },
+      { etiqueta: "Estructura", valor: "Aluminio" },
+      { etiqueta: "Cubierta", valor: "Policarbonato" },
+    ],
+    variants: [],
+    prices: { minorista: null, mayorista: null },
+    sku: "YS1003",
+  },
+
+  // ==========================================
+  // CATEGORÍA: LIMPIEZA
+  // ==========================================
+  {
+    id: "barredora-manual",
+    name: "Barredora manual",
+    category: "Limpieza",
+    description:
+      "Barredora manual plegable de 98 cm de ancho, que funciona sin baterías, motor ni electricidad y recoge hojas, polvo fino y basura.",
+    images: [], // sin foto todavía: se usa el placeholder
+    caracteristicas: [
+      "100% manual: no necesita baterías, motor ni electricidad",
+      "Plegable: se guarda fácilmente y ocupa menos espacio",
+      "Ancho de 98 cm para mayor cobertura en cada pasada",
+      "Recoge residuos: ideal para hojas, polvo fino y basura",
+    ],
+    especificaciones: [
+      { etiqueta: "Ancho", valor: "98 cm" },
+      { etiqueta: "Funcionamiento", valor: "Manual, sin baterías ni electricidad" },
+    ],
+    variants: [],
+    prices: { minorista: null, mayorista: null },
+    sku: "YZ-S1",
+  },
 ];
 
 export const categories = Array.from(new Set(products.map((p) => p.category)));

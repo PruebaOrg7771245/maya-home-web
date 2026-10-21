@@ -188,8 +188,8 @@ prueba("esDetalleVertical: solo si el alto supera el ancho en más de un 20 %", 
 const sinRepetidos = (textos: string[]) =>
   new Set(textos.map((t) => normalizar(t))).size === textos.length;
 
-prueba("los 25 productos tienen descripción no vacía", () => {
-  assert.equal(products.length, 25);
+prueba("los 28 productos tienen descripción no vacía", () => {
+  assert.equal(products.length, 28);
   for (const p of products) assert.ok(p.description.trim() !== "", `${p.id}: sin descripción`);
 });
 
@@ -218,6 +218,47 @@ prueba("los 5 nombres cambiados coinciden con el JSON", () => {
   };
   for (const [sku, nombre] of Object.entries(esperados)) {
     assert.equal(products.find((p) => p.sku === sku)?.name, nombre, sku);
+  }
+});
+
+prueba("los 3 productos nuevos coinciden con el JSON", () => {
+  const nuevos: Record<string, { nombre: string; categoria: string; descripcion: string; car: string[]; esp: [string, string][] }> = {
+    SHELTERTENT: {
+      nombre: "Pérgola de aluminio premium · 3 × 4 m",
+      categoria: "Pérgolas",
+      descripcion: "Pérgola de aluminio premium de 3 x 4 m, con cubierta de policarbonato y malla anti insectos.",
+      car: ["Estructura de aluminio", "Cubierta de policarbonato", "Malla anti insectos"],
+      esp: [["Medidas", "3 x 4 m"], ["Estructura", "Aluminio"], ["Cubierta", "Policarbonato"]],
+    },
+    YS1003: {
+      nombre: "Pérgola de aluminio premium · 3 × 3 m",
+      categoria: "Pérgolas",
+      descripcion: "Pérgola de aluminio premium de 3 x 3 m, con cubierta de policarbonato y malla anti insectos.",
+      car: ["Estructura de aluminio", "Cubierta de policarbonato", "Malla anti insectos"],
+      esp: [["Medidas", "3 x 3 m"], ["Estructura", "Aluminio"], ["Cubierta", "Policarbonato"]],
+    },
+    "YZ-S1": {
+      nombre: "Barredora manual",
+      categoria: "Limpieza",
+      descripcion: "Barredora manual plegable de 98 cm de ancho, que funciona sin baterías, motor ni electricidad y recoge hojas, polvo fino y basura.",
+      car: [
+        "100% manual: no necesita baterías, motor ni electricidad",
+        "Plegable: se guarda fácilmente y ocupa menos espacio",
+        "Ancho de 98 cm para mayor cobertura en cada pasada",
+        "Recoge residuos: ideal para hojas, polvo fino y basura",
+      ],
+      esp: [["Ancho", "98 cm"], ["Funcionamiento", "Manual, sin baterías ni electricidad"]],
+    },
+  };
+  for (const [sku, n] of Object.entries(nuevos)) {
+    const p = products.find((x) => x.sku === sku);
+    assert.ok(p, sku);
+    assert.equal(p.name, n.nombre, sku);
+    assert.equal(p.category, n.categoria, sku);
+    assert.equal(p.description, n.descripcion, sku);
+    assert.deepEqual(p.caracteristicas, n.car, sku);
+    assert.deepEqual(filasEspecificaciones(p).map((f) => [f.etiqueta, f.valor]), n.esp, sku);
+    assert.deepEqual(fotosProducto(p.images), [IMAGEN_PLACEHOLDER], `${sku}: debe usar el placeholder`);
   }
 });
 

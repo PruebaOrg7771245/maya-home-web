@@ -23,6 +23,7 @@ const GRUPOS_SINONIMOS: string[][] = [
   ["lavamanos", "lavabo", "lavatorio"],
   ["secador de manos", "secamanos"],
   ["dispensador de jabon", "jabonera"],
+  ["barredora", "recolector de basura", "recolector"],
 ];
 
 // término → los demás términos de su grupo (se arma una vez al cargar el módulo)

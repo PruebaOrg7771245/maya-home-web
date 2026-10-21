@@ -120,6 +120,19 @@ prueba("varias palabras: todas deben coincidir (y el orden no importa)", () => {
   for (const id of juntas) assert.ok(id.startsWith("lavamanos"));
 });
 
+// ---------- productos nuevos: pérgolas y barredora ----------
+prueba("'pergola' y 'pérgola' encuentran las dos pérgolas", () => {
+  assert.deepEqual(buscarProductos("pergola"), ["pergola-3x4", "pergola-3x3"]);
+  assert.deepEqual(buscarProductos("pérgola"), buscarProductos("pergola"));
+  assert.deepEqual(buscarProductos("pergolas"), buscarProductos("pergola"));
+});
+
+prueba("'barredora' y 'recolector' encuentran la barredora (sinónimo del ERP)", () => {
+  assert.deepEqual(buscarProductos("barredora"), ["barredora-manual"]);
+  assert.deepEqual(buscarProductos("recolector"), ["barredora-manual"]);
+  assert.deepEqual(buscarProductos("recolector de basura"), ["barredora-manual"]);
+});
+
 // ---------- campos: sku, categoría, descripción ----------
 prueba("por sku (sin importar mayúsculas)", () => {
   const conSku = products.find((p) => p.sku);
