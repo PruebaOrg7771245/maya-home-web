@@ -44,15 +44,12 @@ export default function Footer() {
         <div>
           <Link href="/" className="inline-flex items-center gap-3">
             <Image
-              src="/images/brand/logo-icon.png"
-              alt=""
-              width={36}
-              height={34}
+              src="/images/brand/logo-maya-home.webp"
+              alt={sitio.nombre}
+              width={112}
+              height={71}
               className="shrink-0"
             />
-            <span className="font-[var(--font-heading)] text-lg font-bold leading-none text-[#232320]">
-              {sitio.nombre}
-            </span>
             <span className="sr-only"> — ir al inicio</span>
           </Link>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#6B6862]">{sitio.descripcion}</p>

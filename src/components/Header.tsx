@@ -118,31 +118,27 @@ export default function Header({ opciones }: { opciones: OpcionCategoria[] }) {
   const cerrarMenu = () => setMenuAbierto(false);
 
   return (
-    <header className="border-b border-[#D8D4CC] bg-white px-6 py-3">
+    <header className="relative z-20 border-b border-[#D8D4CC] bg-white px-6 py-3">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6">
         <Link href="/" onClick={cerrarMenu} className="flex items-center gap-3" aria-label={`${sitio.nombre}, ir al inicio`}>
-          {/* Reemplazamos el SVG placeholder por el ícono real del logo de Maya Home.
-              Usamos solo el ícono (casa + M) recortado del logo completo, para que
-              quede compacto al lado del texto - el logo completo (con "MAYA HOME"
-              debajo) se guarda aparte por si se necesita en otra parte del sitio
-              (ej: pie de página, favicon, etc.) */}
+          {/* Logo completo (ícono + "MAYA HOME"), versión liviana de 256 px de ancho
+              (logo-maya-home.webp, recortada de logo-full.png; los originales no se tocan).
+              Se muestra a 88 px de ancho: alcanza para pantallas de doble densidad. */}
           <Image
-            src="/images/brand/logo-icon.png"
-            alt=""
-            width={36}
-            height={34}
+            src="/images/brand/logo-maya-home.webp"
+            alt={sitio.nombre}
+            width={88}
+            height={56}
+            priority
             className="shrink-0"
           />
 
           <div>
-            <p className="font-[var(--font-heading)] text-lg font-bold leading-none text-[#232320]">
-              {sitio.nombre}
-            </p>
             {/* Tagline provisional - el anterior ("Porcelanatos y pisos...")
                 ya no aplica porque el catálogo real es de línea sanitaria.
                 Ajustar cuando el cliente confirme cómo quiere describirse.
                 Oculto en pantallas muy angostas (320 px) para que quepan los botones. */}
-            <p className="mt-1 hidden text-xs text-[#6B6862] min-[400px]:block">
+            <p className="hidden text-xs text-[#6B6862] min-[400px]:block">
                Accesorios  y acabados para el hogar
             </p>
           </div>
