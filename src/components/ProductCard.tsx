@@ -16,10 +16,13 @@ import { fotosProducto } from "@/lib/fichaProducto"; // foto principal (placehol
 type ProductCardProps = {
   product: Product; // un solo producto, con la forma que ya definimos en products.ts
   stock: StockInfo; // stock y precio del ERP (precio con IVA incluido; null = no se puede vender)
+  // Variante del resumen de la página de inicio: solo foto, nombre, precio y código.
+  // Va en un grid de 2 columnas en móvil y 4 desde md, bajo el pliegue (carga diferida).
+  compacta?: boolean;
 };
 
 // Componente principal - recibe "product" desestructurado directamente de las props
-export default function ProductCard({ product, stock }: ProductCardProps) {
+export default function ProductCard({ product, stock, compacta = false }: ProductCardProps) {
   const precio = stock.precio; // null = producto sin precio: no se muestra precio y no se vende
 
   return (
@@ -33,52 +36,73 @@ export default function ProductCard({ product, stock }: ProductCardProps) {
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#EFEDE7]">
         <Image
           src={fotosProducto(product.images)[0]} // la primera foto es la principal (placeholder si no hay ninguna)
-          alt={product.name} // texto alternativo para accesibilidad y SEO
+          alt={product.altFoto ?? product.name} // texto alternativo para accesibilidad y SEO
           fill // hace que la imagen llene el contenedor padre (que tiene position: relative)
-          sizes="(max-width: 768px) 50vw, 25vw" // ayuda a Next.js a servir el tamaño de imagen correcto según pantalla
+          // ayuda a Next.js a servir el tamaño de imagen correcto según pantalla
+          // (compacta: 2 columnas hasta md, luego 4 dentro del contenedor de 1280 px)
+          sizes={compacta ? "(max-width: 767px) 50vw, (max-width: 1279px) 25vw, 304px" : "(max-width: 768px) 50vw, 25vw"}
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           // object-cover recorta la imagen sin deformarla; el scale da un leve zoom al pasar el mouse
         />
       </div>
 
-      {/* Contenido de texto debajo de la imagen */}
-      <div className="p-4">
-        {/* Categoría/subcategoría en texto pequeño y discreto */}
-        <p className="text-xs text-[#6B6862]">
-          {product.subcategory ?? product.category}
-          {/* si no tiene subcategoría, mostramos la categoría general */}
-        </p>
-
-        {/* Nombre del producto - usa la tipografía de headings */}
-        <h3 className="mt-1 font-[var(--font-heading)] text-lg font-semibold text-[#232320]">
-          {product.name}
-        </h3>
-
-        {/* Lista de formatos disponibles, como pequeñas etiquetas separadas por punto */}
-        <p className="mt-1 text-sm text-[#6B6862]">
-          {product.variants.map((v) => v.value).join(" · ")}
-          {/* ej: "60x120 · 80x160" si tuviera más de un formato */}
-        </p>
-
-        {/* Línea divisoria fina antes del precio (o del aviso, si no hay precio) */}
-        <div className="mt-3 border-t border-[#D8D4CC] pt-3">
-          {precio !== null ? (
-            // Un solo precio: el precio público del ERP (IVA incluido). El mayorista ya no se muestra.
-            // Apilado (etiqueta arriba, precio abajo) porque en el grid de 2 columnas
-            // del móvil la etiqueta larga y el precio no caben en la misma línea.
-            <div>
-              <p className="text-xs text-[#6B6862]">Precio (IVA incluido)</p>
-              <p className="mt-0.5 text-base font-semibold text-[#232320]">
-                {formatPrice(precio)}
+      {compacta ? (
+        // Variante compacta: nombre, precio con "IVA incluido" y código del ERP. Nada más.
+        <div className="p-3 sm:p-4">
+          <h3 className="font-[var(--font-heading)] text-base font-semibold text-[#232320]">
+            {product.name}
+          </h3>
+          <div className="mt-2">
+            {precio !== null ? (
+              <p className="text-base font-semibold text-[#232320]">
+                {formatPrice(precio)} <span className="text-xs font-normal text-[#6B6862]">IVA incluido</span>
               </p>
-            </div>
-          ) : (
-            // Sin precio: no se muestra precio. "Próximamente" si no tiene sku,
-            // "No disponible por ahora" si tiene sku pero no precio
-            <AvisoSinPrecio stock={stock} />
-          )}
+            ) : (
+              <AvisoSinPrecio stock={stock} />
+            )}
+          </div>
+          {product.sku && <p className="mt-1 text-xs text-[#6B6862]">Código: {product.sku}</p>}
         </div>
-      </div>
+      ) : (
+        // Contenido de texto debajo de la imagen
+        <div className="p-4">
+          {/* Categoría/subcategoría en texto pequeño y discreto */}
+          <p className="text-xs text-[#6B6862]">
+            {product.subcategory ?? product.category}
+            {/* si no tiene subcategoría, mostramos la categoría general */}
+          </p>
+
+          {/* Nombre del producto - usa la tipografía de headings */}
+          <h3 className="mt-1 font-[var(--font-heading)] text-lg font-semibold text-[#232320]">
+            {product.name}
+          </h3>
+
+          {/* Lista de formatos disponibles, como pequeñas etiquetas separadas por punto */}
+          <p className="mt-1 text-sm text-[#6B6862]">
+            {product.variants.map((v) => v.value).join(" · ")}
+            {/* ej: "60x120 · 80x160" si tuviera más de un formato */}
+          </p>
+
+          {/* Línea divisoria fina antes del precio (o del aviso, si no hay precio) */}
+          <div className="mt-3 border-t border-[#D8D4CC] pt-3">
+            {precio !== null ? (
+              // Un solo precio: el precio público del ERP (IVA incluido). El mayorista ya no se muestra.
+              // Apilado (etiqueta arriba, precio abajo) porque en el grid de 2 columnas
+              // del móvil la etiqueta larga y el precio no caben en la misma línea.
+              <div>
+                <p className="text-xs text-[#6B6862]">Precio (IVA incluido)</p>
+                <p className="mt-0.5 text-base font-semibold text-[#232320]">
+                  {formatPrice(precio)}
+                </p>
+              </div>
+            ) : (
+              // Sin precio: no se muestra precio. "Próximamente" si no tiene sku,
+              // "No disponible por ahora" si tiene sku pero no precio
+              <AvisoSinPrecio stock={stock} />
+            )}
+          </div>
+        </div>
+      )}
     </Link>
   );
 }

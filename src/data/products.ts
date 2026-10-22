@@ -55,6 +55,8 @@ export type Product = {
   // de una, la ficha muestra miniaturas debajo de la foto principal. Con [] se usa el placeholder.
   // Para añadir fotos: copiar el archivo a public/images/products/ y agregar su ruta al arreglo.
   images: string[];
+  // OPCIONAL. Texto alternativo de la foto principal (tarjetas y ficha). Sin él se arma con el nombre.
+  altFoto?: string;
   // Datos del producto que hoy ya existen. El que tenga attribute "medidas" es la fila "Medidas"
   // de la ficha (no se migró a especificaciones; siguen aquí).
   variants: ProductVariant[];
@@ -778,7 +780,6 @@ export const products: Product[] = [
 
   // ==========================================
   // CATEGORÍA: PÉRGOLAS
-  // (sin foto todavía: usan placeholder.jpg)
   // ==========================================
   {
     id: "pergola-3x4",
@@ -786,7 +787,8 @@ export const products: Product[] = [
     category: "Pérgolas",
     description:
       "Pérgola de aluminio premium de 3 x 4 m, con cubierta de policarbonato y malla anti insectos.",
-    images: [], // sin foto todavía: se usa el placeholder
+    images: ["/images/products/pergola-3x4.jpg"],
+    altFoto: "Pérgola de aluminio con techo oscuro y cortinas color taupe recogidas en las columnas",
     caracteristicas: [
       "Estructura de aluminio",
       "Cubierta de policarbonato",
@@ -807,7 +809,8 @@ export const products: Product[] = [
     category: "Pérgolas",
     description:
       "Pérgola de aluminio premium de 3 x 3 m, con cubierta de policarbonato y malla anti insectos.",
-    images: [], // sin foto todavía: se usa el placeholder
+    images: ["/images/products/pergola-3x3.jpg"], // foto original de baja resolución (359 px): reemplazar cuando haya una mejor
+    altFoto: "Pérgola de aluminio con techo oscuro de doble nivel y cortinas color taupe",
     caracteristicas: [
       "Estructura de aluminio",
       "Cubierta de policarbonato",
@@ -832,7 +835,8 @@ export const products: Product[] = [
     category: "Limpieza",
     description:
       "Barredora manual plegable de 98 cm de ancho, que funciona sin baterías, motor ni electricidad y recoge hojas, polvo fino y basura.",
-    images: [], // sin foto todavía: se usa el placeholder
+    images: ["/images/products/barredora-manual.jpg"],
+    altFoto: "Barredora manual gris y negra con dos cepillos laterales, ruedas grandes y mango plegable",
     caracteristicas: [
       "100% manual: no necesita baterías, motor ni electricidad",
       "Plegable: se guarda fácilmente y ocupa menos espacio",

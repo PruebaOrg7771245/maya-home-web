@@ -644,3 +644,28 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
   1024 y 1280 px. Si algún día se solaparan, subir la cabecera a `z-30`.
 - **Alternativas descartadas:** ninguna se evaluó.
 - **Estado:** vigente (21/10/2026).
+
+## ADR-31: Portada de inicio con una imagen en dos versiones y resumen del catálogo por categoría
+- **Contexto:** la página de inicio era temporal (nombre, descripción y botón
+  al catálogo). Se quería una portada con imagen y, debajo, un resumen del
+  catálogo.
+- **Decisión (portada):** cada portada es UNA imagen con dos versiones
+  (`src/data/portada.ts`): escritorio 1920x720 (8:3) desde `md` y móvil
+  800x1000 (4:5) por debajo, con el texto ya dentro de la imagen (no se dibuja
+  nada encima). Dirección de arte con `<picture>` + `getImageProps` de Next:
+  cada dispositivo descarga solo su versión. El alto se reserva con
+  `aspect-ratio` y la primera portada carga con `priority`. Con una sola
+  portada se dibuja estática y sin JS; con 2 o más, `CarruselPortada`
+  (cliente) agrega UNA flecha "Siguiente imagen" (sin puntos) y avance cada
+  6 s, en pausa con hover o foco y desactivado con `prefers-reduced-motion`.
+  Las portadas ocultas cargan diferidas (no se descargan hasta mostrarse).
+- **Decisión (resumen):** `seccionesResumen()` en `src/lib/resumenCatalogo.ts`
+  (lógica pura, `scripts/test-resumen.ts`): por categoría, en el orden del
+  catálogo, se saltan los productos sin precio (ADR-13), los disponibles van
+  antes que los agotados, máximo 4, y una categoría sin ninguno vendible no
+  sale. Sin combos (tienen su propio menú). "Ver todos" usa `urlCatalogo()`.
+  Stock y precio con UNA `getStockPorSkus()` e ISR de 60 s, igual que
+  `/catalogo`. La tarjeta es `ProductCard` con la prop `compacta` (foto,
+  nombre, precio con "IVA incluido" y código del ERP), no un componente nuevo.
+- **Alternativas descartadas:** ninguna se evaluó; la forma la fijó el pedido.
+- **Estado:** vigente (22/10/2026).

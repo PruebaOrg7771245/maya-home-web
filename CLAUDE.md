@@ -18,8 +18,8 @@ antes de asumir nada sobre el estado del proyecto.
 - `npm run lint` — ESLint 9 (flat config en `eslint.config.mjs`).
 - No hay framework de tests configurado. La lógica pura tiene scripts sueltos
   que corren con Node 22.18+ (ejecuta TypeScript directo):
-  `node scripts/test-combos.ts`, `node scripts/test-busqueda.ts` y
-  `node scripts/test-ficha.ts`.
+  `node scripts/test-combos.ts`, `node scripts/test-busqueda.ts`,
+  `node scripts/test-ficha.ts` y `node scripts/test-resumen.ts`.
 
 **Ruta del proyecto:** `C:\dev\e-commercetest`. El proyecto vive fuera de
 OneDrive a propósito (dentro de OneDrive daba errores de build); no moverlo
@@ -37,32 +37,36 @@ de los pedidos), `NEXT_PUBLIC_ADVISOR_EMAIL` (sin uso actual),
 src/
   app/
     layout.tsx            # fuentes, metadata, CartProvider + Header + Footer globales
-    page.tsx              # "/" portada TEMPORAL (se reemplaza en la fase 4)
+    page.tsx              # "/" portada (hero) + catálogo resumido por categoría
     catalogo/             # "/catalogo" catálogo (server): lee stock y precio
     productos/[id]/       # "/productos/:id" detalle de producto
     combos/[familia]/     # "/combos/:familia" detalle de una familia de combos
     carrito/              # "/carrito" wizard de 3 pasos (WhatsApp o correo)
     api/pedido/           # POST: valida, calcula el total y guarda el pedido
   components/             # Header, Footer, MenuCategorias, BuscadorCabecera,
+                          # Portada, CarruselPortada,
                           # CatalogoConFiltro, ProductCard, ComboCard,
                           # SelectorCombo, ProductGallery, AddToCartButton,
                           # StockBadge, AvisoSinPrecio, IconosSitio;
                           # useDesplegable.ts (hook) y estilosNav.ts (clases)
   context/CartContext.tsx # estado del carrito (useCart)
-  data/products.ts        # catálogo estático (25 productos, sin precios; campos
-                          # opcionales caracteristicas y detalles para la ficha)
+  data/products.ts        # catálogo estático (28 productos, sin precios; campos
+                          # opcionales caracteristicas, detalles y altFoto)
   data/combos.ts          # familias de combos lavamanos + mueble (sin precios)
   data/sitio.ts           # datos del sitio: marca, contacto, redes (ver abajo)
+  data/portada.ts         # imágenes de la portada (versión escritorio y móvil)
   lib/stock.ts            # stock y precio (getStock, getStockPorSkus)
   lib/catalogoUrl.ts      # urlCatalogo() y nombres de categoría "Todos"/"Combos"
   lib/categorias.ts       # categorías con su cantidad (menú desplegable)
   lib/busqueda.ts         # lógica pura del buscador (sin React ni red)
   lib/fichaProducto.ts    # lógica pura de la ficha (especificaciones, fotos, bloques)
+  lib/resumenCatalogo.ts  # lógica pura del catálogo resumido de "/" (ADR-31)
   lib/combos.ts           # lógica de combos (combinaciones, precio, stock)
   lib/supabase.ts         # cliente de servidor (import "server-only")
   lib/email.ts            # correo al asesor (Resend)
 public/images/            # logos (brand/) e imágenes de productos
-scripts/                  # pruebas de lógica pura (test-combos, test-busqueda, test-ficha)
+scripts/                  # pruebas de lógica pura (test-combos, test-busqueda,
+                          # test-ficha, test-resumen)
 docs/                     # CHANGELOG, DECISIONS (ADRs), REQUIREMENTS-STOCK
 .claude/agents/           # agentes de proyecto (versionados)
 ```
@@ -72,7 +76,7 @@ docs/                     # CHANGELOG, DECISIONS (ADRs), REQUIREMENTS-STOCK
 App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
 
 - **Catálogo estático:** `src/data/products.ts` es la única fuente de
-  productos (25, tipo `Product`, `categories` derivado de ahí). Cada
+  productos (28, tipo `Product`, `categories` derivado de ahí). Cada
   producto tiene `sku` = código del ERP (mapeo en
   `docs/MAPEO-PRODUCTOS-ERP.md`). **Los precios ya no viven acá:**
   `prices` quedó en `null` (campo vestigial) y el precio sale del ERP.
@@ -88,8 +92,15 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
   "Próximamente"; con sku sin precio: "No disponible por ahora", ambos vía
   `AvisoSinPrecio`). Agotado con precio = se puede agregar, con el aviso
   "Consulta la disponibilidad con tu asesor".
-- **`/` (`src/app/page.tsx`)** — portada temporal: título, descripción de
-  `sitio.ts` y botón a `/catalogo`. Se reemplaza en la fase 4.
+- **`/` (`src/app/page.tsx`)** — server component con `revalidate = 60`
+  (ISR), de arriba abajo: (1) portada (`Portada`, imágenes en
+  `data/portada.ts`, versión escritorio/móvil con `<picture>`; con 2 o más
+  imágenes pasa a `CarruselPortada`, cliente); (2) catálogo resumido: una
+  sección por categoría con hasta 4 productos vendibles, disponibles primero
+  (`seccionesResumen` en `lib/resumenCatalogo.ts`, ADR-31), en
+  `ProductCard compacta` y con enlace "Ver todos"; sin combos; (3) el bloque
+  de marca con botón a `/catalogo`. Stock y precio con UNA sola
+  `getStockPorSkus`.
 - **`/catalogo` (`src/app/catalogo/page.tsx`)** — server component con
   `revalidate = 60` (ISR): pide stock y precio de todo el catálogo y de las
   piezas de los combos con UNA sola `getStockPorSkus` y se los pasa a

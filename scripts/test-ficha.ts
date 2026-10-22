@@ -258,7 +258,11 @@ prueba("los 3 productos nuevos coinciden con el JSON", () => {
     assert.equal(p.description, n.descripcion, sku);
     assert.deepEqual(p.caracteristicas, n.car, sku);
     assert.deepEqual(filasEspecificaciones(p).map((f) => [f.etiqueta, f.valor]), n.esp, sku);
-    assert.deepEqual(fotosProducto(p.images), [IMAGEN_PLACEHOLDER], `${sku}: debe usar el placeholder`);
+    // Desde el 22/10/2026 tienen una foto principal propia (sin galería) y su alt
+    const fotos = fotosProducto(p.images);
+    assert.equal(fotos.length, 1, `${sku}: una sola foto`);
+    assert.notEqual(fotos[0], IMAGEN_PLACEHOLDER, `${sku}: ya no usa el placeholder`);
+    assert.ok(p.altFoto?.trim(), `${sku}: debe tener altFoto`);
   }
 });
 

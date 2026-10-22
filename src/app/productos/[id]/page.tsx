@@ -89,7 +89,7 @@ export default async function ProductoPage({
 
       <div className="mx-auto max-w-5xl px-6 py-10">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
-          <ProductGallery images={fotos} productName={product.name} />
+          <ProductGallery images={fotos} productName={product.name} altFoto={product.altFoto} />
 
           {/* min-w-0: un texto largo no debe ensanchar la columna del grid (scroll horizontal a 320 px) */}
           <div className="min-w-0">

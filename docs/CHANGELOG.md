@@ -18,6 +18,16 @@ Formato de entrada:
 
 ---
 
+## 22/10/2026 - Portada y catálogo resumido en el inicio; fotos de pérgolas y barredora
+- Inicio: portada a ancho completo (una imagen, versiones escritorio/móvil,
+  WebP de 49 y 32 KB) y debajo un resumen de hasta 4 productos vendibles por
+  categoría con "Ver todos" (ADR-31); el bloque anterior (nombre, descripción
+  y "Ver catálogo") queda al final. Fotos principales de `pergola-3x4`,
+  `pergola-3x3` (359 px de origen, sin agrandar: se ve suave en la ficha) y
+  `barredora-manual` (rellenada a 4:3 con blanco), con el campo nuevo
+  opcional `altFoto`. Las demás fotos de la barredora quedan fuera del repo,
+  en `C:\Dev\fotos-extras-pendientes\barredora\`.
+
 ## 21/10/2026 - 3 productos nuevos, sinónimos de barredora, logo completo y botón flotante de WhatsApp
 - **Productos (25 -> 28):** `pergola-3x4` (sku `SHELTERTENT`), `pergola-3x3`
   (`YS1003`), categoría "Pérgolas"; y `barredora-manual` (`YZ-S1`), categoría
