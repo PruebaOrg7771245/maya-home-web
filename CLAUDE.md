@@ -134,7 +134,9 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
   hoy `urlPrivacidad` es `null` porque la página no existe. Cabecera, pie y
   portada leen de ahí; no repetir esos datos en otros componentes.
 - **Cabecera y pie:** `Header` (navegación Inicio / Catálogo / Combos, lupa
-  de búsqueda, carrito con contador; menú plegable accesible en móvil) y
+  de búsqueda, carrito con contador; menú plegable accesible en móvil; la
+  fila nunca se parte en dos líneas y el texto junto al logo sale solo desde
+  `md`, recortándose antes que los iconos) y
   `Footer` (marca, categorías, contacto, redes solo con iconos SVG inline).
   Reglas globales en `globals.css`: foco visible con el acento (en
   `@layer base`) y `prefers-reduced-motion` respetado.

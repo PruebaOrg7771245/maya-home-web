@@ -18,6 +18,12 @@ Formato de entrada:
 
 ---
 
+## 22/10/2026 - Cabecera en una sola fila en todo ancho
+- `Header`: el texto "Accesorios y acabados para el hogar" sale solo desde `md`
+  (antes desde 400 px, y en 412-430 px empujaba el carrito a una segunda
+  línea); logo e iconos con `shrink-0` y, si falta espacio, se recorta el texto.
+  Medido de 320 a 1440 px: siempre una fila de 81 px.
+
 ## 22/10/2026 - Inicio sin la portada temporal
 - Se quitó el bloque que quedaba al final de `/` (título "Maya Home" visible,
   descripción de `sitio.ts` y botón "Ver catálogo"); la portada nueva ya cumple

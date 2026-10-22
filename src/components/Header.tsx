@@ -37,7 +37,7 @@ function Navegacion({ activa, categoriaActiva, opciones, abierto, alElegir }: Na
     <nav
       id="menu-principal"
       aria-label="Principal"
-      className={`${abierto ? "block" : "hidden"} order-3 w-full border-t border-[#D8D4CC] pt-2 md:order-none md:flex md:w-auto md:border-t-0 md:pt-0`}
+      className={`${abierto ? "block" : "hidden"} order-3 w-full border-t border-[#D8D4CC] pt-2 md:order-none md:flex md:w-auto md:shrink-0 md:border-t-0 md:pt-0`}
     >
       {/* Buscador: solo en el menú plegable móvil (en escritorio es la lupa de la cabecera) */}
       <div className="py-2 md:hidden">
@@ -119,8 +119,16 @@ export default function Header({ opciones }: { opciones: OpcionCategoria[] }) {
 
   return (
     <header className="relative z-20 border-b border-[#D8D4CC] bg-white px-6 py-3">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6">
-        <Link href="/" onClick={cerrarMenu} className="flex items-center gap-3" aria-label={`${sitio.nombre}, ir al inicio`}>
+      {/* Fila de una sola línea en todo ancho. En móvil flex-wrap solo sirve para bajar el
+          menú abierto (w-full); el logo arranca de ancho 0 (basis-0) para que nunca empuje
+          los iconos a otra línea. Desde md no se parte: si falta espacio se recorta el texto. */}
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6 md:flex-nowrap">
+        <Link
+          href="/"
+          onClick={cerrarMenu}
+          className="flex min-w-0 flex-1 basis-0 items-center gap-3 md:flex-initial md:basis-auto"
+          aria-label={`${sitio.nombre}, ir al inicio`}
+        >
           {/* Logo completo (ícono + "MAYA HOME"), versión liviana de 256 px de ancho
               (logo-maya-home.webp, recortada de logo-full.png; los originales no se tocan).
               Se muestra a 88 px de ancho: alcanza para pantallas de doble densidad. */}
@@ -133,18 +141,18 @@ export default function Header({ opciones }: { opciones: OpcionCategoria[] }) {
             className="shrink-0"
           />
 
-          <div>
+          <div className="min-w-0">
             {/* Tagline provisional - el anterior ("Porcelanatos y pisos...")
                 ya no aplica porque el catálogo real es de línea sanitaria.
                 Ajustar cuando el cliente confirme cómo quiere describirse.
-                Oculto en pantallas muy angostas (320 px) para que quepan los botones. */}
-            <p className="hidden text-xs text-[#6B6862] min-[400px]:block">
-               Accesorios  y acabados para el hogar
+                Solo desde md; si no cabe se recorta (truncate) antes que los iconos. */}
+            <p className="hidden truncate text-xs text-[#6B6862] md:block">
+              Accesorios y acabados para el hogar
             </p>
           </div>
         </Link>
 
-        <div className="flex items-center gap-1 md:order-last">
+        <div className="flex shrink-0 items-center gap-1 md:order-last">
           <BuscadorEscritorio />
 
           <Link
