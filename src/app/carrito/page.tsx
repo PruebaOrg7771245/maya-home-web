@@ -163,7 +163,7 @@ export default function CarritoPage() {
     if (canal === "correo") {
       setEnviandoCorreo(false);
       if (guardadoFallo) {
-        setCorreoError("No pudimos enviar tu pedido. Probá de nuevo en un momento.");
+        setCorreoError("No pudimos enviar tu pedido. Prueba de nuevo en un momento.");
         return;
       }
       setSentChannel("correo");
@@ -522,7 +522,7 @@ export default function CarritoPage() {
         {step === 3 && (
           <>
             <h1 className="font-[var(--font-heading)] text-2xl font-bold text-[#232320]">
-              Cómo enviarlo
+              ¿Cómo prefieres enviar tu pedido?
             </h1>
             <p className="mt-2 text-sm text-[#6B6862]">Elige cómo quieres que te contactemos.</p>
 
@@ -533,10 +533,10 @@ export default function CarritoPage() {
                 className="flex flex-col items-start gap-2 border border-[#D8D4CC] bg-white p-5 text-left transition-colors hover:border-[#A8562E]"
               >
                 <span className="font-[var(--font-heading)] text-base font-semibold text-[#232320]">
-                  Enviar por WhatsApp
+                  Enviar mi pedido por WhatsApp
                 </span>
                 <span className="text-sm text-[#6B6862]">
-                  Se abre WhatsApp con tu pedido ya escrito, listo para enviar a nuestro asesor.
+                  Se abrirá WhatsApp con tu pedido listo. Solo tendrás que revisar el mensaje y presionar enviar para compartirlo con nuestro asesor.
                 </span>
               </button>
 
@@ -551,12 +551,12 @@ export default function CarritoPage() {
                   className="flex flex-col items-start gap-2 border border-[#D8D4CC] bg-white p-5 text-left transition-colors hover:border-[#A8562E] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <span className="font-[var(--font-heading)] text-base font-semibold text-[#232320]">
-                    Que un asesor me contacte
+                    Quiero que un asesor me contacte
                   </span>
                   <span className="text-sm text-[#6B6862]">
                     {enviandoCorreo
                       ? "Enviando tu pedido..."
-                      : "Guardamos tu pedido y un asesor te escribe por correo, sin pasar por WhatsApp."}
+                      : "Recibiremos tu pedido y uno de nuestros asesores se comunicará contigo para ayudarte a finalizar tu compra."}
                   </span>
                 </button>
                 {correoError && <p className="text-xs text-red-600">{correoError}</p>}
