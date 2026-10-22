@@ -605,3 +605,42 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
   (término buscado -> término del catálogo): obliga a repetir entradas para
   cubrir todos los sentidos y se desordena al crecer. No se evaluó otra.
 - **Estado:** vigente (20/10/2026). Los grupos siguen por confirmar con el cliente.
+  Actualización 21/10/2026: grupo nuevo barredora=recolector de basura=recolector
+  (el "recolector" suelto se añadió porque los términos de varias palabras solo
+  coinciden completos).
+
+## ADR-29: Botón flotante de WhatsApp (servidor + cliente), sin carrito, con verde propio
+- **Contexto:** se quiere un acceso rápido al asesor desde las páginas donde
+  alguien puede tener dudas, sin terceros ni seguimiento.
+- **Decisión:** `BotonWhatsApp.tsx` (servidor) arma el enlace con
+  `sitio.redes.whatsapp` (o sea `NEXT_PUBLIC_ADVISOR_PHONE`, sin variable nueva)
+  y el mensaje "Hola, quiero información sobre sus productos." (+ " Me interesa:
+  <nombre>." en ficha y combo). `BotonWhatsAppFlotante.tsx` (cliente) solo
+  maneja el comportamiento: se oculta al bajar con scroll y reaparece al subir o
+  a los 600 ms quieto (listener pasivo, solo con `motion-safe`). Va en inicio,
+  catálogo, ficha y combo; NO en el carrito, para no competir con el wizard de
+  pedido. Tamaño 44 px en móvil y 56 px desde `md`, `z-10`, `print:hidden`.
+  El globo "¿Necesitas asesoría?" es decorativo (`aria-hidden`): sale a los 3 s,
+  se oculta a los 8 s o antes con scroll, abrir un menú (`[aria-expanded]`) o
+  tocar el botón, y solo una vez por visita (`sessionStorage` en try/catch, con
+  respaldo en variable de módulo).
+- **Excepción al sistema de diseño:** el botón es verde `#128C7E` (verde de
+  WhatsApp en tono oscuro para que el ícono blanco contraste) y no usa los
+  colores de la marca; sin sombra. Es una excepción consciente: reconocer al
+  instante que es WhatsApp pesa más que la coherencia de paleta en este único
+  elemento.
+- **Alternativas descartadas:** ninguna se evaluó.
+- **Estado:** vigente (21/10/2026). Limitación conocida: en una ficha con
+  precio, si "Agregar al pedido" queda justo en el borde inferior en móvil, el
+  botón cubre su extremo derecho.
+
+## ADR-30: Cabecera por encima del botón flotante (`relative z-20`)
+- **Contexto:** con el botón flotante (`z-10`), el menú plegable de la cabecera
+  en móvil quedaba debajo de él, porque el contenido de la página no tenía
+  `z-index`.
+- **Decisión:** la cabecera pasa a `relative z-20` (`Header.tsx`, línea 121),
+  por encima del botón. Se verificó que no hay solape entre los paneles de la
+  cabecera y el panel de categorías del catálogo (también `z-20`) a 360, 768,
+  1024 y 1280 px. Si algún día se solaparan, subir la cabecera a `z-30`.
+- **Alternativas descartadas:** ninguna se evaluó.
+- **Estado:** vigente (21/10/2026).

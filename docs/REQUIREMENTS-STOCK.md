@@ -45,6 +45,13 @@ disponibles.
 - Pendiente al corregir `sync-stock.js`: el código del mueble
   `MUEBLLUX-600SMOKE` tiene espacios al final en el ERP (el `trim()` de
   `stock.ts` lo cubre al leer, pero conviene limpiarlo al cargar el espejo).
+- Nota (21/10/2026): los 3 productos nuevos (`SHELTERTENT`, `YS1003`,
+  `YZ-S1`) ya tienen filas en `stock_espejo`: en desarrollo la ficha mostró
+  precio y existencia (sin filas se vería "No disponible por ahora", ADR-13;
+  ese caso no se probó con estos productos). Los 3 códigos están verificados:
+  Mateo los comprobó en el ERP el 21/10/2026 y los tres existen con precio y
+  existencia. El nombre del ERP de la pérgola dice YS1006, pero el código
+  correcto es `SHELTERTENT`.
 
 ## Opciones evaluadas (según comentario en el código)
 - **Opción A - vía API:** un endpoint intermedio (`STOCK_API_URL`) que

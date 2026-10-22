@@ -18,6 +18,42 @@ Formato de entrada:
 
 ---
 
+## 21/10/2026 - 3 productos nuevos, sinónimos de barredora, logo completo y botón flotante de WhatsApp
+- **Productos (25 -> 28):** `pergola-3x4` (sku `SHELTERTENT`), `pergola-3x3`
+  (`YS1003`), categoría "Pérgolas"; y `barredora-manual` (`YZ-S1`), categoría
+  "Limpieza" (ERP: RECOLECTOR DE BASURA MANUAL). Sin foto (`images: []`, sale el
+  placeholder), sin `variants`; textos tal cual del JSON de fichas y precio y
+  stock por sku desde `stock_espejo`. Las categorías nuevas se derivan del orden
+  de `products.ts`: menú "Todos, ..., Saunas, Pérgolas, Limpieza, Combos". No se
+  cargaron color ni marca (Yangzi) ni marcas de "nuevo"/"tendencia" (fase 4).
+  Verificado: los 3 códigos (`SHELTERTENT`, `YS1003`, `YZ-S1`) los comprobó
+  Mateo en el ERP el 21/10/2026; los tres existen con precio y existencia. El
+  nombre del ERP de la pérgola 3x4 dice YS1006, pero el código correcto es
+  `SHELTERTENT`. Por confirmar: en la barredora, si los 98 cm son ancho de la
+  máquina o de barrido (peso, materiales y capacidad no constan).
+- **Buscador:** grupo nuevo `["barredora", "recolector de basura", "recolector"]`
+  (ADR-28). "recolector" suelto porque los términos de varias palabras solo
+  coinciden completos. `test-ficha.ts` (28 productos, los 3 nuevos contra el
+  JSON, placeholder) y `test-busqueda.ts` (pergola/pérgola/pergolas,
+  barredora/recolector) ampliados.
+- **Logo:** cabecera y pie usan el logo completo `logo-maya-home.webp` (256 px,
+  12 KB, recortado de `logo-full.png`; originales intactos; alt "Maya Home") en
+  vez de ícono + texto. Se conserva el eslogan de la cabecera (oculto bajo 400
+  px). Correos y favicon sin cambios; `logo-icon.png` quedó sin uso.
+- **Botón flotante de WhatsApp (ADR-29):** `BotonWhatsApp.tsx` (servidor) y
+  `BotonWhatsAppFlotante.tsx` (cliente). En inicio, catálogo, ficha y combo; no
+  en el carrito. Usa `sitio.redes.whatsapp` (sin variable nueva); en ficha y
+  combo el mensaje añade " Me interesa: <nombre>.". Se oculta al bajar y
+  reaparece al subir o a los 600 ms quieto; globo "¿Necesitas asesoría?" una vez
+  por visita.
+- **Corrección de apilamiento (ADR-30):** el menú plegable de la cabecera en
+  móvil quedaba debajo del botón; la cabecera pasa a `relative z-20`.
+- **Limitación conocida:** en una ficha con precio, si "Agregar al pedido" queda
+  justo en el borde inferior de la pantalla en móvil, el botón flotante cubre su
+  extremo derecho.
+- Verificación: lint, `tsc --noEmit`, build y los 3 scripts pasan; revisión
+  visual con Chrome headless.
+
 ## 20/10/2026 - Fichas completas de los 25 productos, nombres, fotos principales y fotos de los saunas
 - **Fichas (ADR-21 y 22):** los 25 productos tienen descripción, características
   y especificaciones, tomadas de una hoja de Excel (vía JSON, fuera del repo) y
