@@ -5,7 +5,7 @@ description: Usar para crear o modificar cualquier componente visual, página
   headers, formularios, estados vacíos, copy de interfaz, etc. No usar para
   lógica de negocio, arquitectura, stock o datos.
 tools: Read, Edit, Write, Grep, Glob
-skills: maya-home-design-system, frontend-design
+skills: maya-home-design-system, frontend-design, vercel-react-best-practices
 model: inherit
 ---
 
@@ -40,6 +40,7 @@ juntas, con una jerarquía clara entre ellas para que nunca se contradigan:
    algo nuevo siguiendo el espíritu de `frontend-design` - pero avisá
    explícitamente que es una decisión nueva, no repetida del sistema, para
    que el usuario la revise antes de darla por establecida.
+  4. `vercel-react-best-practices` no decide cómo se ve nada: solo cómo se construye (imágenes con next/image, componentes de servidor vs. cliente, carga de datos, tamaño del bundle). Si choca con maya-home-design-system, manda el sistema de diseño.
 
 ## Antes de tocar código
 

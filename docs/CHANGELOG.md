@@ -18,6 +18,13 @@ Formato de entrada:
 
 ---
 
+## 22/10/2026 - Inicio sin la portada temporal
+- Se quitó el bloque que quedaba al final de `/` (título "Maya Home" visible,
+  descripción de `sitio.ts` y botón "Ver catálogo"); la portada nueva ya cumple
+  esa función (nota en ADR-31). En su lugar, un enlace de texto discreto "Ver
+  catálogo completo" tras la última categoría. Se mantiene el `h1` oculto y el
+  botón flotante de WhatsApp; `sitio.ts` no cambia.
+
 ## 22/10/2026 - Portada y catálogo resumido en el inicio; fotos de pérgolas y barredora
 - Inicio: portada a ancho completo (una imagen, versiones escritorio/móvil,
   WebP de 49 y 32 KB) y debajo un resumen de hasta 4 productos vendibles por

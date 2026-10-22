@@ -5,7 +5,7 @@
 //   2. Catálogo resumido: una sección por categoría con hasta 4 productos
 //      vendibles, disponibles primero (regla en src/lib/resumenCatalogo.ts,
 //      ADR-31) y un enlace "Ver todos" al catálogo filtrado. Sin combos.
-//   3. El bloque que ya había: nombre, descripción y botón al catálogo.
+//   3. Un enlace de texto discreto al catálogo completo.
 //
 // Server component con ISR, igual que /catalogo: stock y precio de todos los
 // productos con UNA sola llamada a getStockPorSkus().
@@ -41,52 +41,42 @@ export default async function PortadaPage() {
       <h1 className="sr-only">{sitio.nombre}</h1>
       <Portada />
 
-      {secciones.length > 0 && (
-        <div className="mx-auto max-w-7xl space-y-10 px-6 py-10 md:space-y-14 md:py-14">
-          {secciones.map(({ categoria, productos }, i) => (
-            <section key={categoria} aria-labelledby={`resumen-${i}`}>
-              <div className="flex items-end justify-between gap-4 border-b border-[#D8D4CC] pb-3">
-                <h2
-                  id={`resumen-${i}`} // por índice: el nombre tiene espacios
-                  className="font-[var(--font-heading)] text-xl font-bold text-[#232320] md:text-2xl"
-                >
-                  {categoria}
-                </h2>
-                <Link
-                  href={urlCatalogo(categoria)}
-                  aria-label={`Ver todos: ${categoria}`}
-                  className="inline-flex min-h-11 shrink-0 items-center text-sm text-[#232320] underline underline-offset-4 transition-colors hover:text-[#A8562E]"
-                >
-                  Ver todos
-                </Link>
-              </div>
-              <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
-                {productos.map((product) => (
-                  <ProductCard key={product.id} product={product} stock={stockPorId[product.id]} compacta />
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      )}
+      <div className="mx-auto max-w-7xl space-y-10 px-6 py-10 md:space-y-14 md:py-14">
+        {secciones.map(({ categoria, productos }, i) => (
+          <section key={categoria} aria-labelledby={`resumen-${i}`}>
+            <div className="flex items-end justify-between gap-4 border-b border-[#D8D4CC] pb-3">
+              <h2
+                id={`resumen-${i}`} // por índice: el nombre tiene espacios
+                className="font-[var(--font-heading)] text-xl font-bold text-[#232320] md:text-2xl"
+              >
+                {categoria}
+              </h2>
+              <Link
+                href={urlCatalogo(categoria)}
+                aria-label={`Ver todos: ${categoria}`}
+                className="inline-flex min-h-11 shrink-0 items-center text-sm text-[#232320] underline underline-offset-4 transition-colors hover:text-[#A8562E]"
+              >
+                Ver todos
+              </Link>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
+              {productos.map((product) => (
+                <ProductCard key={product.id} product={product} stock={stockPorId[product.id]} compacta />
+              ))}
+            </div>
+          </section>
+        ))}
 
-      {/* Bloque que ya tenía la portada temporal (antes de la fase 4), debajo del resumen */}
-      <section className="border-t border-[#D8D4CC] bg-[#EFEDE7] px-6 py-16">
-        <div className="mx-auto w-full max-w-3xl">
-          <h2 className="break-words font-[var(--font-heading)] text-4xl font-bold text-[#232320]">
-            {sitio.nombre}
-          </h2>
-          <p className="mt-4 max-w-xl text-base leading-relaxed text-[#6B6862]">
-            {sitio.descripcion}
-          </p>
+        <p className="text-center">
           <Link
-            href="/catalogo"
-            className="mt-8 inline-flex min-h-11 items-center bg-[#232320] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#A8562E]"
+            href={urlCatalogo()}
+            className="inline-flex min-h-11 items-center text-sm text-[#232320] underline underline-offset-4 transition-colors hover:text-[#A8562E]"
           >
-            Ver catálogo
+            Ver catálogo completo
           </Link>
-        </div>
-      </section>
+        </p>
+      </div>
+
       <BotonWhatsApp />
     </main>
   );

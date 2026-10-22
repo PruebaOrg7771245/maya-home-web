@@ -98,9 +98,10 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
   imágenes pasa a `CarruselPortada`, cliente); (2) catálogo resumido: una
   sección por categoría con hasta 4 productos vendibles, disponibles primero
   (`seccionesResumen` en `lib/resumenCatalogo.ts`, ADR-31), en
-  `ProductCard compacta` y con enlace "Ver todos"; sin combos; (3) el bloque
-  de marca con botón a `/catalogo`. Stock y precio con UNA sola
-  `getStockPorSkus`.
+  `ProductCard compacta` y con enlace "Ver todos"; sin combos; (3) un enlace
+  de texto discreto "Ver catálogo completo" (`urlCatalogo()`). Ya no hay
+  bloque inferior de marca; el único `h1` ("Maya Home") es `sr-only`. Stock y
+  precio con UNA sola `getStockPorSkus`.
 - **`/catalogo` (`src/app/catalogo/page.tsx`)** — server component con
   `revalidate = 60` (ISR): pide stock y precio de todo el catálogo y de las
   piezas de los combos con UNA sola `getStockPorSkus` y se los pasa a
@@ -181,11 +182,13 @@ archivos. No hace falta para cambios triviales (typos, estilo).
 
 ## Agentes y skills del proyecto
 
-Este repo tiene tres agentes versionados en `.claude/agents/` y un skill de
-diseño versionado en `.claude/skills/`. Además hay dos skills globales
-(`frontend-design`, `vercel-react-best-practices`) vendorizados de solo
-lectura en `.agents/skills/` como referencia — no son específicos de este
-proyecto, se usan igual que cualquier skill del sistema.
+Este repo tiene cuatro agentes versionados en `.claude/agents/`
+(`front-end`, `stock-integration`, `database`, `trazabilidad`) y una skill
+propia, `maya-home-design-system`, en `.claude/skills/`. Además usa tres
+skills externas (`frontend-design`, `vercel-react-best-practices`,
+`supabase-postgres-best-practices`) instaladas en `.agents/skills/` y
+enlazadas a `.claude/skills/` (ver "Skills externas" más abajo). No son
+específicas del proyecto.
 
 ### Cuándo delegar a cada agente
 
@@ -196,20 +199,21 @@ proyecto, se usan igual que cualquier skill del sistema.
   de contacto"): igual hay que pasar por acá porque el sistema de diseño ya
   tiene reglas para eso. NO usar para lógica de negocio, arquitectura,
   stock o datos — solo la parte visual de esos cambios, si la hay.
-  - Este agente carga `maya-home-design-system` y `frontend-design` juntos,
-    con jerarquía fija: `maya-home-design-system` manda siempre que el
-    proyecto ya tenga una decisión tomada (colores, tipografía, bordes,
-    sombras); `frontend-design` solo llena los huecos que el sistema de
-    diseño no cubre (composición, jerarquía visual, movimiento,
-    copywriting, accesibilidad). Nunca al revés.
+  - Este agente carga `maya-home-design-system`, `frontend-design` y
+    `vercel-react-best-practices` juntos. Jerarquía fija:
+    `maya-home-design-system` manda siempre que el proyecto ya tenga una
+    decisión tomada (colores, tipografía, bordes, sombras);
+    `frontend-design` solo llena los huecos de diseño que el sistema no
+    cubre; `vercel-react-best-practices` no decide el aspecto, solo cómo se
+    construye (rendimiento). Nunca al revés.
   - **Excepción:** si el contenido de `maya-home-design-system` ya está
     cargado en el contexto de la sesión actual (por ejemplo, porque se leyó
     recién para otra tarea), no hace falta delegar al agente `front-end` —
     aplicar las reglas directamente evita el costo redundante de que un
-    subagente aislado vuelva a leer la misma skill desde cero. Esta
-    excepción NO aplica a `frontend-design`: esa sí sigue cargándose solo a
-    través del agente, ya que rara vez ya está en contexto sin haberla
-    pedido explícitamente.
+    subagente aislado vuelva a leer la misma skill desde cero. Esta excepción NO aplica a `frontend-design` ni a `vercel-react-best-practices`: si se trabaja directo, sin delegar,
+    cargar la de Vercel antes de escribir código React/Next.js;
+    `frontend-design` solo se usa a través del agente, y solo para los
+    huecos de diseño que `maya-home-design-system` no cubre.
       
 - **`stock-integration`** — cualquier trabajo relacionado con
   `src/lib/stock.ts` o con avanzar la integración de stock real (SQL
@@ -239,17 +243,29 @@ proyecto, se usan igual que cualquier skill del sistema.
   proyecto. Se carga siempre que se toque JSX/Tailwind visual, ya sea a
   través del agente `front-end` o directamente si el cambio es chico y no
   amerita delegar.
-- **`vercel-react-best-practices`** — aplica a cualquier trabajo de
-  performance en componentes/páginas React o Next.js (data fetching,
-  memoización, bundle, hidratación, etc.), independientemente de si el
-  cambio es visual o no. No está atado a ningún agente de este proyecto;
-  cargarlo cuando el pedido sea de optimización o al escribir/revisar
-  código React/Next.js en general.
-- **`frontend-design`** — solo para las partes de diseño visual que
-  `maya-home-design-system` no cubre (ver arriba). Fuera del contexto de
-  este proyecto no aplica.
-- **`supabase-postgres-best-practices`** — está atada al agente
-  `database`, no se usa suelta en este proyecto.
+- **`vercel-react-best-practices`** — se carga SIEMPRE que se escriba,
+  revise o refactorice código React/Next.js: componentes, páginas, imágenes
+  (`next/image`), carga de datos, componentes cliente vs. servidor, bundle.
+  Ya viene incluida en el agente `front-end`; si el trabajo se hace directo,
+  sin delegar, cargarla igual antes de escribir código. No hace falta en
+  cambios solo de texto, estilos o docs.
+- **`supabase-postgres-best-practices`** — se carga ANTES de escribir o
+  cambiar cualquier cosa que viva en Postgres: tablas, columnas,
+  migraciones, RLS, índices, funciones o consultas SQL, y al diagnosticar
+  consultas lentas. Ya viene incluida en el agente `database`; si el cambio
+  se hace directo por ser pequeño, cargarla igual: una sola columna o una
+  sola consulta también cuenta.
+
+### Skills externas (enlaces locales)
+
+`frontend-design`, `vercel-react-best-practices` y
+`supabase-postgres-best-practices` viven en `.agents/skills/` y se enlazan
+a `.claude/skills/` con junction (no se versionan: están en `.gitignore`).
+Los junction guardan la ruta completa, así que se rompen si el proyecto se
+mueve o se clona en otro PC: recrearlos con
+`New-Item -ItemType Junction -Path .claude\skills\<nombre> -Target "$PWD\.agents\skills\<nombre>"`.
+Tras cualquier cambio, abrir una sesión nueva y comprobar con `/skills`
+que las cuatro skills salen activas (✓).
 
 ### Regla general
 

@@ -668,4 +668,9 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
   `/catalogo`. La tarjeta es `ProductCard` con la prop `compacta` (foto,
   nombre, precio con "IVA incluido" y código del ERP), no un componente nuevo.
 - **Alternativas descartadas:** ninguna se evaluó; la forma la fijó el pedido.
+- **Nota (22/10/2026):** se quitó el bloque de la portada temporal que había
+  quedado al final (título "Maya Home" visible, descripción y botón "Ver
+  catálogo"); la portada nueva cumple esa función. En su lugar, tras la última
+  categoría, un enlace de texto "Ver catálogo completo" (`urlCatalogo()`). Se
+  conserva el `h1` oculto (`sr-only`), único en la página.
 - **Estado:** vigente (22/10/2026).
