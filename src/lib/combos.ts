@@ -189,3 +189,29 @@ export function precioDesde(vistas: CombinacionVista[]): number | null {
   const precios = vistas.flatMap((v) => (v.precio !== null ? [v.precio] : []));
   return precios.length > 0 ? Math.min(...precios) : null;
 }
+
+// Tarjeta de UNA familia (catálogo y resumen de inicio): mismos datos que ComboCard,
+// más si alguna combinación vendible tiene existencia (para ordenar disponibles primero)
+export type TarjetaFamilia = {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  imagen: string;
+  desde: number | null; // menor precio entre sus combinaciones vendibles; null = ninguna se vende
+  disponible: boolean; // true: alguna combinación vendible no está agotada
+};
+
+export function tarjetaFamilia(
+  familia: FamiliaCombo,
+  mapaStock: Record<string, StockInfo>
+): TarjetaFamilia {
+  const vistas = vistaCombinaciones(familia, mapaStock);
+  return {
+    id: familia.id,
+    nombre: familia.nombre,
+    descripcion: familia.descripcion,
+    imagen: familia.imagen,
+    desde: precioDesde(vistas),
+    disponible: vistas.some((v) => v.precio !== null && v.status !== "out_of_stock"),
+  };
+}

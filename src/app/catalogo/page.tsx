@@ -10,7 +10,7 @@ import CatalogoConFiltro from "@/components/CatalogoConFiltro";
 import BotonWhatsApp from "@/components/BotonWhatsApp";
 import { getStockPorSkus, type StockInfo } from "@/lib/stock";
 import { FAMILIAS_COMBO } from "@/data/combos";
-import { precioDesde, vistaCombinaciones } from "@/lib/combos";
+import { tarjetaFamilia } from "@/lib/combos";
 
 // Igual que productos/[id]: la página se puede regenerar como máximo cada 60
 // segundos, para no mostrar stock/precio de hace días. Recordar que la tabla
@@ -35,13 +35,8 @@ export default async function CatalogoPage() {
   }
 
   // Una tarjeta por familia: "Desde $X" = menor precio entre sus combinaciones vendibles
-  const combos = FAMILIAS_COMBO.map((familia) => ({
-    id: familia.id,
-    nombre: familia.nombre,
-    descripcion: familia.descripcion,
-    imagen: familia.imagen,
-    desde: precioDesde(vistaCombinaciones(familia, stockPorSku)), // null = ninguna combinación se vende
-  }));
+  // (desde = null: ninguna combinación se vende). Mismo cálculo que el resumen de "/".
+  const combos = FAMILIAS_COMBO.map((familia) => tarjetaFamilia(familia, stockPorSku));
 
   return (
     <>

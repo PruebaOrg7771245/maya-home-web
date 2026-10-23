@@ -24,7 +24,15 @@ export type ComboCardData = {
 // "coming_soon" el aviso dice "No disponible por ahora".
 const SIN_PRECIO: StockInfo = { status: "unknown", quantity: null, precio: null };
 
-export default function ComboCard({ combo }: { combo: ComboCardData }) {
+type ComboCardProps = {
+  combo: ComboCardData;
+  // Variante del resumen de la página de inicio (igual que ProductCard compacta):
+  // solo foto, nombre y "Desde $X" con "IVA incluido". La ficha del combo no muestra
+  // ningún código (cada pieza tiene el suyo), así que la tarjeta tampoco.
+  compacta?: boolean;
+};
+
+export default function ComboCard({ combo, compacta = false }: ComboCardProps) {
   return (
     <Link
       href={`/combos/${combo.id}`}
@@ -36,41 +44,62 @@ export default function ComboCard({ combo }: { combo: ComboCardData }) {
           src={combo.imagen}
           alt={`Combo ${combo.nombre}`}
           fill
-          sizes="(max-width: 768px) 50vw, 25vw"
+          // compacta: mismo grid que ProductCard compacta (2 columnas hasta md, luego 4)
+          sizes={compacta ? "(max-width: 767px) 50vw, (max-width: 1279px) 25vw, 304px" : "(max-width: 768px) 50vw, 25vw"}
           className="object-cover motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-105"
         />
       </div>
 
-      <div className="p-4">
-        <p className="text-xs text-[#6B6862]">Lavamanos + mueble</p>
-
-        {/* break-words: nombres como "CONNON SX800" o "LUMINA-1600" no deben desbordar en 2 columnas */}
-        <h3 className="mt-1 break-words font-[var(--font-heading)] text-lg font-semibold text-[#232320]">
-          Combo {combo.nombre}
-        </h3>
-
-        {/* Descripción corta, limitada a 2 líneas para que todas las tarjetas midan parecido */}
-        <p className="mt-1 line-clamp-2 text-sm text-[#6B6862]">{combo.descripcion}</p>
-
-        <div className="mt-3 border-t border-[#D8D4CC] pt-3">
-          {combo.desde !== null ? (
-            // Apilado (etiqueta arriba, precio abajo) igual que ProductCard
-            <div>
-              <p className="text-xs text-[#6B6862]">Desde (IVA incluido)</p>
-              <p className="mt-0.5 text-base font-semibold text-[#232320]">
-                {formatPrice(combo.desde)}
+      {compacta ? (
+        // Variante compacta: nombre y precio "Desde" con "IVA incluido". Nada más.
+        <div className="p-3 sm:p-4">
+          <h3 className="break-words font-[var(--font-heading)] text-base font-semibold text-[#232320]">
+            Combo {combo.nombre}
+          </h3>
+          <div className="mt-2">
+            {combo.desde !== null ? (
+              <p className="text-base font-semibold text-[#232320]">
+                <span className="text-xs font-normal text-[#6B6862]">Desde</span> {formatPrice(combo.desde)}{" "}
+                {/* nowrap: en 2 columnas de móvil la etiqueta baja entera, sin partirse */}
+                <span className="whitespace-nowrap text-xs font-normal text-[#6B6862]">IVA incluido</span>
               </p>
-            </div>
-          ) : (
-            // Ninguna combinación de la familia tiene precio: no se muestra precio
-            <AvisoSinPrecio stock={SIN_PRECIO} />
-          )}
-
-          <p className="mt-2 text-xs text-[#6B6862]">
-            Consulta nuestros descuentos por llevarte el combo
-          </p>
+            ) : (
+              <AvisoSinPrecio stock={SIN_PRECIO} />
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="p-4">
+          <p className="text-xs text-[#6B6862]">Lavamanos + mueble</p>
+
+          {/* break-words: nombres como "CONNON SX800" o "LUMINA-1600" no deben desbordar en 2 columnas */}
+          <h3 className="mt-1 break-words font-[var(--font-heading)] text-lg font-semibold text-[#232320]">
+            Combo {combo.nombre}
+          </h3>
+
+          {/* Descripción corta, limitada a 2 líneas para que todas las tarjetas midan parecido */}
+          <p className="mt-1 line-clamp-2 text-sm text-[#6B6862]">{combo.descripcion}</p>
+
+          <div className="mt-3 border-t border-[#D8D4CC] pt-3">
+            {combo.desde !== null ? (
+              // Apilado (etiqueta arriba, precio abajo) igual que ProductCard
+              <div>
+                <p className="text-xs text-[#6B6862]">Desde (IVA incluido)</p>
+                <p className="mt-0.5 text-base font-semibold text-[#232320]">
+                  {formatPrice(combo.desde)}
+                </p>
+              </div>
+            ) : (
+              // Ninguna combinación de la familia tiene precio: no se muestra precio
+              <AvisoSinPrecio stock={SIN_PRECIO} />
+            )}
+
+            <p className="mt-2 text-xs text-[#6B6862]">
+              Consulta nuestros descuentos por llevarte el combo
+            </p>
+          </div>
+        </div>
+      )}
     </Link>
   );
 }

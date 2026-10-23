@@ -18,6 +18,10 @@ Formato de entrada:
 
 ---
 
+## 23/10/2026 - Combos en el resumen de inicio y en la vista "Todos" del catálogo
+- `/`: fila "Combos lavamanos" tras Lavamanos (hasta 4 familias vendibles, disponibles primero, `combosResumen()`), con `ComboCard compacta` y "Ver todos"; datos con la nueva `tarjetaFamilia()` (`lib/combos.ts`), que ahora usa también `/catalogo`. Una sola `getStockPorSkus`.
+- `/catalogo`: "Todos" muestra productos y luego combos, con o sin búsqueda; su cantidad en el menú suma las familias (33 hoy). `scripts/test-resumen.ts` cubre los casos de combos. Ver ADR-32.
+
 ## 23/10/2026 - Globo de WhatsApp visible: ya no se cierra con el scroll
 - `BotonWhatsAppFlotante`: el globo "¿Necesitas asesoría?" sale a los 3 s de la primera página de la visita y se queda 8 s (antes 5 s reales); lo cierran tocarlo o pulsar el botón, ya no el scroll ni abrir un menú (cualquier scroll lo borraba al instante y ya quedaba marcado como visto). `sessionStorage["maya-globo-whatsapp"]` guarda la hora de inicio de la visita y luego `"cerrado"`, así el plazo sigue al cambiar de página o recargar. Se anuncia con `aria-live="polite"` (antes `aria-hidden`). El botón sigue en cada página (no se movió al layout, ADR-29).
 

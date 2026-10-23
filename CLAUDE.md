@@ -105,10 +105,15 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
   imágenes pasa a `CarruselPortada`, cliente); (2) catálogo resumido: una
   sección por categoría con hasta 4 productos vendibles, disponibles primero
   (`seccionesResumen` en `lib/resumenCatalogo.ts`, ADR-31), en
-  `ProductCard compacta` y con enlace "Ver todos"; sin combos; (3) un enlace
+  `ProductCard compacta` y con enlace "Ver todos"; justo después de
+  Lavamanos, una fila "Combos lavamanos" con hasta 4 familias vendibles,
+  disponibles primero (`combosResumen`, misma `tarjetaFamilia` de
+  `lib/combos.ts` que `/catalogo`, ADR-32) en `ComboCard compacta` (foto,
+  nombre, "Desde $X" con IVA; sin código: la ficha del combo no muestra
+  ninguno); sin ningún combo vendible la fila no sale; (3) un enlace
   de texto discreto "Ver catálogo completo" (`urlCatalogo()`). Ya no hay
   bloque inferior de marca; el único `h1` ("Maya Home") es `sr-only`. Stock y
-  precio con UNA sola `getStockPorSkus`.
+  precio de productos y piezas de combos con UNA sola `getStockPorSkus`.
 - **`/catalogo` (`src/app/catalogo/page.tsx`)** — server component con
   `revalidate = 60` (ISR): pide stock y precio de todo el catálogo y de las
   piezas de los combos con UNA sola `getStockPorSkus` y se los pasa a
@@ -117,8 +122,11 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
   elegir categoría es un enlace normal; escribir actualiza la URL con
   `history.replaceState` tras 250 ms. `useSearchParams` va dentro de
   `Suspense` para que la página siga estática: el HTML estático trae el
-  catálogo completo y el filtro se aplica al hidratar. "Todos" muestra solo
-  productos; con una búsqueda activa también los combos que coinciden. La
+  catálogo completo y el filtro se aplica al hidratar. "Todos" muestra los
+  productos y, a continuación, los combos bajo su título (ADR-32); su
+  cantidad en el menú y el contador de resultados los incluyen. Una
+  categoría concreta muestra solo esa; "Combos lavamanos", solo combos. La
+  búsqueda filtra ambos igual que antes. La
   URL del catálogo se arma siempre con `urlCatalogo()` (`lib/catalogoUrl.ts`).
 - **Buscador (`lib/busqueda.ts`):** filtra en el navegador sobre lo ya
   cargado, sin consultas nuevas; lo que escribe la persona no se guarda ni se

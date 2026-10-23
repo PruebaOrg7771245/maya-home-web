@@ -4,11 +4,11 @@
 // categoría (o la pestaña de combos) elegida va en ?categoria=... y la búsqueda
 // en ?q=... Se importa desde servidor y cliente (no depende del navegador).
 
-// Nombre de la categoría de combos. Va al final de las categorías; "Todos" NO
-// incluye combos (solo productos), salvo cuando hay una búsqueda.
+// Nombre de la categoría de combos. Va al final de las categorías; "Todos"
+// muestra los productos y, a continuación, los combos (ADR-32).
 export const PESTANA_COMBOS = "Combos lavamanos";
 
-// Opción que muestra todos los productos (no lleva parámetro en la URL)
+// Opción que muestra todo el catálogo, productos y combos (no lleva parámetro en la URL)
 export const PESTANA_TODOS = "Todos";
 
 // Ruta del catálogo con la categoría y/o la búsqueda si se indican:

@@ -77,16 +77,15 @@ function Catalogo({ stockPorId, combos, categoria, texto, alEscribir, alLimpiar,
     );
   }, [verCombos, categoria, grupos]);
 
-  // Combos: en la categoría "Combos lavamanos" siempre; en "Todos" solo cuando se busca algo
-  // (sin búsqueda "Todos" muestra únicamente productos, como antes)
+  // Combos: en "Combos lavamanos" y en "Todos" (tras los productos, ADR-32); nunca en
+  // otra categoría. La búsqueda los filtra igual que antes.
   const combosFiltrados = useMemo(() => {
-    const incluir = verCombos || (categoria === PESTANA_TODOS && hayConsulta);
-    if (!incluir) return [];
+    if (!verCombos && categoria !== PESTANA_TODOS) return [];
     return combos.filter((c) => coincide(TEXTO_COMBO.get(c.id) ?? "", grupos));
-  }, [verCombos, categoria, hayConsulta, combos, grupos]);
+  }, [verCombos, categoria, combos, grupos]);
 
   const total = productosFiltrados.length + combosFiltrados.length;
-  // Combos aparte bajo su propio título cuando se mezclan con productos (Todos + búsqueda)
+  // Combos aparte bajo su propio título cuando se mezclan con productos ("Todos")
   const combosSeparados = !verCombos && combosFiltrados.length > 0;
 
   return (

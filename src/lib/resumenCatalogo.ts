@@ -6,9 +6,9 @@
 //   - los disponibles van primero y los agotados después, cada grupo en el
 //     orden normal del catálogo (products.ts);
 //   - como máximo POR_CATEGORIA; una categoría sin ninguno vendible no sale.
-// Los combos no entran: ya tienen su propio menú.
+// Los combos van en su propia fila (combosResumen, ADR-32), con la misma regla.
 
-// Productos por categoría en el resumen
+// Productos (o combos) por fila en el resumen
 export const POR_CATEGORIA = 4;
 
 // Lo único que se lee del producto y del stock (tipos estructurales)
@@ -44,4 +44,20 @@ export function seccionesResumen<P extends ProductoResumen>(
     if (elegidos.length > 0) secciones.push({ categoria, productos: elegidos });
   }
   return secciones;
+}
+
+// Lo único que se lee de cada familia de combos (ver tarjetaFamilia en lib/combos.ts)
+type ComboResumen = { desde: number | null; disponible: boolean };
+
+// Fila de combos: se omiten las familias sin precio calculable (ninguna combinación
+// tiene sus dos piezas con precio), las disponibles van antes que las agotadas (orden
+// estable de data/combos.ts) y como máximo POR_CATEGORIA. Vacía = la fila no sale.
+export function combosResumen<C extends ComboResumen>(combos: C[]): C[] {
+  const disponibles: C[] = [];
+  const agotados: C[] = [];
+  for (const c of combos) {
+    if (c.desde === null) continue; // sin precio: no se vende
+    (c.disponible ? disponibles : agotados).push(c);
+  }
+  return [...disponibles, ...agotados].slice(0, POR_CATEGORIA);
 }

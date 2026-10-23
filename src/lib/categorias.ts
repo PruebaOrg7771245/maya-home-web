@@ -9,13 +9,13 @@ import { PESTANA_COMBOS, PESTANA_TODOS } from "@/lib/catalogoUrl";
 
 export type OpcionCategoria = {
   nombre: string; // texto del menú y valor de ?categoria=
-  cantidad: number; // productos de la categoría (en Combos, familias de combos)
+  cantidad: number; // productos de la categoría (en Combos, familias; en "Todos", ambos)
 };
 
-// "Todos" + las categorías de los productos + "Combos lavamanos" al final
+// "Todos" (productos + combos, ADR-32) + las categorías de los productos + "Combos lavamanos" al final
 export function opcionesCategorias(): OpcionCategoria[] {
   return [
-    { nombre: PESTANA_TODOS, cantidad: products.length },
+    { nombre: PESTANA_TODOS, cantidad: products.length + FAMILIAS_COMBO.length },
     ...categories.map((nombre) => ({
       nombre,
       cantidad: products.filter((p) => p.category === nombre).length,

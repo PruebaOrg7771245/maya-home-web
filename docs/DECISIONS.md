@@ -461,6 +461,8 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
   - Confirmar el comportamiento de los combos dentro de "Todos" cuando hay
     búsqueda activa (hoy aparecen bajo un título "Combos"; sin búsqueda,
     "Todos" muestra solo productos).
+- **Nota (23/10/2026):** reemplazado por ADR-32 en lo que toca a los combos en
+  "Todos": ahora salen siempre, tras los productos, con o sin búsqueda.
 - **Estado:** vigente (12/10/2026).
 
 ## ADR-19: Menú desplegable de categorías accesible y compartido (`useDesplegable`) en vez de pestañas
@@ -678,4 +680,33 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
   catálogo"); la portada nueva cumple esa función. En su lugar, tras la última
   categoría, un enlace de texto "Ver catálogo completo" (`urlCatalogo()`). Se
   conserva el `h1` oculto (`sr-only`), único en la página.
+- **Nota (23/10/2026):** la parte "sin combos (tienen su propio menú)" la
+  reemplaza ADR-32: el resumen tiene ahora una fila "Combos lavamanos".
 - **Estado:** vigente (22/10/2026).
+
+## ADR-32: Combos en el resumen de inicio y en la vista "Todos" del catálogo
+- **Contexto:** los combos solo se veían en `/catalogo` eligiendo "Combos
+  lavamanos" o buscando algo en "Todos"; el inicio no los mostraba (ADR-31).
+- **Decisión (inicio):** fila "Combos lavamanos" justo después de la de
+  Lavamanos (si esa no sale, al final), con "Ver todos" a
+  `urlCatalogo(PESTANA_COMBOS)`. La elige `combosResumen()` en
+  `src/lib/resumenCatalogo.ts` (lógica pura): se omiten las familias sin precio
+  calculable (`desde = null`: ninguna combinación con las dos piezas con
+  precio), las disponibles (alguna combinación vendible no agotada) van
+  primero, orden estable de `data/combos.ts`, máximo `POR_CATEGORIA` (4); sin
+  ninguna vendible la fila no sale. Los datos de cada familia salen de
+  `tarjetaFamilia()` (`src/lib/combos.ts`), que ahora usan también `/catalogo`
+  (antes armaba el objeto a mano). Productos y piezas de combos en UNA
+  `getStockPorSkus()` (ADR-1). La tarjeta es `ComboCard` con la prop
+  `compacta` (foto, "Combo <nombre>", "Desde $X" + "IVA incluido"), sin
+  componente nuevo y **sin código**: la ficha `/combos/[familia]` tampoco
+  muestra uno (cada pieza tiene su sku), así que no se inventó.
+- **Decisión (catálogo):** "Todos" muestra los productos y a continuación los
+  combos, bajo el título "Combos lavamanos", con o sin búsqueda (antes solo
+  con búsqueda). Una categoría concreta muestra solo esa; "Combos lavamanos",
+  solo combos. La cantidad de "Todos" en `opcionesCategorias()` pasa a ser
+  productos + familias de combos (33 hoy).
+- **Alternativas descartadas:** ninguna se evaluó; la forma la fijó el pedido.
+- **Consecuencia:** reemplaza la parte "sin combos" de ADR-31 y el pendiente
+  de ADR-18 sobre combos en "Todos".
+- **Estado:** vigente (23/10/2026).

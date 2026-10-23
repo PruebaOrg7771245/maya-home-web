@@ -5,7 +5,10 @@
 // Termina con código 1 si alguna comprobación falla.
 
 import assert from "node:assert/strict";
-import { POR_CATEGORIA, seccionesResumen } from "../src/lib/resumenCatalogo.ts";
+import { POR_CATEGORIA, combosResumen, seccionesResumen } from "../src/lib/resumenCatalogo.ts";
+import { tarjetaFamilia } from "../src/lib/combos.ts";
+import type { FamiliaCombo } from "../src/data/combos.ts";
+import type { StockInfo } from "../src/lib/stock.ts";
 
 let fallos = 0;
 function prueba(nombre: string, fn: () => void) {
@@ -46,6 +49,61 @@ prueba("una categoría sin ninguno vendible no sale; respeta el orden de categor
 
 prueba("sin dato de stock = no se vende", () => {
   assert.deepEqual(seccionesResumen([p("a", "X")], {}), []);
+});
+
+// ---------- fila de combos ----------
+const c = (id: string, desde: number | null, disponible = true) => ({ id, desde, disponible });
+const idsCombos = (lista: { id: string }[]) => lista.map((x) => x.id);
+
+// Familia de prueba: un lavamanos y dos muebles (dos combinaciones)
+const familia: FamiliaCombo = {
+  id: "f",
+  nombre: "F",
+  descripcion: "",
+  imagen: "/f.jpg",
+  lavamanos: [{ sku: "LAV", nombre: "Lavamanos F", etiqueta: "Blanco" }],
+  muebles: [
+    { sku: "MUE1", nombre: "Mueble F 1", etiqueta: "Uno" },
+    { sku: "MUE2", nombre: "Mueble F 2", etiqueta: "Dos" },
+  ],
+};
+const st = (precio: number | null, quantity: number): StockInfo => ({
+  status: quantity > 0 ? "in_stock" : "out_of_stock",
+  quantity,
+  precio,
+});
+
+prueba("combo con una pieza sin precio: esa combinación no cuenta para el 'Desde'", () => {
+  const t = tarjetaFamilia(familia, { LAV: st(100, 5), MUE1: st(null, 5), MUE2: st(50, 5) });
+  assert.equal(t.desde, 150);
+  assert.equal(t.disponible, true);
+});
+
+prueba("combo cuya única pieza común no tiene precio: no se puede calcular y se omite", () => {
+  const t = tarjetaFamilia(familia, { LAV: st(null, 5), MUE1: st(40, 5), MUE2: st(50, 5) });
+  assert.equal(t.desde, null);
+  assert.deepEqual(combosResumen([t, c("otro", 10)]).map((x) => x.id), ["otro"]);
+});
+
+prueba("combo vendible pero agotado: disponible = false (va después)", () => {
+  const t = tarjetaFamilia(familia, { LAV: st(100, 0), MUE1: st(40, 5), MUE2: st(50, 5) });
+  assert.equal(t.desde, 140);
+  assert.equal(t.disponible, false);
+  assert.deepEqual(idsCombos(combosResumen([{ ...t, id: "agotado" }, c("ok", 10)])), ["ok", "agotado"]);
+});
+
+prueba(`combos: disponibles primero (orden estable) y máximo ${POR_CATEGORIA}`, () => {
+  const lista = [c("1", 1, false), c("2", 1), c("3", null), c("4", 1), c("5", 1), c("6", 1), c("7", 1)];
+  assert.deepEqual(idsCombos(combosResumen(lista)), ["2", "4", "5", "6"]);
+});
+
+prueba("menos de 4 combos vendibles: salen los que haya", () => {
+  assert.deepEqual(idsCombos(combosResumen([c("a", 5), c("b", null), c("c", 7, false)])), ["a", "c"]);
+});
+
+prueba("ningún combo vendible: lista vacía (la fila no sale)", () => {
+  assert.deepEqual(combosResumen([c("a", null), c("b", null)]), []);
+  assert.deepEqual(combosResumen([]), []);
 });
 
 if (fallos > 0) {
