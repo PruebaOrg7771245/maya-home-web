@@ -72,7 +72,7 @@ function Navegacion({ activa, categoriaActiva, opciones, abierto, alElegir }: Na
             aria-current={activa === "combos" ? "page" : undefined}
             className={claseEnlaceNav(activa === "combos")}
           >
-            Combos
+            {PESTANA_COMBOS}
           </Link>
         </li>
       </ul>

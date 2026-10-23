@@ -6,13 +6,13 @@
 
 // Nombre de la categoría de combos. Va al final de las categorías; "Todos" NO
 // incluye combos (solo productos), salvo cuando hay una búsqueda.
-export const PESTANA_COMBOS = "Combos";
+export const PESTANA_COMBOS = "Combos lavamanos";
 
 // Opción que muestra todos los productos (no lleva parámetro en la URL)
 export const PESTANA_TODOS = "Todos";
 
 // Ruta del catálogo con la categoría y/o la búsqueda si se indican:
-//   urlCatalogo("Combos")           → "/catalogo?categoria=Combos"
+//   urlCatalogo(PESTANA_COMBOS)     → "/catalogo?categoria=Combos+lavamanos"
 //   urlCatalogo(undefined, "sanit") → "/catalogo?q=sanit"
 //   urlCatalogo("Sanitarios", "sd") → "/catalogo?categoria=Sanitarios&q=sd"
 // Sin nada (o "Todos" y búsqueda vacía) → "/catalogo".

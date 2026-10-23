@@ -20,6 +20,13 @@ antes de asumir nada sobre el estado del proyecto.
   que corren con Node 22.18+ (ejecuta TypeScript directo):
   `node scripts/test-combos.ts`, `node scripts/test-busqueda.ts`,
   `node scripts/test-ficha.ts` y `node scripts/test-resumen.ts`.
+- Al terminar una prueba con servidor (`npm run start` o `npm run dev`),
+  cerrar el proceso que se levantó con
+  `taskkill /PID <pid> /T /F`, usando el PID exacto del proceso que
+  escucha en el puerto. Nunca cerrar por nombre (`pkill`,
+  `taskkill /IM node.exe`): eso mata también los servidores del usuario y
+  puede corromper `.next`. Al final, confirmar con `Get-NetTCPConnection`
+  que el puerto quedó libre.
 
 **Ruta del proyecto:** `C:\dev\e-commercetest`. El proyecto vive fuera de
 OneDrive a propósito (dentro de OneDrive daba errores de build); no moverlo

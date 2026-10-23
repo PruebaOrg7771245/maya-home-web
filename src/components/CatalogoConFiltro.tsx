@@ -53,7 +53,7 @@ const TEXTO_COMBO = new Map(FAMILIAS_COMBO.map((f) => [f.id, textoBusquedaCombo(
 const ESPERA_URL_MS = 250;
 
 type CatalogoProps = CatalogoConFiltroProps & {
-  categoria: string; // categoría activa ("Todos", una de los productos o "Combos")
+  categoria: string; // categoría activa ("Todos", una de los productos o "Combos lavamanos")
   texto: string; // lo escrito en el buscador
   alEscribir: (valor: string) => void;
   alLimpiar: () => void; // quita categoría y búsqueda
@@ -62,12 +62,12 @@ type CatalogoProps = CatalogoConFiltroProps & {
 
 // Parte visual del catálogo; no sabe de dónde salen la categoría y el texto
 function Catalogo({ stockPorId, combos, categoria, texto, alEscribir, alLimpiar, inputRef }: CatalogoProps) {
-  const verCombos = categoria === PESTANA_COMBOS; // categoría "Combos": el grid muestra familias
+  const verCombos = categoria === PESTANA_COMBOS; // categoría "Combos lavamanos": el grid muestra familias
   const grupos = useMemo(() => prepararConsulta(texto), [texto]);
   const hayConsulta = grupos.length > 0;
   const hayFiltros = hayConsulta || categoria !== PESTANA_TODOS;
 
-  // Productos: por categoría y por búsqueda (nada si la categoría es "Combos")
+  // Productos: por categoría y por búsqueda (nada si la categoría es "Combos lavamanos")
   const productosFiltrados = useMemo(() => {
     if (verCombos) return [];
     return products.filter(
@@ -77,7 +77,7 @@ function Catalogo({ stockPorId, combos, categoria, texto, alEscribir, alLimpiar,
     );
   }, [verCombos, categoria, grupos]);
 
-  // Combos: en la categoría "Combos" siempre; en "Todos" solo cuando se busca algo
+  // Combos: en la categoría "Combos lavamanos" siempre; en "Todos" solo cuando se busca algo
   // (sin búsqueda "Todos" muestra únicamente productos, como antes)
   const combosFiltrados = useMemo(() => {
     const incluir = verCombos || (categoria === PESTANA_TODOS && hayConsulta);
@@ -169,7 +169,7 @@ function Catalogo({ stockPorId, combos, categoria, texto, alEscribir, alLimpiar,
           <section className={combosSeparados ? "mt-10" : "mt-4"}>
             {combosSeparados && (
               <h2 className="mb-4 font-[var(--font-heading)] text-xl font-semibold text-[#232320]">
-                Combos
+                {PESTANA_COMBOS}
               </h2>
             )}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -202,7 +202,7 @@ function Catalogo({ stockPorId, combos, categoria, texto, alEscribir, alLimpiar,
         {total === 0 && !hayConsulta && (
           <p className="mt-12 text-center text-[#6B6862]">
             {verCombos
-              ? "Todavía no hay combos disponibles. Vuelve pronto o consulta con tu asesor."
+              ? "Todavía no hay combos lavamanos disponibles. Vuelve pronto o consulta con tu asesor."
               : "No hay productos en esta categoría todavía."}
           </p>
         )}

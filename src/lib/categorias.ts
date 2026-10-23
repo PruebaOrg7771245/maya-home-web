@@ -12,7 +12,7 @@ export type OpcionCategoria = {
   cantidad: number; // productos de la categoría (en Combos, familias de combos)
 };
 
-// "Todos" + las categorías de los productos + "Combos" al final
+// "Todos" + las categorías de los productos + "Combos lavamanos" al final
 export function opcionesCategorias(): OpcionCategoria[] {
   return [
     { nombre: PESTANA_TODOS, cantidad: products.length },
