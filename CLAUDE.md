@@ -268,6 +268,7 @@ mueve o se clona en otro PC: recrearlos con
 `New-Item -ItemType Junction -Path .claude\skills\<nombre> -Target "$PWD\.agents\skills\<nombre>"`.
 Tras cualquier cambio, abrir una sesión nueva y comprobar con `/skills`
 que las cuatro skills salen activas (✓).
+Si `npm run build` falla con `TypeError ... reading 'length'` dentro de webpack, borrar `.next` (caché desactualizada tras crear o cambiar los enlaces) y repetir el build.
 
 ### Regla general
 

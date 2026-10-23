@@ -17,11 +17,15 @@ import CarruselPortada from "@/components/CarruselPortada";
 
 // Tiene que coincidir con el breakpoint md de Tailwind (y con md:aspect-[8/3] de abajo)
 const MEDIA_ESCRITORIO = "(min-width: 768px)";
+// Tiene que estar en images.qualities de next.config.ts
+const CALIDAD_PORTADA = 90;
 
 function ImagenPortada({ portada, prioridad }: { portada: DatosPortada; prioridad: boolean }) {
   // priority = carga inmediata y fetchpriority alta (es lo primero que se ve);
   // las portadas siguientes del carrusel cargan diferidas cuando se muestran
-  const comunes = { alt: portada.alt, sizes: "100vw", priority: prioridad };
+  // quality 90 (no la 75 por defecto): la imagen lleva texto y logo, y a 75 la
+  // recompresión de Next deja halos visibles en el logo
+  const comunes = { alt: portada.alt, sizes: "100vw", priority: prioridad, quality: CALIDAD_PORTADA };
   const {
     props: { srcSet: srcSetEscritorio },
   } = getImageProps({ ...comunes, ...portada.desktop });

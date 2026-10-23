@@ -24,8 +24,8 @@ export type Portada = {
 export const PORTADAS: Portada[] = [
   {
     id: "portada-1",
-    desktop: { src: "/images/portada/portada-1-desktop.webp", width: 1920, height: 720 },
-    movil: { src: "/images/portada/portada-1-movil.webp", width: 800, height: 1000 },
+    desktop: { src: "/images/portada/portada-1-desktop-v2.webp", width: 1920, height: 720 },
+    movil: { src: "/images/portada/portada-1-movil-v2.webp", width: 800, height: 1000 },
     alt: "Maya Home: todo para tu hogar, a un clic",
   },
 ];
