@@ -18,6 +18,9 @@ Formato de entrada:
 
 ---
 
+## 23/10/2026 - Globo de WhatsApp visible: ya no se cierra con el scroll
+- `BotonWhatsAppFlotante`: el globo "¿Necesitas asesoría?" sale a los 3 s de la primera página de la visita y se queda 8 s (antes 5 s reales); lo cierran tocarlo o pulsar el botón, ya no el scroll ni abrir un menú (cualquier scroll lo borraba al instante y ya quedaba marcado como visto). `sessionStorage["maya-globo-whatsapp"]` guarda la hora de inicio de la visita y luego `"cerrado"`, así el plazo sigue al cambiar de página o recargar. Se anuncia con `aria-live="polite"` (antes `aria-hidden`). El botón sigue en cada página (no se movió al layout, ADR-29).
+
 ## 23/10/2026 - Portada v2 sin pérdida de calidad en el logo
 - Imágenes nuevas `portada-1-desktop-v2.webp` (1920×720) y `portada-1-movil-v2.webp` (800×1000), WebP near-lossless (249 y 131 KB); se borraron las anteriores. `Portada` pide `quality` 90 a next/image (antes 75 por defecto, que dejaba halos en el logo) y `next.config.ts` declara `images.qualities: [75, 90]`.
 

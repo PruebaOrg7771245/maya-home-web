@@ -633,6 +633,11 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
 - **Estado:** vigente (21/10/2026). Limitación conocida: en una ficha con
   precio, si "Agregar al pedido" queda justo en el borde inferior en móvil, el
   botón cubre su extremo derecho.
+  Actualización 23/10/2026: el globo ya no es decorativo (`aria-live="polite"`),
+  dura 8 s desde los 3 s de la primera página de la visita y solo se cierra
+  solo, al tocarlo o con el botón (ni scroll ni menús). Se evaluó montar el botón
+  una sola vez en el layout y se descartó: el plazo ya se guarda en
+  `sessionStorage` y el layout no conoce el producto de la ficha o el combo.
 
 ## ADR-30: Cabecera por encima del botón flotante (`relative z-20`)
 - **Contexto:** con el botón flotante (`z-10`), el menú plegable de la cabecera

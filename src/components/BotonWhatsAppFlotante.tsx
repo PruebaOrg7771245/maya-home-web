@@ -5,9 +5,13 @@
 // Parte interactiva del botón flotante de WhatsApp (ver BotonWhatsApp.tsx):
 // - Se oculta al hacer scroll hacia abajo y reaparece al subir o al detenerse
 //   (así no tapa tarjetas de producto). Con el foco en el botón no se oculta.
-// - Globo "¿Necesitas asesoría?": aparece a los 3 s de cargar, se oculta solo a los 8 s
-//   y antes si hay scroll, se abre un menú (cualquier [aria-expanded]) o se toca el botón.
-//   Una vez por visita (sessionStorage; si no está disponible, una vez por carga).
+// - Globo "¿Necesitas asesoría?": aparece a los 3 s de cargar la primera página de la
+//   visita, se queda 8 s y se oculta solo; también al tocarlo o al pulsar el botón. El
+//   scroll NO lo cierra (antes sí, y casi nadie llegaba a verlo). Una vez por visita en
+//   todo el sitio: sessionStorage guarda la hora de inicio de la visita, así el plazo
+//   sigue al cambiar de página o recargar (cada página monta su propio botón), y
+//   "cerrado" cuando ya se mostró. Sin sessionStorage: variable de módulo (una vez por
+//   carga). El texto se anuncia con aria-live="polite".
 // Excepción buscada al sistema de diseño: el verde de WhatsApp (tono oscuro para que el
 // ícono blanco contraste), sin sombra. z-10: por debajo de los menús (cabecera z-20,
 // desplegables z-20/z-30). No sale al imprimir. Sin animación con prefers-reduced-motion
@@ -15,31 +19,43 @@
 
 import { useEffect, useRef, useState } from "react";
 
+// Valor: hora (ms, Date.now()) en que empezó la visita, o CERRADO si ya se mostró
 const CLAVE_GLOBO = "maya-globo-whatsapp";
-const MS_APARECE = 3000; // el globo aparece 3 s después de cargar
-const MS_DESAPARECE = 8000; // y se oculta solo a los 8 s de la carga
+const CERRADO = "cerrado";
+const MS_APARECE = 3000; // el globo aparece 3 s después de la primera página
+const MS_DURA = 8000; // y se queda 8 s
 const MS_QUIETO = 600; // sin scroll durante este tiempo, el botón reaparece
 const PX_MINIMO = 80; // no se oculta cerca del inicio de la página
 
-// Respaldo si sessionStorage no está disponible: una vez por carga de la app
-let globoMostrado = false;
+// Respaldo si sessionStorage no está disponible (o espejo del valor guardado)
+let globoMemoria: string | null = null;
 
-function yaSeMostro(): boolean {
-  if (globoMostrado) return true;
+function leerGlobo(): string | null {
   try {
-    return window.sessionStorage.getItem(CLAVE_GLOBO) === "1";
+    return window.sessionStorage.getItem(CLAVE_GLOBO) ?? globoMemoria;
   } catch {
-    return false;
+    return globoMemoria;
   }
 }
 
-function marcarMostrado() {
-  globoMostrado = true;
+function guardarGlobo(valor: string) {
+  globoMemoria = valor;
   try {
-    window.sessionStorage.setItem(CLAVE_GLOBO, "1");
+    window.sessionStorage.setItem(CLAVE_GLOBO, valor);
   } catch {
     // sin almacenamiento: queda solo la marca en memoria
   }
+}
+
+// Hora de inicio de la visita (la registra si es la primera página); null si ya se mostró
+function inicioVisita(): number | null {
+  const valor = leerGlobo();
+  if (valor === CERRADO) return null;
+  const inicio = Number(valor);
+  if (valor && Number.isFinite(inicio)) return inicio;
+  const ahora = Date.now();
+  guardarGlobo(String(ahora));
+  return ahora;
 }
 
 export default function BotonWhatsAppFlotante({ href }: { href: string }) {
@@ -68,27 +84,30 @@ export default function BotonWhatsAppFlotante({ href }: { href: string }) {
     };
   }, []);
 
-  // Globo: aparece y se oculta solo; también se oculta con scroll o al abrir un menú
+  // Globo: el plazo se cuenta desde el inicio de la visita, no desde esta página
   useEffect(() => {
-    if (yaSeMostro()) return;
-    const ocultar = () => setGlobo(false);
-    const abrir = setTimeout(() => {
-      marcarMostrado();
-      setGlobo(true);
-    }, MS_APARECE);
-    const cerrar = setTimeout(ocultar, MS_DESAPARECE);
-    const alClic = (e: MouseEvent) => {
-      if ((e.target as Element).closest?.("[aria-expanded]")) ocultar();
-    };
-    window.addEventListener("scroll", ocultar, { passive: true });
-    document.addEventListener("click", alClic, true);
+    const inicio = inicioVisita();
+    if (inicio === null) return;
+    const pasado = Date.now() - inicio;
+    if (pasado >= MS_APARECE + MS_DURA) {
+      guardarGlobo(CERRADO);
+      return;
+    }
+    const abrir = setTimeout(() => setGlobo(true), Math.max(0, MS_APARECE - pasado));
+    const cerrar = setTimeout(() => {
+      guardarGlobo(CERRADO);
+      setGlobo(false);
+    }, MS_APARECE + MS_DURA - pasado);
     return () => {
       clearTimeout(abrir);
       clearTimeout(cerrar);
-      window.removeEventListener("scroll", ocultar);
-      document.removeEventListener("click", alClic, true);
     };
   }, []);
+
+  function cerrarGlobo() {
+    guardarGlobo(CERRADO);
+    setGlobo(false);
+  }
 
   return (
     <div
@@ -96,21 +115,26 @@ export default function BotonWhatsAppFlotante({ href }: { href: string }) {
         oculto ? "invisible translate-y-4 opacity-0" : "translate-y-0 opacity-100"
       }`}
     >
-      {globo && (
+      {/* Región viva siempre presente: el lector anuncia el texto al aparecer, sin interrumpir */}
+      <span aria-live="polite" className="sr-only">
+        {globo ? "¿Necesitas asesoría? Escribe a un asesor por WhatsApp." : ""}
+      </span>
+      {globo ? (
         <span
           aria-hidden="true"
-          className="whitespace-nowrap border border-[#D8D4CC] bg-white px-3 py-2 text-sm text-[#232320]"
+          onClick={cerrarGlobo}
+          className="pointer-events-auto cursor-pointer whitespace-nowrap border border-[#D8D4CC] bg-white px-3 py-2 text-sm text-[#232320]"
         >
           ¿Necesitas asesoría?
         </span>
-      )}
+      ) : null}
       <a
         ref={enlace}
         href={href}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Escribir a un asesor por WhatsApp"
-        onClick={() => setGlobo(false)}
+        onClick={cerrarGlobo}
         className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-[#128C7E] text-white transition-colors hover:bg-[#0E6F64] md:h-14 md:w-14"
       >
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="h-6 w-6 md:h-[30px] md:w-[30px]">
