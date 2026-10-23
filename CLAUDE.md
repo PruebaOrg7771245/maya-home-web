@@ -50,7 +50,7 @@ src/
     combos/[familia]/     # "/combos/:familia" detalle de una familia de combos
     carrito/              # "/carrito" wizard de 3 pasos (WhatsApp o correo)
     api/pedido/           # POST: valida, calcula el total y guarda el pedido
-  components/             # Header, Footer, MenuCategorias, BuscadorCabecera,
+  components/             # Header, Footer, CintaCategorias, BuscadorCabecera,
                           # Portada, CarruselPortada,
                           # CatalogoConFiltro, ProductCard, ComboCard,
                           # SelectorCombo, ProductGallery, AddToCartButton,
@@ -64,7 +64,7 @@ src/
   data/portada.ts         # imágenes de la portada (versión escritorio y móvil)
   lib/stock.ts            # stock y precio (getStock, getStockPorSkus)
   lib/catalogoUrl.ts      # urlCatalogo() y nombres de categoría "Todos"/"Combos"
-  lib/categorias.ts       # categorías con su cantidad (menú desplegable)
+  lib/categorias.ts       # orden de las opciones de la cinta de /catalogo
   lib/busqueda.ts         # lógica pura del buscador (sin React ni red)
   lib/fichaProducto.ts    # lógica pura de la ficha (especificaciones, fotos, bloques)
   lib/resumenCatalogo.ts  # lógica pura del catálogo resumido de "/" (ADR-31)
@@ -122,9 +122,10 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
   elegir categoría es un enlace normal; escribir actualiza la URL con
   `history.replaceState` tras 250 ms. `useSearchParams` va dentro de
   `Suspense` para que la página siga estática: el HTML estático trae el
-  catálogo completo y el filtro se aplica al hidratar. "Todos" muestra los
-  productos y, a continuación, los combos bajo su título (ADR-32); su
-  cantidad en el menú y el contador de resultados los incluyen. Una
+  catálogo completo y el filtro se aplica al hidratar. Orden: `h1`
+  (`sr-only`) → cinta de categorías → buscador → resultados. "Todos" muestra
+  los productos y, a continuación, los combos bajo su título (ADR-32); el
+  contador de resultados los incluye. Una
   categoría concreta muestra solo esa; "Combos lavamanos", solo combos. La
   búsqueda filtra ambos igual que antes. La
   URL del catálogo se arma siempre con `urlCatalogo()` (`lib/catalogoUrl.ts`).
@@ -135,20 +136,29 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
   (`lavabo` → `lavamanos`, ver `SINONIMOS`). Productos: nombre, categoría,
   descripción y sku; combos: nombre de la familia, nombre y etiqueta de cada
   pieza y la palabra "combo".
-- **Menú de categorías:** `MenuCategorias` (enlaces a
-  `/catalogo?categoria=...` con la cantidad de cada una) se usa en la
-  cabecera (botón "Catálogo"; en móvil, dentro del menú plegable) y en
-  `/catalogo` (control "Categoría"). Los desplegables comparten
-  `useDesplegable` (aria-expanded/controls, Escape, clic fuera, flechas).
-  `opcionesCategorias()` se calcula en `layout.tsx` (servidor) y llega a
-  `Header` por props, para no meter los productos en el bundle de todas las
-  páginas.
+- **Cinta de categorías (`CintaCategorias`, ADR-33):** solo en `/catalogo`.
+  Componente cliente GENÉRICO: recibe `elementos: { etiqueta, href, activo }[]`
+  y no trae categorías fijas (está pensado para recibir más adelante grupos de
+  categorías sin cambiarlo). `CatalogoConFiltro` arma los chips con
+  `categoriasCatalogo()` ("Todos", categorías, "Combos lavamanos"; sin
+  cantidades) y `urlCatalogo(nombre, q)`. Si los chips caben, es estática; si
+  no, se desplaza sola a ~30 px/s en bucle (una copia `aria-hidden` con
+  `tabindex=-1`), moviendo `scrollLeft` con `requestAnimationFrame` sobre
+  scroll nativo. Se mueve a mano con dedo, rueda/trackpad, arrastre con mouse
+  y flechas ‹ › (solo con desbordamiento y `pointer-fine`). Se pausa con
+  hover, foco de teclado, toque/arrastre y pestaña oculta, y vuelve tras 3 s.
+  Tiene botón de pausa (WCAG 2.2.2); con `prefers-reduced-motion` no se mueve
+  sola. Al cargar centra el chip activo. `useDesplegable` (aria-expanded,
+  Escape, clic fuera, flechas) queda solo para el buscador de la cabecera.
 - **Datos del sitio (`src/data/sitio.ts`):** marca, empresa, contacto, redes y
   WhatsApp (se construye con `NEXT_PUBLIC_ADVISOR_PHONE`, sin número copiado).
   Regla: un campo `null` NO se muestra (sin enlaces muertos ni relleno);
   hoy `urlPrivacidad` es `null` porque la página no existe. Cabecera, pie y
   portada leen de ahí; no repetir esos datos en otros componentes.
-- **Cabecera y pie:** `Header` (navegación Inicio / Catálogo / Combos, lupa
+- **Cabecera y pie:** `Header` (navegación con enlaces simples Inicio /
+  Catálogo (`/catalogo` sin parámetros) / Combos lavamanos (su filtro); en
+  `/catalogo` se marca solo uno de los dos; sin desplegable de categorías,
+  ADR-33; lupa
   de búsqueda, carrito con contador; menú plegable accesible en móvil; la
   fila nunca se parte en dos líneas y el texto junto al logo sale solo desde
   `md`, recortándose antes que los iconos) y

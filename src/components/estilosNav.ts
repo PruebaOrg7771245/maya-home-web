@@ -1,7 +1,6 @@
 // src/components/estilosNav.ts
 //
-// Clases de los elementos de la navegación de la cabecera (enlaces y el botón
-// "Catálogo"), para que se vean idénticos.
+// Clases de los enlaces de la navegación de la cabecera, para que se vean idénticos.
 // Móvil: fila de 44 px con marca lateral. md: pestaña con línea inferior, igual
 // que las pestañas que tenía el catálogo.
 

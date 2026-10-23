@@ -488,6 +488,9 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
   paneles; un cambio de comportamiento se hace en `useDesplegable`. Se eliminó
   `CategoryFilter.tsx`; el comentario de ADR-13 sobre el auto-scroll de la
   pestaña activa ya no aplica.
+- **Nota (23/10/2026):** superado por ADR-33 en lo que toca a las categorías:
+  `MenuCategorias.tsx` se borró (cabecera con enlaces simples, cinta en
+  `/catalogo`); `useDesplegable` sigue solo para el buscador de la cabecera.
 - **Estado:** vigente (12/10/2026).
 
 ## ADR-20: Ficha de producto con bloques opcionales y fotos completas (`object-contain`)
@@ -709,4 +712,58 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
 - **Alternativas descartadas:** ninguna se evaluó; la forma la fijó el pedido.
 - **Consecuencia:** reemplaza la parte "sin combos" de ADR-31 y el pendiente
   de ADR-18 sobre combos en "Todos".
+- **Nota (23/10/2026):** con ADR-33 las cantidades ya no se muestran en ningún
+  sitio (`opcionesCategorias()` pasó a `categoriasCatalogo()`, sin cantidades),
+  así que la cantidad de "Todos" (productos + familias) quedó sin uso.
+- **Estado:** vigente (23/10/2026).
+
+## ADR-33: Cabecera sin desplegable de categorías y cinta de categorías en `/catalogo`
+- **Contexto:** las categorías vivían en un menú desplegable (`MenuCategorias`,
+  ADR-19), repetido como botón "Catálogo" en la cabecera y como control
+  "Categoría" en `/catalogo`.
+- **Decisión (cabecera):** enlaces simples Inicio, Catálogo (`urlCatalogo()`,
+  sin parámetros) y Combos lavamanos (`urlCatalogo(PESTANA_COMBOS)`). En
+  `/catalogo` se marca uno solo: Combos lavamanos con `?categoria=Combos
+  lavamanos`, Catálogo con cualquier otra. `Header` ya no recibe props
+  (`layout.tsx` ya no llama a `opcionesCategorias()`); se borró
+  `MenuCategorias.tsx`. Sigue en una sola fila de 320 a 1440 px (verificado).
+- **Decisión (catálogo):** `CintaCategorias` (cliente) sustituye al control;
+  orden: `h1` sr-only, cinta, buscador, resultados. `lib/categorias.ts` expone
+  `categoriasCatalogo(): string[]` ("Todos", categorías, "Combos lavamanos").
+  No cambia el contrato de URL ni `urlCatalogo`; los chips conservan `?q=`; la
+  página sigue con ISR.
+- **Decisión (cinta):** recibe una lista genérica `{ etiqueta, href, activo }`
+  y no trae categorías fijas, **pensada para recibir más adelante grupos de
+  categorías** (ej. "Accesorios de baño" = lavamanos, jaboneras,
+  dispensadores) sin cambiar el componente; los grupos no se implementan
+  ahora. Comportamiento:
+  - Si los chips caben, estática y sin copias. Si no, se desplaza sola
+    (~30 px/s) en bucle con una segunda copia `aria-hidden` y `tabindex=-1`:
+    al pasar el ancho W de la primera fila, `scrollLeft` retrocede exactamente
+    W (`pr-2` = gap, el período es exacto y no hay salto).
+  - Scroll nativo (`overflow-x`) con `scrollLeft` desde
+    `requestAnimationFrame`, para que dedo, rueda/trackpad y teclado sigan
+    funcionando. Arrastre con mouse: la captura del puntero empieza al pasar
+    5 px, así un clic navega y soltar tras arrastrar no.
+  - Flechas ‹ › solo con desbordamiento y `pointer-fine`. Botón de
+    pausa/reanudar (WCAG 2.2.2) siempre que haya movimiento, también en táctil.
+  - Pausa con hover, foco de teclado (`:focus-visible`, no tras un clic),
+    toque/arrastre y pestaña oculta; reanuda 3 s después de la última
+    interacción. Con `prefers-reduced-motion`: sin copia ni movimiento, solo
+    scroll manual y flechas.
+  - Al montar centra el chip activo antes de pintar (si está al principio,
+    como "Todos", arranca en el orden normal).
+  - Chips de 44 px con los tokens de Maya Home (activo `#232320` con texto
+    blanco; inactivo blanco, borde `#D8D4CC`, hover `#A8562E`); bordes
+    desvanecidos con `mask-image` solo con desbordamiento.
+  - Con los 11 chips actuales desborda incluso a 1440 px: hoy siempre se mueve.
+- **Verificación:** prueba temporal (borrada, no versionada) con 25 categorías
+  falsas: bucle sin salto (cada chip de la copia exactamente W px después),
+  ~30 px/s, pausas, reanudación a los 3 s, arrastre, clic y flechas; con 3,
+  estática. También reduced-motion y táctil. La pausa por pestaña oculta no se
+  probó de forma automática.
+- **Alternativas descartadas:** animación con `transform`/CSS, descartada en el
+  propio pedido porque impide el scroll manual. Ninguna otra se evaluó.
+- **Consecuencia:** supera ADR-19 en lo que toca a las categorías y deja sin
+  uso la cantidad de "Todos" de ADR-32.
 - **Estado:** vigente (23/10/2026).

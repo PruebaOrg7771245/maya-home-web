@@ -1,8 +1,8 @@
 // src/components/Header.tsx
 //
 // Encabezado global del sitio: logo + nombre a la izquierda; navegación (Inicio,
-// menú desplegable "Catálogo" con las categorías, Combos), buscador y carrito con
-// su contador a la derecha. En móvil todo se pliega detrás de un botón de menú
+// Catálogo, Combos lavamanos: enlaces simples, las categorías están en la cinta de
+// /catalogo, ADR-33), buscador y carrito con su contador a la derecha. En móvil todo se pliega detrás de un botón de menú
 // (aria-expanded, se cierra con Escape o al elegir un enlace) y el buscador pasa
 // a ser un campo dentro de ese menú.
 "use client";  // necesita "use client": usa el carrito (useCart), el estado del menú y la ruta actual
@@ -13,9 +13,7 @@ import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCart } from "@/context/CartContext"; // hook para leer el estado del carrito
 import { sitio } from "@/data/sitio";
-import { PESTANA_COMBOS, PESTANA_TODOS, urlCatalogo } from "@/lib/catalogoUrl";
-import type { OpcionCategoria } from "@/lib/categorias"; // solo el TIPO: las categorías llegan por props desde layout.tsx
-import MenuCategorias from "@/components/MenuCategorias";
+import { PESTANA_COMBOS, urlCatalogo } from "@/lib/catalogoUrl";
 import { BuscadorEscritorio, FormBusqueda } from "@/components/BuscadorCabecera";
 import { claseEnlaceNav } from "@/components/estilosNav";
 
@@ -23,14 +21,12 @@ type SeccionActiva = "inicio" | "catalogo" | "combos" | null;
 
 type NavegacionProps = {
   activa: SeccionActiva;
-  categoriaActiva: string | null; // categoría marcada en el menú (solo dentro de /catalogo)
-  opciones: OpcionCategoria[];
   abierto: boolean;
   alElegir: () => void;
 };
 
 // Parte visual de la navegación (no lee la URL: recibe cuál sección está activa)
-function Navegacion({ activa, categoriaActiva, opciones, abierto, alElegir }: NavegacionProps) {
+function Navegacion({ activa, abierto, alElegir }: NavegacionProps) {
   return (
     // En móvil: panel a todo el ancho bajo la fila del logo, solo si está abierto.
     // Desde md: fila horizontal siempre visible.
@@ -56,14 +52,14 @@ function Navegacion({ activa, categoriaActiva, opciones, abierto, alElegir }: Na
           </Link>
         </li>
         <li>
-          <MenuCategorias
-            variante="cabecera"
-            etiqueta="Catálogo"
-            opciones={opciones}
-            activa={categoriaActiva}
-            seccionActiva={activa === "catalogo"}
-            alElegir={alElegir}
-          />
+          <Link
+            href={urlCatalogo()}
+            onClick={alElegir}
+            aria-current={activa === "catalogo" ? "page" : undefined}
+            className={claseEnlaceNav(activa === "catalogo")}
+          >
+            Catálogo
+          </Link>
         </li>
         <li>
           <Link
@@ -80,23 +76,20 @@ function Navegacion({ activa, categoriaActiva, opciones, abierto, alElegir }: Na
   );
 }
 
-// Calcula la sección activa con la ruta y ?categoria= (por eso va dentro de Suspense)
-function NavegacionConRuta(props: Omit<NavegacionProps, "activa" | "categoriaActiva">) {
+// Calcula la sección activa con la ruta y ?categoria= (por eso va dentro de Suspense).
+// En /catalogo se marca UNA sola: "Combos lavamanos" con su filtro, "Catálogo" con cualquier otro.
+function NavegacionConRuta(props: Omit<NavegacionProps, "activa">) {
   const pathname = usePathname();
   const categoria = useSearchParams().get("categoria");
 
   let activa: SeccionActiva = null;
-  let categoriaActiva: string | null = null;
   if (pathname === "/") activa = "inicio";
-  else if (pathname === "/catalogo") {
-    activa = categoria === PESTANA_COMBOS ? "combos" : "catalogo";
-    categoriaActiva = props.opciones.some((o) => o.nombre === categoria) ? categoria : PESTANA_TODOS;
-  }
+  else if (pathname === "/catalogo") activa = categoria === PESTANA_COMBOS ? "combos" : "catalogo";
 
-  return <Navegacion activa={activa} categoriaActiva={categoriaActiva} {...props} />;
+  return <Navegacion activa={activa} {...props} />;
 }
 
-export default function Header({ opciones }: { opciones: OpcionCategoria[] }) {
+export default function Header() {
   const { totalItems } = useCart();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const botonMenu = useRef<HTMLButtonElement>(null);
@@ -205,16 +198,10 @@ export default function Header({ opciones }: { opciones: OpcionCategoria[] }) {
             Mientras tanto se ve la misma navegación sin sección marcada. */}
         <Suspense
           fallback={
-            <Navegacion
-              activa={null}
-              categoriaActiva={null}
-              opciones={opciones}
-              abierto={menuAbierto}
-              alElegir={cerrarMenu}
-            />
+            <Navegacion activa={null} abierto={menuAbierto} alElegir={cerrarMenu} />
           }
         >
-          <NavegacionConRuta opciones={opciones} abierto={menuAbierto} alElegir={cerrarMenu} />
+          <NavegacionConRuta abierto={menuAbierto} alElegir={cerrarMenu} />
         </Suspense>
       </div>
     </header>

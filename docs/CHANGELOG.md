@@ -18,6 +18,10 @@ Formato de entrada:
 
 ---
 
+## 23/10/2026 - Cabecera sin desplegable de categorías y cinta de categorías en /catalogo
+- `Header`: enlaces simples Inicio, Catálogo y Combos lavamanos (en `/catalogo` se marca uno solo); ya no recibe props y se borró `MenuCategorias.tsx`. `useDesplegable` queda solo para el buscador.
+- `/catalogo`: el control "Categoría" pasa a `CintaCategorias` (encima del buscador), genérica `{ etiqueta, href, activo }` para admitir grupos de categorías más adelante. Si desborda, se desplaza sola en bucle (~30 px/s) con scroll nativo, arrastre, flechas y botón de pausa; con `prefers-reduced-motion`, solo scroll manual y flechas. `categoriasCatalogo()` reemplaza a `opcionesCategorias()` (sin cantidades). URL e ISR sin cambios. Ver ADR-33.
+
 ## 23/10/2026 - Combos en el resumen de inicio y en la vista "Todos" del catálogo
 - `/`: fila "Combos lavamanos" tras Lavamanos (hasta 4 familias vendibles, disponibles primero, `combosResumen()`), con `ComboCard compacta` y "Ver todos"; datos con la nueva `tarjetaFamilia()` (`lib/combos.ts`), que ahora usa también `/catalogo`. Una sola `getStockPorSkus`.
 - `/catalogo`: "Todos" muestra productos y luego combos, con o sin búsqueda; su cantidad en el menú suma las familias (33 hoy). `scripts/test-resumen.ts` cubre los casos de combos. Ver ADR-32.

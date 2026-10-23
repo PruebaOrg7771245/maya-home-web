@@ -1,7 +1,6 @@
 // src/components/useDesplegable.ts
 //
-// Comportamiento común de los paneles desplegables (menú de categorías de la
-// cabecera, control "Categoría" del catálogo y buscador de la cabecera):
+// Comportamiento de los paneles desplegables (hoy, el buscador de la cabecera):
 //  - botón con aria-expanded; el panel se muestra/oculta con el atributo hidden
 //  - Escape cierra y devuelve el foco al botón
 //  - clic fuera o Tab hacia fuera cierran (sin robar el foco)

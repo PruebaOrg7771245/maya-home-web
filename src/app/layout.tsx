@@ -4,7 +4,6 @@ import { Archivo, Inter } from "next/font/google"; // importamos las 2 fuentes q
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { opcionesCategorias } from "@/lib/categorias"; // categorías y cantidades para el menú de la cabecera
 import { CartProvider } from "@/context/CartContext"; // importamos el proveedor del carrito
 
 // Fuente para títulos - Archivo, en pesos semi-bold y bold
@@ -39,7 +38,7 @@ export default function RootLayout({
             ícono del carrito como cualquier página puedan leer/modificar
             el estado del carrito */}
         <CartProvider>
-          <Header opciones={opcionesCategorias()} />
+          <Header />
           {children}
           <Footer />
         </CartProvider>

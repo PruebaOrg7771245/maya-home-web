@@ -1,25 +1,13 @@
 // src/lib/categorias.ts
 //
-// Lista de categorías del catálogo con su cantidad, para el menú desplegable
-// (cabecera y /catalogo). Se calcula con los datos estáticos: no hay consultas.
+// Orden de las opciones del catálogo, para la cinta de /catalogo (ADR-33):
+// "Todos", las categorías de los productos y "Combos lavamanos" al final.
+// Se calcula con los datos estáticos: no hay consultas. Sin cantidades (ya no
+// se muestran en ningún sitio).
 
-import { products, categories } from "@/data/products";
-import { FAMILIAS_COMBO } from "@/data/combos";
+import { categories } from "@/data/products";
 import { PESTANA_COMBOS, PESTANA_TODOS } from "@/lib/catalogoUrl";
 
-export type OpcionCategoria = {
-  nombre: string; // texto del menú y valor de ?categoria=
-  cantidad: number; // productos de la categoría (en Combos, familias; en "Todos", ambos)
-};
-
-// "Todos" (productos + combos, ADR-32) + las categorías de los productos + "Combos lavamanos" al final
-export function opcionesCategorias(): OpcionCategoria[] {
-  return [
-    { nombre: PESTANA_TODOS, cantidad: products.length + FAMILIAS_COMBO.length },
-    ...categories.map((nombre) => ({
-      nombre,
-      cantidad: products.filter((p) => p.category === nombre).length,
-    })),
-    { nombre: PESTANA_COMBOS, cantidad: FAMILIAS_COMBO.length },
-  ];
+export function categoriasCatalogo(): string[] {
+  return [PESTANA_TODOS, ...categories, PESTANA_COMBOS];
 }

@@ -16,12 +16,12 @@ import { useSearchParams } from "next/navigation"; // lee ?categoria= y ?q= de l
 import { products } from "@/data/products"; // nuestros datos del catálogo
 import { FAMILIAS_COMBO } from "@/data/combos"; // solo para armar el texto buscable de los combos
 import ProductCard from "@/components/ProductCard"; // tarjeta individual de producto
-import MenuCategorias from "@/components/MenuCategorias"; // menú desplegable de categorías
+import CintaCategorias, { type ElementoCinta } from "@/components/CintaCategorias"; // cinta horizontal de categorías
 import { IconoLupa } from "@/components/BuscadorCabecera"; // lupa del campo
 import ComboCard, { type ComboCardData } from "@/components/ComboCard"; // tarjeta de una familia de combos
 import type { StockInfo } from "@/lib/stock"; // solo el TIPO: no arrastra el cliente de servidor al navegador
 import { PESTANA_COMBOS, PESTANA_TODOS, urlCatalogo } from "@/lib/catalogoUrl"; // nombres de categorías y URL del catálogo
-import { opcionesCategorias } from "@/lib/categorias";
+import { categoriasCatalogo } from "@/lib/categorias";
 import { guardarOrigen } from "@/lib/origenCatalogo"; // recuerda el filtro al abrir una ficha
 import {
   LARGO_MAXIMO_CONSULTA,
@@ -42,8 +42,8 @@ type CatalogoConFiltroProps = {
 // page.tsx arma una entrada por producto). Sin precio = no se puede vender.
 const STOCK_DESCONOCIDO: StockInfo = { status: "unknown", quantity: null, precio: null };
 
-// Opciones del menú de categorías (datos estáticos, se calculan una vez)
-const OPCIONES = opcionesCategorias();
+// Opciones de la cinta, en orden (datos estáticos, se calculan una vez)
+const CATEGORIAS = categoriasCatalogo();
 
 // Textos buscables, calculados una sola vez (id → texto sin tildes ni mayúsculas)
 const TEXTO_PRODUCTO = new Map(products.map((p) => [p.id, textoBusquedaProducto(p)]));
@@ -66,6 +66,17 @@ function Catalogo({ stockPorId, combos, categoria, texto, alEscribir, alLimpiar,
   const grupos = useMemo(() => prepararConsulta(texto), [texto]);
   const hayConsulta = grupos.length > 0;
   const hayFiltros = hayConsulta || categoria !== PESTANA_TODOS;
+
+  // Chips de la cinta: cambiar de categoría conserva la búsqueda escrita
+  const chips = useMemo<ElementoCinta[]>(
+    () =>
+      CATEGORIAS.map((nombre) => ({
+        etiqueta: nombre,
+        href: urlCatalogo(nombre, texto),
+        activo: nombre === categoria,
+      })),
+    [categoria, texto]
+  );
 
   // Productos: por categoría y por búsqueda (nada si la categoría es "Combos lavamanos")
   const productosFiltrados = useMemo(() => {
@@ -101,37 +112,29 @@ function Catalogo({ stockPorId, combos, categoria, texto, alEscribir, alLimpiar,
       <div className="mx-auto max-w-7xl px-6 py-8">
         <h1 className="sr-only">Catálogo</h1>
 
-        {/* Barra de herramientas: control de categoría + buscador. Alturas y anchos fijos
-            (h-11): no cambian de tamaño al escribir ni al cambiar de categoría. */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <MenuCategorias
-            variante="control"
-            etiqueta="Categoría"
-            opciones={OPCIONES}
-            activa={categoria}
-            q={texto}
-          />
+        {/* Cinta de categorías y, debajo, el buscador. Alturas fijas (h-11): nada cambia
+            de tamaño al escribir ni al cambiar de categoría. */}
+        <CintaCategorias elementos={chips} etiqueta="Categorías del catálogo" />
 
-          <div className="relative min-w-0 flex-1">
-            <label htmlFor="buscar-catalogo" className="sr-only">
-              Buscar en el catálogo
-            </label>
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6862]">
-              <IconoLupa tamano={18} />
-            </span>
-            <input
-              ref={inputRef}
-              id="buscar-catalogo"
-              type="search"
-              value={texto}
-              onChange={(e) => alEscribir(e.target.value)}
-              maxLength={LARGO_MAXIMO_CONSULTA}
-              placeholder="Buscar por nombre, categoría o código"
-              autoComplete="off"
-              enterKeyHint="search"
-              className="h-11 w-full border border-[#D8D4CC] bg-white pl-10 pr-3 text-base text-[#232320] placeholder:text-[#6B6862] focus:border-[#A8562E] sm:text-sm [&::-webkit-search-cancel-button]:hidden"
-            />
-          </div>
+        <div className="relative mt-3">
+          <label htmlFor="buscar-catalogo" className="sr-only">
+            Buscar en el catálogo
+          </label>
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6862]">
+            <IconoLupa tamano={18} />
+          </span>
+          <input
+            ref={inputRef}
+            id="buscar-catalogo"
+            type="search"
+            value={texto}
+            onChange={(e) => alEscribir(e.target.value)}
+            maxLength={LARGO_MAXIMO_CONSULTA}
+            placeholder="Buscar por nombre, categoría o código"
+            autoComplete="off"
+            enterKeyHint="search"
+            className="h-11 w-full border border-[#D8D4CC] bg-white pl-10 pr-3 text-base text-[#232320] placeholder:text-[#6B6862] focus:border-[#A8562E] sm:text-sm [&::-webkit-search-cancel-button]:hidden"
+          />
         </div>
 
         {/* Número de resultados (anunciado por lectores de pantalla) y "Limpiar filtros".
@@ -218,7 +221,7 @@ function CatalogoConUrl(props: CatalogoConFiltroProps) {
   const searchParams = useSearchParams();
   const pedida = searchParams.get("categoria");
   const categoria =
-    pedida !== null && OPCIONES.some((o) => o.nombre === pedida) ? pedida : PESTANA_TODOS;
+    pedida !== null && CATEGORIAS.includes(pedida) ? pedida : PESTANA_TODOS;
   const qUrl = (searchParams.get("q") ?? "").slice(0, LARGO_MAXIMO_CONSULTA);
 
   // Lo escrito vive en estado local (respuesta inmediata) y se copia a la URL con una pequeña espera
