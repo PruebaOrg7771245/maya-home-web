@@ -6,16 +6,18 @@
 //
 // Comportamiento:
 //  - Si los chips caben: cinta estática, sin copias ni movimiento.
-//  - Si no caben: se desplaza sola (~30 px/s) en bucle. El bucle es una SEGUNDA copia
-//    de los chips (aria-hidden, sin foco) pegada detrás de la primera; al llegar al
-//    final de la primera, scrollLeft vuelve atrás exactamente su ancho y la vista
-//    queda idéntica (sin salto visible).
-//  - El movimiento es scroll nativo (overflow-x + scrollLeft desde requestAnimationFrame),
-//    así que dedo, rueda/trackpad y teclado siguen funcionando; con mouse también se
-//    arrastra. Flechas ‹ › solo con desbordamiento y puntero fino; botón de pausa
-//    siempre que haya movimiento (WCAG 2.2.2).
-//  - Pausa con hover, foco, toque o arrastre; se reanuda 3 s después de la última
-//    interacción. No se mueve con la pestaña oculta ni con prefers-reduced-motion.
+//  - Si no caben: la cinta está quieta y cada 5 s da UN salto, igual que pulsar la flecha ›
+//    (60 % del ancho visible, animación de ~350 ms), y vuelve a quedarse quieta. El
+//    bucle es una SEGUNDA copia de los chips (aria-hidden, sin foco) pegada detrás de
+//    la primera; al pasar del final de la primera, scrollLeft vuelve atrás exactamente
+//    su ancho y la vista queda idéntica (sin salto visible).
+//  - Es scroll nativo (overflow-x), así que dedo, rueda/trackpad y teclado siguen
+//    funcionando; con mouse también se arrastra. Flechas ‹ › solo con desbordamiento
+//    y puntero fino.
+//  - Los saltos se programan con un setTimeout que se reinicia tras cada salto y tras
+//    cualquier interacción (hover, foco, toque, arrastre, rueda, flechas): el siguiente
+//    salto ocurre 5 s después. Con hover, foco de teclado, toque o pestaña oculta no
+//    salta. Con prefers-reduced-motion no hay saltos: solo scroll manual y flechas.
 //  - Al montar centra el chip activo, sin animación (si está al principio, la cinta
 //    arranca en su orden normal).
 "use client";
@@ -34,8 +36,7 @@ type CintaCategoriasProps = {
   etiqueta: string; // aria-label del <nav>
 };
 
-const VELOCIDAD_PX_S = 30; // movimiento automático
-const ESPERA_REANUDAR_MS = 3000; // sin interacción antes de volver a moverse
+const ESPERA_SALTO_MS = 5000; // quieta entre un salto y el siguiente (y tras una interacción)
 const UMBRAL_ARRASTRE_PX = 5; // menos que esto es un clic, no un arrastre
 const DURACION_FLECHA_MS = 350; // desplazamiento animado de las flechas
 
@@ -49,7 +50,7 @@ function claseChip(activo: boolean): string {
   }`;
 }
 
-// Botón redondo de control (flechas y pausa): mismo patrón que los iconos de la cabecera
+// Botón redondo de control (flechas): mismo patrón que los iconos de la cabecera
 // (sin display: las flechas lo cambian según el tipo de puntero)
 const CLASE_CONTROL =
   "h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#232320] transition-colors hover:bg-[#EFEDE7]";
@@ -96,25 +97,19 @@ export default function CintaCategorias({ elementos, etiqueta }: CintaCategorias
   const [reducido, setReducido] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
-  const [pausadoUsuario, setPausadoUsuario] = useState(false); // botón de pausa
 
-  // Valores que cambian a cada cuadro o evento: refs, no estado (sin re-render)
+  // Valores que cambian a cada evento: refs, no estado (sin re-render)
   const periodo = useRef(0); // ancho de una fila completa
-  const posicion = useRef(0); // scrollLeft "exacto" (con decimales) del movimiento automático
   const ultimoPuesto = useRef(-1); // último scrollLeft que puso este componente
-  const ultimaInteraccion = useRef(-Infinity); // sin interacción aún: se mueve desde el inicio
   const encima = useRef(false); // mouse sobre la cinta
   const enfocada = useRef(false); // foco dentro de la cinta
   const tocando = useRef(false); // dedo o botón del mouse abajo
-  const pausadoRef = useRef(false);
+  const temporizador = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const saltar = useRef<() => void>(() => {}); // salto automático (siempre la versión del último render)
   const arrastre = useRef<{ x: number; inicio: number; movido: boolean; id: number } | null>(null);
   const centrado = useRef(false);
 
-  const bucle = desborda && !reducido; // ¿se dibuja la copia y se mueve sola?
-
-  useEffect(() => {
-    pausadoRef.current = pausadoUsuario;
-  }, [pausadoUsuario]);
+  const bucle = desborda && !reducido; // ¿se dibuja la copia y salta sola?
 
   // prefers-reduced-motion, con cambios en vivo
   useEffect(() => {
@@ -173,42 +168,33 @@ export default function CintaCategorias({ elementos, etiqueta }: CintaCategorias
     // Nunca antes del inicio: un chip del principio (ej. "Todos") deja la cinta en su orden
     const destino = x <= 0 ? 0 : bucle ? normalizar(x) : x;
     poner(destino);
-    posicion.current = destino;
   }, [desborda, bucle, normalizar, poner]);
 
-  // Bucle de animación: avanza si nada lo pausa
+  // (Re)programa el próximo salto automático a 5 s desde ahora. Se llama tras cada
+  // salto y tras cada interacción, así que el salto nunca llega antes de esos 5 s.
+  const programar = useCallback(() => {
+    clearTimeout(temporizador.current);
+    if (!bucle) return;
+    temporizador.current = setTimeout(() => saltar.current(), ESPERA_SALTO_MS);
+  }, [bucle]);
+
+  const interactuar = programar;
+
+  // Al activarse el salto (o dejar de estar activo) se arranca/cancela el temporizador
+  useEffect(() => {
+    programar();
+    return () => clearTimeout(temporizador.current);
+  }, [programar]);
+
+  // Con la pestaña oculta no se salta; al volver, 5 s de espera desde ese momento
   useEffect(() => {
     if (!bucle) return;
-    let id = 0;
-    let anterior = performance.now();
-    const cuadro = (ahora: number) => {
-      const dt = Math.min(ahora - anterior, 50); // tras un corte (pestaña oculta) no da un salto
-      anterior = ahora;
-      const p = pista.current;
-      if (p) {
-        // El usuario movió la cinta (dedo, rueda, teclado): se sigue desde ahí
-        if (Math.abs(p.scrollLeft - ultimoPuesto.current) > 1) posicion.current = p.scrollLeft;
-        const quieta =
-          pausadoRef.current ||
-          encima.current ||
-          enfocada.current ||
-          tocando.current ||
-          document.visibilityState !== "visible" ||
-          ahora - ultimaInteraccion.current < ESPERA_REANUDAR_MS;
-        if (!quieta) {
-          posicion.current = normalizar(posicion.current + (VELOCIDAD_PX_S * dt) / 1000);
-          poner(posicion.current);
-        }
-      }
-      id = requestAnimationFrame(cuadro);
+    const alCambiarVisibilidad = () => {
+      if (document.visibilityState === "visible") programar();
     };
-    id = requestAnimationFrame(cuadro);
-    return () => cancelAnimationFrame(id);
-  }, [bucle, normalizar, poner]);
-
-  const interactuar = () => {
-    ultimaInteraccion.current = performance.now();
-  };
+    document.addEventListener("visibilitychange", alCambiarVisibilidad);
+    return () => document.removeEventListener("visibilitychange", alCambiarVisibilidad);
+  }, [bucle, programar]);
 
   // Scroll del usuario: cuenta como interacción y, con bucle, se mantiene en el primer
   // período (también hacia la izquierda: en 0 salta a "periodo", que se ve igual)
@@ -221,7 +207,6 @@ export default function CintaCategorias({ elementos, etiqueta }: CintaCategorias
     const w = periodo.current;
     if (p.scrollLeft >= w) poner(p.scrollLeft - w);
     else if (p.scrollLeft < 1) poner(p.scrollLeft + w);
-    posicion.current = p.scrollLeft;
   };
 
   // Arrastre con mouse (en táctil ya lo hace el scroll nativo)
@@ -243,7 +228,6 @@ export default function CintaCategorias({ elementos, etiqueta }: CintaCategorias
     }
     const x = bucle ? normalizar(a.inicio - dx) : a.inicio - dx;
     poner(x);
-    posicion.current = pista.current?.scrollLeft ?? x;
     interactuar();
   };
   const alSoltar = () => {
@@ -277,13 +261,21 @@ export default function CintaCategorias({ elementos, etiqueta }: CintaCategorias
     const paso = (ahora: number) => {
       const t = Math.min((ahora - t0) / DURACION_FLECHA_MS, 1);
       const suave = 1 - (1 - t) ** 3; // ease-out
-      posicion.current = normalizar(inicio + distancia * suave);
-      poner(posicion.current);
-      interactuar();
+      poner(normalizar(inicio + distancia * suave));
       if (t < 1) requestAnimationFrame(paso);
+      else interactuar(); // al terminar, 5 s de quietud hasta el siguiente salto
     };
     requestAnimationFrame(paso);
   };
+
+  // Salto automático: como pulsar ›, salvo que haya hover, foco de teclado, toque o pestaña oculta
+  useEffect(() => {
+    saltar.current = () => {
+      const quieta = encima.current || enfocada.current || tocando.current || document.visibilityState !== "visible";
+      if (quieta) programar();
+      else mover(1);
+    };
+  });
 
   return (
     <nav
@@ -336,16 +328,6 @@ export default function CintaCategorias({ elementos, etiqueta }: CintaCategorias
           <button type="button" onClick={() => mover(1)} aria-label="Ver más categorías" className={`${CLASE_CONTROL} hidden pointer-fine:flex`}>
             <Icono d="M9 6l6 6-6 6" />
           </button>
-          {bucle && (
-            <button
-              type="button"
-              onClick={() => setPausadoUsuario((v) => !v)}
-              aria-label={pausadoUsuario ? "Reanudar el movimiento de la cinta" : "Pausar el movimiento de la cinta"}
-              className={`${CLASE_CONTROL} flex`}
-            >
-              {pausadoUsuario ? <Icono d="M8 5.5v13l10.5-6.5z" /> : <Icono d="M9 6v12M15 6v12" />}
-            </button>
-          )}
         </div>
       )}
     </nav>
