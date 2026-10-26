@@ -18,6 +18,10 @@ Formato de entrada:
 
 ---
 
+## 26/10/2026 - Cinta por saltos sin botón de pausa y buscador sobre todo el catálogo
+- `CintaCategorias`: se quitó el botón de pausa y el movimiento continuo; ahora queda quieta y cada 5 s salta como la flecha ›, con bucle infinito. Sin saltos con `prefers-reduced-motion`. Deja de cumplir estrictamente WCAG 2.2.2 por decisión del dueño (mitigaciones en ADR-34).
+- `/catalogo`: con texto, el buscador abarca todo el catálogo (productos y combos) sin importar la categoría; los chips van sin `q` y ninguno sale activo durante la búsqueda; contador "N resultados para "x" en todo el catálogo"; botón "Limpiar búsqueda". `categoriaVista()` + prueba en `test-busqueda.ts`. Ver ADR-34.
+
 ## 23/10/2026 - Cabecera sin desplegable de categorías y cinta de categorías en /catalogo
 - `Header`: enlaces simples Inicio, Catálogo y Combos lavamanos (en `/catalogo` se marca uno solo); ya no recibe props y se borró `MenuCategorias.tsx`. `useDesplegable` queda solo para el buscador.
 - `/catalogo`: el control "Categoría" pasa a `CintaCategorias` (encima del buscador), genérica `{ etiqueta, href, activo }` para admitir grupos de categorías más adelante. Si desborda, se desplaza sola en bucle (~30 px/s) con scroll nativo, arrastre, flechas y botón de pausa; con `prefers-reduced-motion`, solo scroll manual y flechas. `categoriasCatalogo()` reemplaza a `opcionesCategorias()` (sin cantidades). URL e ISR sin cambios. Ver ADR-33.

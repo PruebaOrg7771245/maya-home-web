@@ -767,3 +767,38 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
 - **Consecuencia:** supera ADR-19 en lo que toca a las categorías y deja sin
   uso la cantidad de "Todos" de ADR-32.
 - **Estado:** vigente (23/10/2026).
+
+- **Nota (26/10/2026):** el movimiento continuo de la cinta (~30 px/s con
+  `requestAnimationFrame`) y su botón de pausa se reemplazaron por saltos
+  (ver ADR-34); el resto de la decisión sigue vigente.
+
+## ADR-34: Cinta por saltos sin botón de pausa y buscador sobre todo el catálogo
+- **Decisión (cinta):** por decisión del dueño, `CintaCategorias` ya no se
+  mueve de forma continua ni tiene botón de pausa. Si desborda, queda quieta y
+  cada 5 s avanza un paso igual que la flecha › (~60 % del ancho visible,
+  350 ms) y vuelve a quedarse quieta. Se conserva el bucle infinito con la copia
+  `aria-hidden`. Un `setTimeout` se reprograma tras cada salto e interacción
+  (el siguiente salto llega 5 s después de la última interacción). Se quitó el
+  bucle `requestAnimationFrame` de movimiento, `VELOCIDAD_PX_S` y el estado de
+  pausa del usuario. Con `prefers-reduced-motion` no hay saltos.
+- **Riesgo aceptado:** al no haber control visible de pausa, no se cumple
+  estrictamente WCAG 2.2.2 (Pausar, detener, ocultar). Mitigaciones: el
+  movimiento es un paso breve cada 5 s con largos periodos de quietud; se
+  pausa con hover, foco de teclado, toque/arrastre y pestaña oculta; las
+  flechas y el scroll manual siguen disponibles; `prefers-reduced-motion` lo
+  desactiva.
+- **Decisión (buscador):** con texto en el buscador, los resultados salen de
+  TODO el catálogo (productos y combos) sin importar la categoría
+  (`categoriaVista()` en `lib/busqueda.ts`). La URL conserva `?categoria=` y
+  `?q=` (contrato sin cambios); al borrar el texto se vuelve a la categoría.
+  Mientras hay búsqueda ningún chip aparece activo. Elegir un chip es una
+  intención nueva: sus enlaces van sin `q` (antes lo conservaban,
+  `urlCatalogo(nombre, texto)`), así que el buscador se vacía. El contador
+  dice `N resultados para "x" en todo el catálogo`; con búsqueda el botón es
+  "Limpiar búsqueda" (quita solo el texto) y el estado vacío ofrece "Ver todo
+  el catálogo" (limpia todo). El buscador de la cabecera ya enviaba
+  `/catalogo?q=` sin categoría: es coherente y no cambió.
+- **Verificación:** tsc, lint y los cuatro scripts (`test-busqueda` incluye el
+  caso con categoría activa). La prueba manual en navegador no se pudo hacer
+  (extensión de Chrome no conectada).
+- **Estado:** vigente (26/10/2026).

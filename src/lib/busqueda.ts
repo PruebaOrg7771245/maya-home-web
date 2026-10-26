@@ -12,6 +12,8 @@
 //   "sanitario"). Una palabra en plural también prueba su singular
 //   ("sanitarios" encuentra "Sanitario SD-1001").
 // - Sinónimos de uso común, en ambos sentidos (ver GRUPOS_SINONIMOS).
+// - Con texto escrito se busca en todo el catálogo, sin importar la categoría
+//   activa (ver categoriaVista).
 
 // Sinónimos reales del oficio, en UN solo sitio. Cada grupo es una lista de
 // términos equivalentes (sin tildes ni mayúsculas): buscar cualquiera de ellos
@@ -83,6 +85,13 @@ export function coincide(textoNormalizado: string, grupos: GrupoBusqueda[]): boo
   return grupos.every((alternativas) =>
     alternativas.some((alternativa) => textoNormalizado.includes(alternativa))
   );
+}
+
+// Categoría que filtra la vista: con texto en el buscador la búsqueda abarca TODO el
+// catálogo (productos y combos), así que se ignora la categoría activa y se usa la de
+// "todos". Sin texto, manda la categoría elegida.
+export function categoriaVista(categoria: string, grupos: GrupoBusqueda[], categoriaTodos: string): string {
+  return grupos.length > 0 ? categoriaTodos : categoria;
 }
 
 // Texto buscable de un producto: nombre, categoría, descripción y sku

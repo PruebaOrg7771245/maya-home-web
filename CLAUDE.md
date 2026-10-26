@@ -126,8 +126,11 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
   (`sr-only`) → cinta de categorías → buscador → resultados. "Todos" muestra
   los productos y, a continuación, los combos bajo su título (ADR-32); el
   contador de resultados los incluye. Una
-  categoría concreta muestra solo esa; "Combos lavamanos", solo combos. La
-  búsqueda filtra ambos igual que antes. La
+  categoría concreta muestra solo esa; "Combos lavamanos", solo combos. Con
+  texto en el buscador se busca en TODO el catálogo (productos y combos) sin
+  importar la categoría (ADR-34): la URL conserva `?categoria=` pero no
+  filtra, y al borrar el texto se vuelve a esa categoría. El contador dice
+  `N resultados para "x" en todo el catálogo`. La
   URL del catálogo se arma siempre con `urlCatalogo()` (`lib/catalogoUrl.ts`).
 - **Buscador (`lib/busqueda.ts`):** filtra en el navegador sobre lo ya
   cargado, sin consultas nuevas; lo que escribe la persona no se guarda ni se
@@ -135,20 +138,22 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
   = todas deben coincidir, el plural prueba el singular y hay un sinónimo
   (`lavabo` → `lavamanos`, ver `SINONIMOS`). Productos: nombre, categoría,
   descripción y sku; combos: nombre de la familia, nombre y etiqueta de cada
-  pieza y la palabra "combo".
+  pieza y la palabra "combo". `categoriaVista()` decide la categoría que
+  filtra: con texto, siempre "Todos".
 - **Cinta de categorías (`CintaCategorias`, ADR-33):** solo en `/catalogo`.
   Componente cliente GENÉRICO: recibe `elementos: { etiqueta, href, activo }[]`
   y no trae categorías fijas (está pensado para recibir más adelante grupos de
   categorías sin cambiarlo). `CatalogoConFiltro` arma los chips con
   `categoriasCatalogo()` ("Todos", categorías, "Combos lavamanos"; sin
-  cantidades) y `urlCatalogo(nombre, q)`. Si los chips caben, es estática; si
-  no, se desplaza sola a ~30 px/s en bucle (una copia `aria-hidden` con
-  `tabindex=-1`), moviendo `scrollLeft` con `requestAnimationFrame` sobre
-  scroll nativo. Se mueve a mano con dedo, rueda/trackpad, arrastre con mouse
+  cantidades) y `urlCatalogo(nombre)` (sin `q`: elegir un chip vacía el buscador; con
+  búsqueda ningún chip sale activo). Si los chips caben, es estática; si no,
+  queda quieta y cada 5 s da un salto igual que la flecha › (~60 % del ancho,
+  350 ms) sobre scroll nativo, en bucle (una copia `aria-hidden` con
+  `tabindex=-1`), con un `setTimeout` reprogramado (ADR-34). Se mueve a mano con dedo, rueda/trackpad, arrastre con mouse
   y flechas ‹ › (solo con desbordamiento y `pointer-fine`). Se pausa con
-  hover, foco de teclado, toque/arrastre y pestaña oculta, y vuelve tras 3 s.
-  Tiene botón de pausa (WCAG 2.2.2); con `prefers-reduced-motion` no se mueve
-  sola. Al cargar centra el chip activo. `useDesplegable` (aria-expanded,
+  hover, foco de teclado, toque/arrastre y pestaña oculta; tras cualquier
+  interacción el siguiente salto llega 5 s después. Sin botón de pausa (decisión
+  del dueño, ver ADR-34); con `prefers-reduced-motion` no salta sola. Al cargar centra el chip activo. `useDesplegable` (aria-expanded,
   Escape, clic fuera, flechas) queda solo para el buscador de la cabecera.
 - **Datos del sitio (`src/data/sitio.ts`):** marca, empresa, contacto, redes y
   WhatsApp (se construye con `NEXT_PUBLIC_ADVISOR_PHONE`, sin número copiado).

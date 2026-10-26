@@ -8,6 +8,7 @@ import assert from "node:assert/strict";
 import { products } from "../src/data/products.ts";
 import { FAMILIAS_COMBO } from "../src/data/combos.ts";
 import {
+  categoriaVista,
   coincide,
   normalizar,
   prepararConsulta,
@@ -170,6 +171,19 @@ prueba("combos: la palabra 'combo' los encuentra todos", () => {
 
 prueba("combos: una búsqueda que no es de combos no los trae", () => {
   assert.deepEqual(buscarCombos("sauna"), []);
+});
+
+// ---------- alcance: con texto se busca en todo el catálogo ----------
+prueba("con texto y una categoría activa, salen productos de otras categorías y combos", () => {
+  const categoria = "Sanitarios";
+  const grupos = prepararConsulta("lav");
+  assert.equal(categoriaVista(categoria, grupos, "Todos"), "Todos"); // la categoría activa no filtra
+  assert.equal(categoriaVista(categoria, prepararConsulta("  "), "Todos"), categoria); // sin texto manda la categoría
+  const otras = products.filter(
+    (p) => p.category !== categoria && coincide(textoBusquedaProducto(p), grupos)
+  );
+  assert.ok(otras.length > 0, "'lav' debe traer productos que no son de Sanitarios");
+  assert.ok(buscarCombos("lav").length > 0, "'lav' debe traer combos lavamanos");
 });
 
 // ---------- URL ----------

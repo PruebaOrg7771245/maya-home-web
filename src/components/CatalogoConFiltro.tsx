@@ -25,6 +25,7 @@ import { categoriasCatalogo } from "@/lib/categorias";
 import { guardarOrigen } from "@/lib/origenCatalogo"; // recuerda el filtro al abrir una ficha
 import {
   LARGO_MAXIMO_CONSULTA,
+  categoriaVista,
   coincide,
   prepararConsulta,
   textoBusquedaCombo,
@@ -57,25 +58,39 @@ type CatalogoProps = CatalogoConFiltroProps & {
   texto: string; // lo escrito en el buscador
   alEscribir: (valor: string) => void;
   alLimpiar: () => void; // quita categoría y búsqueda
+  alLimpiarBusqueda: () => void; // quita solo la búsqueda y conserva la categoría
   inputRef: RefObject<HTMLInputElement | null>;
 };
 
 // Parte visual del catálogo; no sabe de dónde salen la categoría y el texto
-function Catalogo({ stockPorId, combos, categoria, texto, alEscribir, alLimpiar, inputRef }: CatalogoProps) {
-  const verCombos = categoria === PESTANA_COMBOS; // categoría "Combos lavamanos": el grid muestra familias
+function Catalogo({
+  stockPorId,
+  combos,
+  categoria: categoriaUrl,
+  texto,
+  alEscribir,
+  alLimpiar,
+  alLimpiarBusqueda,
+  inputRef,
+}: CatalogoProps) {
   const grupos = useMemo(() => prepararConsulta(texto), [texto]);
   const hayConsulta = grupos.length > 0;
+  // Con texto escrito la búsqueda abarca TODO el catálogo: la categoría de la URL se
+  // conserva (al borrar el texto se vuelve a ella) pero no filtra mientras se busca.
+  const categoria = categoriaVista(categoriaUrl, grupos, PESTANA_TODOS);
+  const verCombos = categoria === PESTANA_COMBOS; // categoría "Combos lavamanos": el grid muestra familias
   const hayFiltros = hayConsulta || categoria !== PESTANA_TODOS;
 
-  // Chips de la cinta: cambiar de categoría conserva la búsqueda escrita
+  // Chips de la cinta: elegir uno es una intención nueva, así que su enlace va SIN búsqueda.
+  // Mientras se busca, ninguno aparece activo (la búsqueda no pertenece a una categoría).
   const chips = useMemo<ElementoCinta[]>(
     () =>
       CATEGORIAS.map((nombre) => ({
         etiqueta: nombre,
-        href: urlCatalogo(nombre, texto),
-        activo: nombre === categoria,
+        href: urlCatalogo(nombre),
+        activo: !hayConsulta && nombre === categoria,
       })),
-    [categoria, texto]
+    [categoria, hayConsulta]
   );
 
   // Productos: por categoría y por búsqueda (nada si la categoría es "Combos lavamanos")
@@ -137,19 +152,25 @@ function Catalogo({ stockPorId, combos, categoria, texto, alEscribir, alLimpiar,
           />
         </div>
 
-        {/* Número de resultados (anunciado por lectores de pantalla) y "Limpiar filtros".
+        {/* Número de resultados (anunciado por lectores de pantalla) y "Limpiar búsqueda"/"Limpiar filtros".
             min-h-11: la fila no cambia de alto aunque el botón aparezca o desaparezca. */}
         <div className="mt-2 flex min-h-11 items-center justify-between gap-4 text-sm text-[#6B6862]">
           <p role="status" aria-live="polite">
             {total} {total === 1 ? "resultado" : "resultados"}
+            {hayConsulta && (
+              <>
+                {" "}
+                para &ldquo;<span className="break-all">{texto.trim()}</span>&rdquo; en todo el catálogo
+              </>
+            )}
           </p>
           {hayFiltros && (
             <button
               type="button"
-              onClick={alLimpiar}
-              className="min-h-11 px-1 text-[#A8562E] underline transition-colors hover:text-[#232320]"
+              onClick={hayConsulta ? alLimpiarBusqueda : alLimpiar}
+              className="min-h-11 shrink-0 px-1 text-[#A8562E] underline transition-colors hover:text-[#232320]"
             >
-              Limpiar filtros
+              {hayConsulta ? "Limpiar búsqueda" : "Limpiar filtros"}
             </button>
           )}
         </div>
@@ -216,7 +237,7 @@ function Catalogo({ stockPorId, combos, categoria, texto, alEscribir, alLimpiar,
 // Lee categoría y búsqueda de la URL y las actualiza SIN recargar ni navegar:
 // history.replaceState cambia la dirección (Next.js la sincroniza con useSearchParams)
 // y no llena el historial con cada tecla. Una categoría desconocida cae en "Todos".
-// (Elegir categoría en el menú es un enlace normal: sí queda en el historial.)
+// (Elegir una categoría en la cinta es un enlace normal: sí queda en el historial.)
 function CatalogoConUrl(props: CatalogoConFiltroProps) {
   const searchParams = useSearchParams();
   const pedida = searchParams.get("categoria");
@@ -256,6 +277,15 @@ function CatalogoConUrl(props: CatalogoConFiltroProps) {
     inputRef.current?.focus(); // el botón desaparece: el foco pasa al campo en vez de perderse
   }
 
+  // Quita solo el texto: la URL conserva ?categoria= y se vuelve a la vista de esa categoría
+  function alLimpiarBusqueda() {
+    clearTimeout(espera.current);
+    setTexto("");
+    const categoriaActual = new URLSearchParams(window.location.search).get("categoria") ?? PESTANA_TODOS;
+    window.history.replaceState(null, "", urlCatalogo(categoriaActual));
+    inputRef.current?.focus();
+  }
+
   return (
     <Catalogo
       {...props}
@@ -263,6 +293,7 @@ function CatalogoConUrl(props: CatalogoConFiltroProps) {
       texto={texto}
       alEscribir={alEscribir}
       alLimpiar={alLimpiar}
+      alLimpiarBusqueda={alLimpiarBusqueda}
       inputRef={inputRef}
     />
   );
@@ -279,6 +310,7 @@ export default function CatalogoConFiltro(props: CatalogoConFiltroProps) {
           texto=""
           alEscribir={() => {}}
           alLimpiar={() => {}}
+          alLimpiarBusqueda={() => {}}
           inputRef={{ current: null }}
         />
       }
