@@ -40,6 +40,15 @@ disponibles.
   conocida: combos que comparten pieza no descuentan stock entre sí. Si los
   datos del espejo faltan para alguna pieza, el combo no se vende; por eso es
   más importante que `sync-stock.js` cargue las 13 piezas de combos.
+- Venta por medida (26/10/2026, aún sin productos cargados): un producto con
+  `ventaPorMedida` (ej. piso de bambú por m², `umbralPocas: 20`) se clasifica
+  con su propio umbral (`clasificarExistencia(existencia, umbralPocas)`,
+  admite decimales) y su existencia real NO llega al navegador:
+  `stockParaInterfaz(info, venta)` devuelve el estado con `quantity: null`
+  (lo usan `/`, `/catalogo` y `getStock(sku, venta)` en la ficha).
+  `estadoDeProducto(info, venta)` da el estado correcto en el servidor (snapshot
+  de `/api/pedido`). Lógica pura en `src/lib/umbralStock.ts`, re-exportada por
+  `stock.ts`; la fuente del dato no cambió. Pruebas: `scripts/test-stock.ts`.
 - Pendiente: sincronización automática. Ya no está pendiente migrar
   `/api/pedido` (hecho el 07/10/2026).
 - Pendiente al corregir `sync-stock.js`: el código del mueble

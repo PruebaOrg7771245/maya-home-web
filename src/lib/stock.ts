@@ -23,7 +23,15 @@
 // componente "use client". Los componentes cliente reciben los datos por props.
 
 import { supabaseServidor } from "@/lib/supabase";
-import { clasificarExistencia } from "@/lib/umbralStock"; // umbral y clasificación compartidos con los combos
+import { clasificarExistencia, stockParaInterfaz } from "@/lib/umbralStock"; // umbral y clasificación compartidos con los combos
+import type { VentaPorMedida } from "@/data/products";
+
+// Productos por medida (Product.ventaPorMedida): funciones puras que viven en
+// umbralStock.ts (para poder probarlas sin Supabase) y se re-exportan aquí, así
+// páginas y rutas siguen importando todo lo de stock desde este archivo.
+//   - stockParaInterfaz(info, venta?): lo que puede ir a props/HTML (quantity null).
+//   - estadoDeProducto(info, venta?): estado con el umbral correcto, para el servidor.
+export { stockParaInterfaz, estadoDeProducto } from "@/lib/umbralStock";
 
 // Los posibles estados de disponibilidad que puede mostrar la web
 export type StockStatus =
@@ -113,11 +121,16 @@ export async function getStockPorSkus(
 }
 
 // Stock y precio de UN producto. Acepta sku vacío/ausente: en ese caso
-// devuelve "coming_soon" sin consultar nada.
-export async function getStock(sku: string | undefined | null): Promise<StockInfo> {
+// devuelve "coming_soon" sin consultar nada. Si se pasa `venta` (producto por
+// medida), el resultado ya es apto para la interfaz: estado con su umbral y
+// quantity null (ver stockParaInterfaz). Sin `venta`, igual que siempre.
+export async function getStock(
+  sku: string | undefined | null,
+  venta?: VentaPorMedida
+): Promise<StockInfo> {
   if (!sku || sku.trim() === "") return SIN_SKU;
   const resultado = await getStockPorSkus([sku]);
-  return resultado[sku] ?? DESCONOCIDO;
+  return stockParaInterfaz(resultado[sku] ?? DESCONOCIDO, venta);
 }
 
 // ÚNICA función de precio del proyecto: precio público (IVA incluido) de un

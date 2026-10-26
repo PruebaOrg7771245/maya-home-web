@@ -119,7 +119,8 @@ for (const f of FAMILIAS_COMBO) {
 }
 
 // 11) Umbral compartido: mismos cortes para productos y combos
-assert.deepEqual([0, 1, 5, 6].map(clasificarExistencia), ["out_of_stock", "low_stock", "low_stock", "in_stock"]);
+// (con flecha: pasada directo a .map(), el índice entraría como umbralPocas)
+assert.deepEqual([0, 1, 5, 6].map((n) => clasificarExistencia(n)), ["out_of_stock", "low_stock", "low_stock", "in_stock"]);
 
 // 12) Formato de precio sin cambios ($479,10); se normaliza el espacio especial que Intl puede insertar
 assert.equal(formatPrice(479.1).replace(/s/g, ""), "$479,10");

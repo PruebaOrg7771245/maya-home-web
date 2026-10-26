@@ -79,6 +79,19 @@ export type Product = {
   // src y alt llevan width y height (px del archivo) para reservar el espacio y evitar saltos.
   // Si no existe o está vacío, el bloque no se muestra.
   detalles?: ProductDetalle[];
+  // OPCIONAL. Solo para productos que se venden por medida (hoy, el piso de bambú por m²).
+  // Con este campo: el precio y la cantidad se muestran con la unidad ("$X por m²", "2 m²"),
+  // la existencia NUNCA se muestra ni viaja al navegador (solo el estado) y "Pocas
+  // unidades" va de más de 0 hasta umbralPocas inclusive. Sin él, todo como siempre.
+  // Ejemplo: ventaPorMedida: { unidad: "m²", umbralPocas: 20 },
+  ventaPorMedida?: VentaPorMedida;
+};
+
+// Venta por medida: unidad en la que se cuenta (precio y cantidad) y umbral propio de
+// "Pocas unidades", en esa misma unidad.
+export type VentaPorMedida = {
+  unidad: "m²";
+  umbralPocas: number;
 };
 
 export type ProductDetalle = {
@@ -113,8 +126,7 @@ export const products: Product[] = [
     ],
     variants: [{ attribute: "medidas", value: "500 x 350 x 120 mm" }],
     prices: { minorista: null, mayorista: null },
-    sku: "9636M001",
-  },
+    sku: "9636M001",  },
   {
     id: "lavamanos-9636",
     name: "Lavamanos Rectangular Blanco 9636",

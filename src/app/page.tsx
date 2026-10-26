@@ -15,7 +15,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { sitio } from "@/data/sitio";
 import { products } from "@/data/products";
-import { getStockPorSkus, type StockInfo } from "@/lib/stock";
+import { getStockPorSkus, stockParaInterfaz, type StockInfo } from "@/lib/stock";
 import { combosResumen, seccionesResumen } from "@/lib/resumenCatalogo";
 import { PESTANA_COMBOS, urlCatalogo } from "@/lib/catalogoUrl";
 import { FAMILIAS_COMBO } from "@/data/combos";
@@ -61,7 +61,11 @@ export default async function PortadaPage() {
   const sinSku: StockInfo = { status: "coming_soon", quantity: null, precio: null };
   const stockPorId: Record<string, StockInfo> = {};
   for (const product of products) {
-    stockPorId[product.id] = product.sku ? stockPorSku[product.sku] ?? sinSku : sinSku;
+    // Productos por medida: estado con su umbral y sin existencia (no viaja al HTML)
+    stockPorId[product.id] = stockParaInterfaz(
+      product.sku ? stockPorSku[product.sku] ?? sinSku : sinSku,
+      product.ventaPorMedida
+    );
   }
 
   const secciones = seccionesResumen(products, stockPorId);

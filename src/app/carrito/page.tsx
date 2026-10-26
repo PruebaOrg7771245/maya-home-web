@@ -23,6 +23,7 @@ import {
 import { limpiarTelefono, validarTelefono } from "@/lib/telefono";
 import { parsearIdCombinacion } from "@/lib/combos";
 import { formatPrice } from "@/lib/formatPrice";
+import { cantidadConUnidad, sufijoPrecio, textoCantidad } from "@/lib/unidadVenta";
 
 // Igual que antes con el correo: lo leemos de una variable de entorno
 // (ver .env.local.example) en vez de quemarlo en el código. El "?? " define
@@ -176,8 +177,11 @@ export default function CarritoPage() {
     const itemsList = items
       .map(
         (item) =>
-          `- ${item.name} x${item.quantity} (${
-            item.price !== null ? `${formatPrice(item.price)} IVA incluido` : "precio a confirmar"
+          // Cantidad: "x2" o, en venta por medida, "2 m²"; el precio va "por m²"
+          `- ${item.name} ${textoCantidad(item.quantity, item.unidad)} (${
+            item.price !== null
+              ? `${formatPrice(item.price)}${sufijoPrecio(item.unidad)} IVA incluido`
+              : "precio a confirmar"
           })` +
           // Se agregó estando agotado: el asesor debe confirmar la disponibilidad con el cliente
           (item.sinStock ? " (sin stock: confirmar disponibilidad)" : "") +
@@ -335,7 +339,14 @@ export default function CarritoPage() {
                     >
                       −
                     </button>
-                    <span className="w-6 text-center text-sm">{item.quantity}</span>
+                    {/* Con unidad ("2 m²") el ancho fijo w-6 no alcanza: crece sin partirse */}
+                    <span
+                      className={
+                        item.unidad ? "min-w-6 whitespace-nowrap text-center text-sm" : "w-6 text-center text-sm"
+                      }
+                    >
+                      {cantidadConUnidad(item.quantity, item.unidad)}
+                    </span>
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       className="h-7 w-7 border border-[#D8D4CC] text-[#232320] hover:bg-[#EFEDE7]"

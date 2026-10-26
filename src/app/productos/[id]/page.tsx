@@ -10,6 +10,7 @@ import { urlCatalogo } from "@/lib/catalogoUrl";
 import { products } from "@/data/products";
 import ProductGallery from "@/components/ProductGallery";
 import { formatPrice } from "@/lib/formatPrice";
+import { sufijoPrecio } from "@/lib/unidadVenta";
 import AddToCartButton from "@/components/AddToCartButton"; // nuevo botón interactivo
 import StockBadge from "@/components/StockBadge"; // nuevo badge de disponibilidad
 import AvisoSinPrecio from "@/components/AvisoSinPrecio"; // qué mostrar cuando el producto no tiene precio
@@ -62,13 +63,16 @@ export default async function ProductoPage({
 
   // Stock y precio reales (tabla stock_espejo). Se consulta por sku, el código
   // del ERP; si el producto no tiene sku, getStock() devuelve "coming_soon"
-  // sin consultar nada.
-  const stock = await getStock(product.sku);
+  // sin consultar nada. Con ventaPorMedida vuelve el estado con su umbral y
+  // quantity null: la existencia real no llega al HTML ni a los componentes.
+  const stock = await getStock(product.sku, product.ventaPorMedida);
 
   // Sin precio = no se puede vender: no se muestra precio ni botón de compra.
   // Agotado (con precio y sin existencias) SÍ se puede agregar, con aviso.
   const precio = stock.precio;
   const agotado = stock.status === "out_of_stock";
+  // Venta por medida (ej. piso por m²): precio y cantidad se leen en esa unidad
+  const unidad = product.ventaPorMedida?.unidad;
 
   // Bloques de información: cada uno aparece SOLO si tiene contenido (no se muestran
   // títulos vacíos ni "pendiente"). "Medidas" es la primera fila de la tabla.
@@ -129,6 +133,10 @@ export default async function ProductoPage({
                     <span className="text-[#6B6862]">Precio (IVA incluido)</span>
                     <span className="text-xl font-semibold text-[#232320]">
                       {formatPrice(precio)}
+                      {/* Venta por medida: "$X por m²" (sin unidad no se agrega nada) */}
+                      {unidad && (
+                        <span className="text-sm font-normal text-[#6B6862]">{sufijoPrecio(unidad)}</span>
+                      )}
                     </span>
                   </div>
                 </div>
@@ -141,6 +149,7 @@ export default async function ProductoPage({
                   image={fotos[0]}
                   price={precio}
                   agotado={agotado}
+                  unidad={unidad}
                 />
               </>
             )}

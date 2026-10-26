@@ -11,6 +11,7 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
+import { cantidadConUnidad } from "@/lib/unidadVenta";
 
 type AddToCartButtonProps = {
   id: string;
@@ -18,6 +19,7 @@ type AddToCartButtonProps = {
   image: string;
   price: number; // precio público (IVA incluido); siempre existe, si no hay precio no se muestra este componente
   agotado?: boolean; // tiene precio pero no hay existencias: igual se puede agregar, con aviso
+  unidad?: string; // producto vendido por medida (ej. "m²"): el contador dice "N m² en el pedido"
 };
 
 export default function AddToCartButton({
@@ -26,6 +28,7 @@ export default function AddToCartButton({
   image,
   price,
   agotado = false,
+  unidad,
 }: AddToCartButtonProps) {
   const { items, addItem, updateQuantity } = useCart();
 
@@ -40,7 +43,7 @@ export default function AddToCartButton({
     <div className="mt-8">
       {!cartItem ? (
         <button
-          onClick={() => addItem({ id, name, image, price, sinStock: agotado })}
+          onClick={() => addItem({ id, name, image, price, sinStock: agotado, unidad })}
           className="w-full bg-[#232320] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#A8562E] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8562E]"
         >
           Agregar al pedido
@@ -55,7 +58,7 @@ export default function AddToCartButton({
             −
           </button>
           <span aria-live="polite" className="text-sm font-medium text-[#232320]">
-            {cartItem.quantity} en el pedido
+            {cantidadConUnidad(cartItem.quantity, unidad)} en el pedido
           </span>
           <button
             onClick={() => updateQuantity(id, cartItem.quantity + 1)}

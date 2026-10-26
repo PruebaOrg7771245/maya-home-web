@@ -7,6 +7,7 @@
 
 import { Resend } from "resend";
 import { formatPrice } from "@/lib/formatPrice"; // mismo formato de precio que el resto del sitio
+import { cantidadConUnidad, sufijoPrecio } from "@/lib/unidadVenta"; // "2 m²" / "por m²" en venta por medida
 
 // El SDK busca RESEND_API_KEY automáticamente en las variables de
 // entorno, así que no hace falta pasarla a mano acá.
@@ -26,6 +27,7 @@ type ProductoPedido = {
   nombre: string;
   cantidad: number;
   precio: number; // precio público por unidad, IVA incluido
+  unidad?: string; // solo venta por medida (ej. "m²"): cantidad y precio se escriben con ella
   sinStock?: boolean; // true si estaba agotado (out_of_stock) al hacer el pedido
   piezas?: Array<{ sku: string; nombre: string }>; // solo combos: lavamanos y mueble
 };
@@ -61,8 +63,8 @@ function construirHtmlPedido(pedido: DatosPedido): string {
       (p) =>
         `<tr>
           <td style="padding:8px;border-bottom:1px solid #D8D4CC;">${p.nombre}${p.sinStock ? ' <strong style="color:#B3261E;">(sin stock)</strong>' : ""}${filasPiezas(p.piezas)}</td>
-          <td style="padding:8px;border-bottom:1px solid #D8D4CC;text-align:center;">${p.cantidad}</td>
-          <td style="padding:8px;border-bottom:1px solid #D8D4CC;text-align:right;">${formatPrice(p.precio)}</td>
+          <td style="padding:8px;border-bottom:1px solid #D8D4CC;text-align:center;">${cantidadConUnidad(p.cantidad, p.unidad)}</td>
+          <td style="padding:8px;border-bottom:1px solid #D8D4CC;text-align:right;">${formatPrice(p.precio)}${sufijoPrecio(p.unidad)}</td>
         </tr>`
     )
     .join("");

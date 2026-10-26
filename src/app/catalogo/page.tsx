@@ -8,7 +8,7 @@
 import { products } from "@/data/products";
 import CatalogoConFiltro from "@/components/CatalogoConFiltro";
 import BotonWhatsApp from "@/components/BotonWhatsApp";
-import { getStockPorSkus, type StockInfo } from "@/lib/stock";
+import { getStockPorSkus, stockParaInterfaz, type StockInfo } from "@/lib/stock";
 import { FAMILIAS_COMBO } from "@/data/combos";
 import { tarjetaFamilia } from "@/lib/combos";
 
@@ -31,7 +31,11 @@ export default async function CatalogoPage() {
   const sinSku: StockInfo = { status: "coming_soon", quantity: null, precio: null };
   const stockPorId: Record<string, StockInfo> = {};
   for (const product of products) {
-    stockPorId[product.id] = product.sku ? stockPorSku[product.sku] ?? sinSku : sinSku;
+    // Productos por medida: estado con su umbral y sin existencia (no viaja al navegador)
+    stockPorId[product.id] = stockParaInterfaz(
+      product.sku ? stockPorSku[product.sku] ?? sinSku : sinSku,
+      product.ventaPorMedida
+    );
   }
 
   // Una tarjeta por familia: "Desde $X" = menor precio entre sus combinaciones vendibles

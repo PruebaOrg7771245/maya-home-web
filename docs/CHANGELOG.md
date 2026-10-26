@@ -18,6 +18,10 @@ Formato de entrada:
 
 ---
 
+## 26/10/2026 - Productos vendidos por medida (m²)
+- Campo opcional `ventaPorMedida: { unidad: "m²"; umbralPocas }` en `Product`, pensado para el piso de bambú (umbral 20 m², aún sin cargar). Estado con umbral propio vía `clasificarExistencia`; la existencia real no se muestra ni llega al navegador (`quantity: null` en `/`, `/catalogo` y la ficha). Ver ADR-35.
+- Unidad visible: "$X por m²" en ficha y tarjetas; "2 m²" en carrito, WhatsApp y correo al asesor (helpers en `lib/unidadVenta.ts`). `/api/pedido` guarda estado y unidad (del catálogo) en el snapshot. Nuevo `scripts/test-stock.ts`; corregido `test-combos.ts` (`.map(clasificarExistencia)` pasaba el índice como umbral).
+
 ## 26/10/2026 - Cinta por saltos sin botón de pausa y buscador sobre todo el catálogo
 - `CintaCategorias`: se quitó el botón de pausa y el movimiento continuo; ahora queda quieta y cada 5 s salta como la flecha ›, con bucle infinito. Sin saltos con `prefers-reduced-motion`. Deja de cumplir estrictamente WCAG 2.2.2 por decisión del dueño (mitigaciones en ADR-34).
 - `/catalogo`: con texto, el buscador abarca todo el catálogo (productos y combos) sin importar la categoría; los chips van sin `q` y ninguno sale activo durante la búsqueda; contador "N resultados para "x" en todo el catálogo"; botón "Limpiar búsqueda". `categoriaVista()` + prueba en `test-busqueda.ts`. Ver ADR-34.

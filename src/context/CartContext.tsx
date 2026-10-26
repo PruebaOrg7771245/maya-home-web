@@ -23,6 +23,7 @@ export type CartItem = {
   price: number | null; // precio público del ERP (IVA incluido) - null si no hay precio cargado
   quantity: number; // cuántas unidades de este producto están en el carrito
   sinStock?: boolean; // true si se agregó estando agotado: el asesor debe confirmar la disponibilidad
+  unidad?: string; // solo productos vendidos por medida (ej. "m²"): cantidad y precio se leen en esa unidad. Solo para mostrar: el servidor la saca del catálogo
 };
 
 // Forma de todo lo que el Context va a exponer a quien lo use

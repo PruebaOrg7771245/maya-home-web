@@ -802,3 +802,49 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
   caso con categoría activa). La prueba manual en navegador no se pudo hacer
   (extensión de Chrome no conectada).
 - **Estado:** vigente (26/10/2026).
+
+## ADR-35: Productos vendidos por medida (m²) con umbral propio y existencia oculta
+- **Contexto:** el piso de bambú se vende por m² (aún no cargado en el
+  catálogo; se cargará con fotos). Su existencia es una medida (ej. 779.53) y
+  el umbral general de "Pocas unidades" no le sirve. Las piedras flexibles se
+  venden por unidad y no cambian; los combos tampoco.
+- **Decisión (dato):** campo opcional único en `Product`:
+  `ventaPorMedida?: { unidad: "m²"; umbralPocas: number }`. Piso de bambú:
+  `umbralPocas: 20` (confirmado por Mateo: hasta 20 m² inclusive es "Pocas
+  unidades"). Sin el campo, todo igual que antes.
+- **Decisión (estado):** Agotado si existencia <= 0; Pocas unidades si
+  0 < existencia <= `umbralPocas`; Disponible si es mayor.
+  `clasificarExistencia(existencia, umbralPocas = UMBRAL_POCO_STOCK)` en
+  `lib/umbralStock.ts` sigue siendo el único punto de cálculo (ADR-1). Nuevas
+  funciones puras: `estadoDeProducto(info, venta?)` (servidor, conserva la
+  existencia) y `stockParaInterfaz(info, venta?)` (estado reclasificado y
+  `quantity: null`); `getStock(sku, venta?)` en `stock.ts`.
+- **Decisión (privacidad):** la existencia real de estos productos no se
+  muestra (solo el estado) ni viaja al navegador: `quantity` va en `null` en
+  props/HTML de `/`, `/catalogo` y `/productos/[id]`. `/api/pedido` guarda en
+  el snapshot el estado con el umbral propio y la unidad, que sale del
+  catálogo, nunca del body.
+- **Decisión (unidad):** precio "$X por m²" en la ficha y en las tarjetas
+  (compacta del inicio y catálogo); cantidad "2 m²" en el carrito,
+  "N m² en el pedido" en `AddToCartButton`, en el mensaje de WhatsApp y en el
+  correo al asesor (también "por m²" en el precio). `CartItem` tiene `unidad`
+  opcional; helpers en `lib/unidadVenta.ts` (`textoCantidad`,
+  `cantidadConUnidad`, `sufijoPrecio`). Cantidad entera, sin decimales ni
+  cajas (si se quiere distinto, se pide después). Total en el servidor sin
+  cambios: precio × cantidad. Siguen ADR-12 y ADR-13.
+- **Pendiente de confirmar (Mateo):** " por m²" en `text-sm` gris `#6B6862`,
+  igual que "IVA incluido". El precio unitario del paso 1 del carrito sigue
+  sin "por m²".
+- **Verificación:** `scripts/test-stock.ts` nuevo (umbral 20 con 0, 1, 20, 21
+  y 779.53; umbral por defecto; `stockParaInterfaz`/`estadoDeProducto`). Se
+  corrigió `scripts/test-combos.ts`: `.map(clasificarExistencia)` pasaba el
+  índice como umbral. tsc, lint, build y los 5 scripts pasan. En navegador
+  con un producto de prueba temporal (no versionado): sin número de
+  existencia, "Pocas unidades" con 11, "por m²" en ficha y tarjetas, "2 m²"
+  en carrito y WhatsApp, `quantity: null` en HTML y payload; correo
+  verificado generando el HTML con `fetch` interceptado.
+- **Alternativas descartadas:** guardar unidad y umbral en Supabase (el
+  catálogo es estático y es dato de producto, no de stock); mostrar la
+  existencia redondeada (se decidió no mostrar nada); filtrar la existencia
+  en el cliente (llegaría igual en el HTML).
+- **Estado:** vigente (26/10/2026).

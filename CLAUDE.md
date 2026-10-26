@@ -19,7 +19,8 @@ antes de asumir nada sobre el estado del proyecto.
 - No hay framework de tests configurado. La lógica pura tiene scripts sueltos
   que corren con Node 22.18+ (ejecuta TypeScript directo):
   `node scripts/test-combos.ts`, `node scripts/test-busqueda.ts`,
-  `node scripts/test-ficha.ts` y `node scripts/test-resumen.ts`.
+  `node scripts/test-ficha.ts`, `node scripts/test-resumen.ts` y
+  `node scripts/test-stock.ts`.
 - Al terminar una prueba con servidor (`npm run start` o `npm run dev`),
   cerrar el proceso que se levantó con
   `taskkill /PID <pid> /T /F`, usando el PID exacto del proceso que
@@ -58,11 +59,15 @@ src/
                           # useDesplegable.ts (hook) y estilosNav.ts (clases)
   context/CartContext.tsx # estado del carrito (useCart)
   data/products.ts        # catálogo estático (28 productos, sin precios; campos
-                          # opcionales caracteristicas, detalles y altFoto)
+                          # opcionales caracteristicas, detalles, altFoto y
+                          # ventaPorMedida)
   data/combos.ts          # familias de combos lavamanos + mueble (sin precios)
   data/sitio.ts           # datos del sitio: marca, contacto, redes (ver abajo)
   data/portada.ts         # imágenes de la portada (versión escritorio y móvil)
   lib/stock.ts            # stock y precio (getStock, getStockPorSkus)
+  lib/umbralStock.ts      # umbrales y estados de stock (clasificarExistencia,
+                          # estadoDeProducto, stockParaInterfaz); puro
+  lib/unidadVenta.ts      # textos "2 m²" / "por m²" de la venta por medida
   lib/catalogoUrl.ts      # urlCatalogo() y nombres de categoría "Todos"/"Combos"
   lib/categorias.ts       # orden de las opciones de la cinta de /catalogo
   lib/busqueda.ts         # lógica pura del buscador (sin React ni red)
@@ -73,7 +78,7 @@ src/
   lib/email.ts            # correo al asesor (Resend)
 public/images/            # logos (brand/) e imágenes de productos
 scripts/                  # pruebas de lógica pura (test-combos, test-busqueda,
-                          # test-ficha, test-resumen)
+                          # test-ficha, test-resumen, test-stock)
 docs/                     # CHANGELOG, DECISIONS (ADRs), REQUIREMENTS-STOCK
 .claude/agents/           # agentes de proyecto (versionados)
 ```
@@ -95,10 +100,24 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
   `getPrecioProducto`), que usa `supabaseServidor` y por eso solo se importa
   desde server components o rutas de servidor; los componentes cliente
   reciben `StockInfo` por props (importando solo el tipo).
+  Estados: `clasificarExistencia(existencia, umbralPocas = 5)` en
+  `lib/umbralStock.ts` es el ÚNICO cálculo (agotado <= 0; "Pocas unidades"
+  hasta el umbral inclusive; si no, disponible).
+- **Venta por medida (`Product.ventaPorMedida`, ADR-35):** opcional,
+  `{ unidad: "m²", umbralPocas }` (piso de bambú: 20). Sin el campo, todo
+  como siempre. Con él: el estado usa `umbralPocas`; la existencia NO se
+  muestra en ninguna parte y NO viaja al navegador — las páginas pasan el
+  stock por `stockParaInterfaz()` (quantity `null`) y la ficha usa
+  `getStock(sku, ventaPorMedida)`; solo `/api/pedido` (servidor) ve el número
+  y guarda el estado con `estadoDeProducto()` y la unidad (del catálogo, nunca
+  del body). Precio "$X por m²" (ficha y tarjetas) y cantidad "2 m²"
+  (carrito, botón, WhatsApp, correo) con `lib/unidadVenta.ts`. Cantidad
+  entera; total = precio * cantidad. Los combos no usan esto.
 - **Reglas de interfaz (ADR-13):** sin precio = no se vende (sin sku:
   "Próximamente"; con sku sin precio: "No disponible por ahora", ambos vía
   `AvisoSinPrecio`). Agotado con precio = se puede agregar, con el aviso
-  "Consulta la disponibilidad con tu asesor".
+  "Consulta la disponibilidad con tu asesor". Productos por medida: solo el
+  estado, nunca la existencia.
 - **`/` (`src/app/page.tsx`)** — server component con `revalidate = 60`
   (ISR), de arriba abajo: (1) portada (`Portada`, imágenes en
   `data/portada.ts`, versión escritorio/móvil con `<picture>`; con 2 o más

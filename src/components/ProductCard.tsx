@@ -10,6 +10,7 @@ import type { Product } from "@/data/products"; // importamos el tipo TypeScript
 import type { StockInfo } from "@/lib/stock"; // solo el TIPO: no arrastra el cliente de servidor al navegador
 import AvisoSinPrecio from "@/components/AvisoSinPrecio"; // qué mostrar cuando el producto no tiene precio
 import { formatPrice } from "@/lib/formatPrice";
+import { sufijoPrecio } from "@/lib/unidadVenta";
 import { fotosProducto } from "@/lib/fichaProducto"; // foto principal (placeholder si el producto no tiene ninguna)
 
 // Definimos qué props (propiedades) recibe este componente
@@ -24,6 +25,7 @@ type ProductCardProps = {
 // Componente principal - recibe "product" desestructurado directamente de las props
 export default function ProductCard({ product, stock, compacta = false }: ProductCardProps) {
   const precio = stock.precio; // null = producto sin precio: no se muestra precio y no se vende
+  const unidad = product.ventaPorMedida?.unidad; // venta por medida: el precio se lee "$X por m²"
 
   return (
     // Contenedor de la tarjeta completa - Link envuelve todo para que la tarjeta sea clickeable
@@ -55,7 +57,9 @@ export default function ProductCard({ product, stock, compacta = false }: Produc
           <div className="mt-2">
             {precio !== null ? (
               <p className="text-base font-semibold text-[#232320]">
-                {formatPrice(precio)} <span className="text-xs font-normal text-[#6B6862]">IVA incluido</span>
+                {formatPrice(precio)}
+                {unidad && <span className="text-sm font-normal text-[#6B6862]">{sufijoPrecio(unidad)}</span>}{" "}
+                <span className="text-xs font-normal text-[#6B6862]">IVA incluido</span>
               </p>
             ) : (
               <AvisoSinPrecio stock={stock} />
@@ -93,6 +97,8 @@ export default function ProductCard({ product, stock, compacta = false }: Produc
                 <p className="text-xs text-[#6B6862]">Precio (IVA incluido)</p>
                 <p className="mt-0.5 text-base font-semibold text-[#232320]">
                   {formatPrice(precio)}
+                  {/* Venta por medida: "$X por m²" (sin unidad no se agrega nada) */}
+                  {unidad && <span className="text-sm font-normal text-[#6B6862]">{sufijoPrecio(unidad)}</span>}
                 </p>
               </div>
             ) : (

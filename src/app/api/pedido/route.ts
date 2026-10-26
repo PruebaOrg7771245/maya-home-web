@@ -13,7 +13,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { products } from "@/data/products";
-import { getStockPorSkus, type StockStatus } from "@/lib/stock";
+import { estadoDeProducto, getStockPorSkus, type StockStatus } from "@/lib/stock";
 import { calcularCombo, nombreCombinacion, parsearIdCombinacion, pareceIdCombo } from "@/lib/combos";
 import type { PiezaCombo } from "@/data/combos";
 import { validarIdentificacion } from "@/lib/identificacion";
@@ -206,6 +206,7 @@ export async function POST(request: NextRequest) {
     cantidad: number;
     precio: number; // precio público CON IVA por unidad
     stock: StockStatus; // estado de stock al momento del pedido
+    unidad?: string; // solo venta por medida (ej. "m²"); sale del catálogo, nunca del body
     piezas?: Array<{ sku: string; nombre: string }>; // solo en combos: lavamanos y mueble
   }> = [];
 
@@ -251,7 +252,8 @@ export async function POST(request: NextRequest) {
       nombre: producto.name,
       cantidad,
       precio: info.precio,
-      stock: info.status,
+      stock: estadoDeProducto(info, producto.ventaPorMedida), // umbral propio en venta por medida
+      ...(producto.ventaPorMedida ? { unidad: producto.ventaPorMedida.unidad } : {}),
     });
   }
 
@@ -412,6 +414,7 @@ export async function POST(request: NextRequest) {
               nombre: p.nombre,
               cantidad: p.cantidad,
               precio: p.precio,
+              unidad: p.unidad,
               sinStock: p.stock === "out_of_stock",
               piezas: p.piezas, // solo combos: el asesor ve lavamanos y mueble
             })),
