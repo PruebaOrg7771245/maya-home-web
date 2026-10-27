@@ -58,7 +58,7 @@ src/
                           # StockBadge, AvisoSinPrecio, IconosSitio;
                           # useDesplegable.ts (hook) y estilosNav.ts (clases)
   context/CartContext.tsx # estado del carrito (useCart)
-  data/products.ts        # catálogo estático (28 productos, sin precios; campos
+  data/products.ts        # catálogo estático (35 productos, sin precios; campos
                           # opcionales caracteristicas, detalles, altFoto y
                           # ventaPorMedida)
   data/combos.ts          # familias de combos lavamanos + mueble (sin precios)
@@ -88,7 +88,10 @@ docs/                     # CHANGELOG, DECISIONS (ADRs), REQUIREMENTS-STOCK
 App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
 
 - **Catálogo estático:** `src/data/products.ts` es la única fuente de
-  productos (28, tipo `Product`, `categories` derivado de ahí). Cada
+  productos (35, tipo `Product`, `categories` derivado de ahí en el orden en
+  que aparecen: 11 categorías, las últimas "Pisos de bambú" y "Piedras
+  flexibles"; una categoría nueva se agrega al final del arreglo y sale sola
+  en la cinta, el pie, el resumen de "/" y el buscador). Cada
   producto tiene `sku` = código del ERP (mapeo en
   `docs/MAPEO-PRODUCTOS-ERP.md`). **Los precios ya no viven acá:**
   `prices` quedó en `null` (campo vestigial) y el precio sale del ERP.

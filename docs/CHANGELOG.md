@@ -18,6 +18,10 @@ Formato de entrada:
 
 ---
 
+## 26/10/2026 - Pisos de bambú y piedras flexibles en el catálogo (28 → 35 productos)
+- `data/products.ts`: 7 productos nuevos en 2 categorías al final, "Pisos de bambú" (natural y carbonized, `ventaPorMedida` m² con umbral 20, sin fotos aún) y "Piedras flexibles" (Star Moon, Linen Weaving, 3D Travertine y las de poliuretano Volcanic Gray y White Jade; por unidad, 5 fotos nuevas). Salen solas en la cinta, el pie, el resumen de "/" y el buscador. Skus, precios y medidas verificados en el ERP; los 7 tienen precio en `stock_espejo`. Pendiente: "Contenido por caja" del bambú (sin confirmar, no se cargó).
+- `ProductCard`: el código de la tarjeta compacta se parte (`break-all`) porque "BAMBCARBO185018514MM" desbordaba a 390 px; el alt de la foto de relleno dice "<nombre> - sin foto disponible", como la galería. `test-ficha.ts` cuenta 35 productos.
+
 ## 26/10/2026 - Productos vendidos por medida (m²)
 - Campo opcional `ventaPorMedida: { unidad: "m²"; umbralPocas }` en `Product`, pensado para el piso de bambú (umbral 20 m², aún sin cargar). Estado con umbral propio vía `clasificarExistencia`; la existencia real no se muestra ni llega al navegador (`quantity: null` en `/`, `/catalogo` y la ficha). Ver ADR-35.
 - Unidad visible: "$X por m²" en ficha y tarjetas; "2 m²" en carrito, WhatsApp y correo al asesor (helpers en `lib/unidadVenta.ts`). `/api/pedido` guarda estado y unidad (del catálogo) en el snapshot. Nuevo `scripts/test-stock.ts`; corregido `test-combos.ts` (`.map(clasificarExistencia)` pasaba el índice como umbral).

@@ -11,7 +11,7 @@ import type { StockInfo } from "@/lib/stock"; // solo el TIPO: no arrastra el cl
 import AvisoSinPrecio from "@/components/AvisoSinPrecio"; // qué mostrar cuando el producto no tiene precio
 import { formatPrice } from "@/lib/formatPrice";
 import { sufijoPrecio } from "@/lib/unidadVenta";
-import { fotosProducto } from "@/lib/fichaProducto"; // foto principal (placeholder si el producto no tiene ninguna)
+import { esPlaceholder, fotosProducto } from "@/lib/fichaProducto"; // foto principal (placeholder si el producto no tiene ninguna)
 
 // Definimos qué props (propiedades) recibe este componente
 type ProductCardProps = {
@@ -26,6 +26,9 @@ type ProductCardProps = {
 export default function ProductCard({ product, stock, compacta = false }: ProductCardProps) {
   const precio = stock.precio; // null = producto sin precio: no se muestra precio y no se vende
   const unidad = product.ventaPorMedida?.unidad; // venta por medida: el precio se lee "$X por m²"
+  const foto = fotosProducto(product.images)[0]; // la primera foto es la principal (placeholder si no hay ninguna)
+  // El placeholder no es una foto del producto: el alt lo dice, igual que ProductGallery
+  const altFoto = esPlaceholder(foto) ? `${product.name} - sin foto disponible` : (product.altFoto ?? product.name);
 
   return (
     // Contenedor de la tarjeta completa - Link envuelve todo para que la tarjeta sea clickeable
@@ -37,8 +40,8 @@ export default function ProductCard({ product, stock, compacta = false }: Produc
       {/* Contenedor de la imagen con proporción fija para que el grid quede alineado */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#EFEDE7]">
         <Image
-          src={fotosProducto(product.images)[0]} // la primera foto es la principal (placeholder si no hay ninguna)
-          alt={product.altFoto ?? product.name} // texto alternativo para accesibilidad y SEO
+          src={foto}
+          alt={altFoto} // texto alternativo para accesibilidad y SEO
           fill // hace que la imagen llene el contenedor padre (que tiene position: relative)
           // ayuda a Next.js a servir el tamaño de imagen correcto según pantalla
           // (compacta: 2 columnas hasta md, luego 4 dentro del contenedor de 1280 px)
@@ -65,7 +68,8 @@ export default function ProductCard({ product, stock, compacta = false }: Produc
               <AvisoSinPrecio stock={stock} />
             )}
           </div>
-          {product.sku && <p className="mt-1 text-xs text-[#6B6862]">Código: {product.sku}</p>}
+          {/* break-all: hay skus largos sin espacios (ej. BAMBCARBO185018514MM) que a 390 px desbordaban */}
+          {product.sku && <p className="mt-1 break-all text-xs text-[#6B6862]">Código: {product.sku}</p>}
         </div>
       ) : (
         // Contenido de texto debajo de la imagen

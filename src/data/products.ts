@@ -863,6 +863,153 @@ export const products: Product[] = [
     prices: { minorista: null, mayorista: null },
     sku: "YZ-S1",
   },
+
+  // ==========================================
+  // CATEGORÍA: PISOS DE BAMBÚ (venta por m², ADR-35)
+  // ==========================================
+  // Sin fotos todavía (images: [] usa el placeholder). "Contenido por caja" pendiente de
+  // confirmar en el ERP: no se carga hasta tenerlo.
+  {
+    id: "piso-bambu-natural",
+    name: "Piso de bambú · natural",
+    category: "Pisos de bambú",
+    description:
+      "Piso de bambú 100 % natural de alta resistencia y durabilidad, con sistema clic para facilitar la instalación.",
+    images: [],
+    caracteristicas: [
+      "100 % bambú",
+      "Alta resistencia y durabilidad",
+      "Sistema clic para facilitar la instalación",
+      "Cuerpo de bambú",
+    ],
+    especificaciones: [
+      { etiqueta: "Espesor del cuerpo de bambú", valor: "14 mm" },
+      { etiqueta: "Material", valor: "100 % bambú" },
+      { etiqueta: "Sistema de instalación", valor: "Clic" },
+      { etiqueta: "Acabado", valor: "Natural" },
+    ],
+    variants: [{ attribute: "medidas", value: "1850 × 185 mm (largo × ancho)" }],
+    prices: { minorista: null, mayorista: null },
+    sku: "BAMBNATU18501514MM",
+    ventaPorMedida: { unidad: "m²", umbralPocas: 20 },
+  },
+  {
+    id: "piso-bambu-carbonized",
+    name: "Piso de bambú · carbonized",
+    category: "Pisos de bambú",
+    description:
+      "Piso de bambú carbonized de alta resistencia y durabilidad, con sistema clic para facilitar la instalación.",
+    images: [],
+    caracteristicas: [
+      "100 % bambú",
+      "Alta resistencia y durabilidad",
+      "Sistema clic para facilitar la instalación",
+      "Cuerpo de bambú",
+    ],
+    especificaciones: [
+      { etiqueta: "Espesor del cuerpo de bambú", valor: "14 mm" },
+      { etiqueta: "Material", valor: "100 % bambú" },
+      { etiqueta: "Sistema de instalación", valor: "Clic" },
+      { etiqueta: "Acabado", valor: "Carbonized" },
+    ],
+    variants: [{ attribute: "medidas", value: "1850 × 185 mm (largo × ancho)" }],
+    prices: { minorista: null, mayorista: null },
+    sku: "BAMBCARBO185018514MM",
+    ventaPorMedida: { unidad: "m²", umbralPocas: 20 },
+  },
+
+  // ==========================================
+  // CATEGORÍA: PIEDRAS FLEXIBLES (venta por unidad)
+  // ==========================================
+  {
+    id: "piedra-flexible-star-moon",
+    name: "Piedra flexible · Star Moon",
+    category: "Piedras flexibles",
+    description:
+      "Piedra flexible de acabado decorativo, perfecta para curvas y apta para interior y exterior.",
+    images: ["/images/products/piedra-flexible-star-moon.jpg"],
+    altFoto: "Panel de piedra flexible Star Moon, de color gris claro y superficie rugosa",
+    caracteristicas: ["Perfecta para curvas", "Apta para interior y exterior"],
+    especificaciones: [
+      { etiqueta: "Uso", valor: "Interior y exterior" },
+      { etiqueta: "Instalación recomendada en", valor: "Superficies curvas" },
+    ],
+    variants: [{ attribute: "medidas", value: "60 × 120 cm" }],
+    prices: { minorista: null, mayorista: null },
+    sku: "6810191000",
+  },
+  {
+    id: "piedra-flexible-linen-weaving",
+    name: "Piedra flexible · Linen Weaving",
+    category: "Piedras flexibles",
+    description:
+      "Piedra flexible de acabado decorativo, perfecta para curvas y apta para interior y exterior.",
+    images: ["/images/products/piedra-flexible-linen-weaving.jpg"],
+    altFoto: "Panel de piedra flexible Linen Weaving, beige, con textura de tejido en zigzag",
+    caracteristicas: ["Perfecta para curvas", "Apta para interior y exterior"],
+    especificaciones: [
+      { etiqueta: "Uso", valor: "Interior y exterior" },
+      { etiqueta: "Instalación recomendada en", valor: "Superficies curvas" },
+    ],
+    variants: [{ attribute: "medidas", value: "60 × 120 cm" }],
+    prices: { minorista: null, mayorista: null },
+    sku: "6810191001",
+  },
+  {
+    id: "piedra-flexible-3d-travertine",
+    name: "Piedra flexible · 3D Travertine",
+    category: "Piedras flexibles",
+    description:
+      "Piedra flexible de acabado decorativo, perfecta para curvas y apta para interior y exterior.",
+    images: ["/images/products/piedra-flexible-3d-travertine.jpg"],
+    altFoto: "Panel de piedra flexible 3D Travertine, beige, con vetas verticales de travertino",
+    caracteristicas: ["Perfecta para curvas", "Apta para interior y exterior"],
+    especificaciones: [
+      { etiqueta: "Uso", valor: "Interior y exterior" },
+      { etiqueta: "Instalación recomendada en", valor: "Superficies curvas" },
+    ],
+    variants: [{ attribute: "medidas", value: "60 × 120 cm" }],
+    prices: { minorista: null, mayorista: null },
+    sku: "6810191002",
+  },
+  // Los skus de las dos de poliuretano tienen distinta longitud (11 y 10 dígitos): vienen
+  // tal cual del ERP (confirmados). No "corregirlos".
+  {
+    id: "piedra-poliuretano-volcanic-gray",
+    name: "Piedra de poliuretano · Volcanic Gray",
+    category: "Piedras flexibles",
+    description: "Panel de piedra de poliuretano para superficies planas, solo para uso interior.",
+    images: ["/images/products/piedra-poliuretano-volcanic-gray.jpg"],
+    altFoto: "Panel de piedra de poliuretano Volcanic Gray, gris oscuro, con relieve de roca",
+    caracteristicas: ["Para superficies planas", "Solo para interiores"],
+    especificaciones: [
+      { etiqueta: "Espesor", valor: "60 mm" },
+      { etiqueta: "Material", valor: "Poliuretano" },
+      { etiqueta: "Uso", valor: "Solo interiores" },
+      { etiqueta: "Instalación recomendada en", valor: "Superficies planas" },
+    ],
+    variants: [{ attribute: "medidas", value: "60 × 120 cm" }],
+    prices: { minorista: null, mayorista: null },
+    sku: "39255900000",
+  },
+  {
+    id: "piedra-poliuretano-white-jade",
+    name: "Piedra de poliuretano · White Jade",
+    category: "Piedras flexibles",
+    description: "Panel de piedra de poliuretano para superficies planas, solo para uso interior.",
+    images: ["/images/products/piedra-poliuretano-white-jade.jpg"],
+    altFoto: "Panel de piedra de poliuretano White Jade, blanco hueso, con relieve de roca",
+    caracteristicas: ["Para superficies planas", "Solo para interiores"],
+    especificaciones: [
+      { etiqueta: "Espesor", valor: "60 mm" },
+      { etiqueta: "Material", valor: "Poliuretano" },
+      { etiqueta: "Uso", valor: "Solo interiores" },
+      { etiqueta: "Instalación recomendada en", valor: "Superficies planas" },
+    ],
+    variants: [{ attribute: "medidas", value: "60 × 120 cm" }],
+    prices: { minorista: null, mayorista: null },
+    sku: "3925900001",
+  },
 ];
 
 export const categories = Array.from(new Set(products.map((p) => p.category)));

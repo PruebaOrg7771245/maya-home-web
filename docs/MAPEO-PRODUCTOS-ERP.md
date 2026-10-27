@@ -40,6 +40,21 @@ Fuente: resultados reales de las consultas sobre `stock_espejo` (bodega BG, prec
 | Saunas | Sauna 120×100×200 (vidrio 6 mm) [nombre provisional, sale del ERP] | `SN96129-1200` | 4 | 2508.70 | 2885.00 | Pocas unidades | Sin foto ni descripción: no está en el PDF |
 | Saunas | Sauna 135×110×210 (vidrio 8 mm) [nombre provisional, sale del ERP] | `SN96137-1350` | 2 | 4660.87 | 5360.00 | Pocas unidades | Sin foto ni descripción: no está en el PDF |
 
+### Pisos de bambú y piedras flexibles (cargados el 26/10/2026)
+
+Skus, precios por m² y medidas verificados por Mateo en el ERP. El nombre del ERP es
+la columna `producto` de `stock_espejo`. Existencia y precio salen del ERP (no se copian aquí).
+
+| Categoría | Nombre web | sku (código ERP) | Nombre en el ERP | Nota |
+|---|---|---|---|---|
+| Pisos de bambú | Piso de bambú · natural | `BAMBNATU18501514MM` | BAMBU NATURAL 1850*185*14MM (1.37M-4P ) FOSH | Venta por m² (umbral 20). Sin foto. "Contenido por caja" pendiente: no cargado |
+| Pisos de bambú | Piso de bambú · carbonized | `BAMBCARBO185018514MM` | BAMBU CARBONIZED 1850*185*14MM (1.37M-4P) FOSH | Igual que el natural |
+| Piedras flexibles | Piedra flexible · Star Moon | `6810191000` | FLEXIBLE STONE STAR MOON 60*120 FOSH | Venta por unidad |
+| Piedras flexibles | Piedra flexible · Linen Weaving | `6810191001` | FLEXIBLE STONE LINEN WEAVING 60*120 FOSH | Venta por unidad |
+| Piedras flexibles | Piedra flexible · 3D Travertine | `6810191002` | FLEXIBLE STONE 3D TRAVERTINE 60*120 FOSH | Venta por unidad |
+| Piedras flexibles | Piedra de poliuretano · Volcanic Gray | `39255900000` | PANEL STONE VOLCANIC GRAY 60*120 FOSH | sku de 11 dígitos, tal cual del ERP (confirmado) |
+| Piedras flexibles | Piedra de poliuretano · White Jade | `3925900001` | PANEL STONE WHITE JADE 60*120 FOSH | sku de 10 dígitos, tal cual del ERP (confirmado) |
+
 ## Combos (2 códigos por versión) — 9 combinaciones válidas
 
 Regla de familias: lavamanos y mueble solo se combinan si **comparten la referencia de familia en el código** (`LUX-600`, `FLUTE800`, `CONNONSX800`/`CONNOSX-800`, `LUX-800`, `LUMINA-1600`). LUX-600 **no** se mezcla con LUX-800 ni con ninguna otra. Que LUX-800 admita lavamanos y muebles cruzados es intencional (así lo creó el negocio).

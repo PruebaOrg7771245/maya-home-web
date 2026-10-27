@@ -188,8 +188,8 @@ prueba("esDetalleVertical: solo si el alto supera el ancho en más de un 20 %", 
 const sinRepetidos = (textos: string[]) =>
   new Set(textos.map((t) => normalizar(t))).size === textos.length;
 
-prueba("los 28 productos tienen descripción no vacía", () => {
-  assert.equal(products.length, 28);
+prueba("los 35 productos tienen descripción no vacía", () => {
+  assert.equal(products.length, 35);
   for (const p of products) assert.ok(p.description.trim() !== "", `${p.id}: sin descripción`);
 });
 
