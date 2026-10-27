@@ -314,7 +314,10 @@ específicas del proyecto.
   nueva, decisión de arquitectura, cambio de rumbo), para dejar registro en
   `docs/CHANGELOG.md` y, si corresponde, `docs/DECISIONS.md` (y
   `docs/REQUIREMENTS-STOCK.md` si el cambio deja algo pendiente de esa
-  integración). NO usar para cambios triviales (typos, formateo, ajustes de
+  integración O modifica algo que ese documento describe). Al registrar un
+  cambio, actualiza también las cifras o frases de los docs que quede
+  desactualizadas. Las fechas de CHANGELOG y ADR son las del trabajo, no las
+  del commit. NO usar para cambios triviales (typos, formateo, ajustes de
   estilo menores). No se dispara solo — hay que invocarlo explícitamente
   al terminar el cambio real (los otros agentes no lo llaman por su cuenta).
 

@@ -25,7 +25,7 @@ disponibles.
   `getStockPorSkus(skus)` (una sola consulta `.in(...)`, usada por `/` y por
   `/api/pedido`) y `getPrecioProducto(sku)` (sin uso actual en rutas).
   `/api/pedido` ya calcula el total con este precio (ADR-12).
-- Catálogo: 25 productos con `sku` = código del ERP (ver
+- Catálogo: 35 productos con `sku` = código del ERP (ver
   [`MAPEO-PRODUCTOS-ERP.md`](./MAPEO-PRODUCTOS-ERP.md)); los precios ya no
   están en `products.ts`. Decisión y alternativas descartadas en ADR-11
   (SQL Server desde Vercel: IP privada, IP fija $120/mes).
@@ -40,7 +40,7 @@ disponibles.
   conocida: combos que comparten pieza no descuentan stock entre sí. Si los
   datos del espejo faltan para alguna pieza, el combo no se vende; por eso es
   más importante que `sync-stock.js` cargue las 13 piezas de combos.
-- Venta por medida (26/10/2026, aún sin productos cargados): un producto con
+- Venta por medida (26/10/2026; cargados los 2 pisos de bambú el mismo día, con fila en `stock_espejo` verificada en el ERP; cobro por cajas de 1,37 m², ver ADR-36): un producto con
   `ventaPorMedida` (ej. piso de bambú por m², `umbralPocas: 20`) se clasifica
   con su propio umbral (`clasificarExistencia(existencia, umbralPocas)`,
   admite decimales) y su existencia real NO llega al navegador:
