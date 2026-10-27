@@ -79,7 +79,7 @@ Cálculo de referencia: (precio lavamanos + precio mueble) × 1,15, con los prec
 - Si falta una pieza en el ERP (sin fila o precio 0): el combo no tiene precio y **no se vende**. Si una pieza está agotada: el combo está agotado y **se puede agregar** con el aviso.
 - Si dos combos comparten una pieza (ej. el mismo mueble CONNON o LUX-800), el stock de cada combo **no descuenta** el del otro. Simplificación aceptada por ahora.
 - `MUEBLLUX-600SMOKE` llega con espacios al final desde el ERP: sin el `.trim()` en `sync-stock.js` el combo LUX-600 no encuentra su pieza.
-- Fotos: hay una foto por combo/versión en el catálogo (LUX-800: 2 de las 4 combinaciones). Implementado: 6 fotos del PDF en `public/images/combos/` (mapa `FOTOS_COMBINACION` en `src/data/combos.ts`, origen ~360 px, se ven suaves: pedir originales). CONNON blanco, LUX-800 BL+SUNTH y LUX-800 BLACK+HONEY usan la foto de la familia con la leyenda "Imagen referencial: el color puede variar".
+- Fotos: hay una foto por combo/versión en el catálogo (LUX-800: las 4 combinaciones tienen foto propia). Implementado: 6 fotos del PDF en `public/images/combos/` (mapa `FOTOS_COMBINACION` en `src/data/combos.ts`, origen ~360 px, se ven suaves: pedir originales). LUX-800 tiene 4 fotos propias (1448 × 1086, 27/10/2026). Las combinaciones sin foto propia usan la foto de la familia con la leyenda "Imagen referencial: el color puede variar".
 - Los skus de las piezas se declaran en `src/data/combos.ts`; si cambia un código en el ERP, cambiarlo ahí y en la tabla de arriba.
 
 ## Pendientes del catálogo (a corregir antes de publicar)

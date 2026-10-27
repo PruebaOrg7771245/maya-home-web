@@ -18,6 +18,9 @@ Formato de entrada:
 
 ---
 
+## 27/10/2026 - Fotos propias para las 4 combinaciones de LUX-800
+- Se agregan `lux-800-blanco-sunth.jpg` y `lux-800-negro-honey.jpg` y se reemplazan las dos existentes (1448 × 1086) en `public/images/combos/`; `FOTOS_COMBINACION` suma las dos claves nuevas. Ninguna combinación de LUX-800 muestra ya "Imagen referencial".
+
 ## 26/10/2026 - Interfaz más limpia en la venta por cajas
 - Ficha: se quitó la vista previa en vivo ("13 m² → 9 cajas…"); se queda el aviso bajo el precio. El cuadro "en el pedido" se centra y mide lo mismo que el botón "Agregar al pedido" (`h-12`), sin salto; bajo 360 px se oculta el texto "en el pedido" para que quepa el selector con "m²".
 - Carrito: en líneas con cajas, sin precio por m²; solo "9 cajas · 12,33 m²" (pequeña, gris) bajo el nombre y el importe a la derecha del campo. En móvil la fila de controles va a todo el ancho y "Quitar" baja si no cabe (antes desbordaba a 390 px). Sin cambios en cálculos, WhatsApp ni correo. `resumenCajasCarrito` y `vistaPreviaCajas` se reemplazan por `detalleCajasCarrito`. Ver nota en ADR-36.

@@ -10,6 +10,7 @@ import { FAMILIAS_COMBO, FOTOS_COMBINACION } from "../src/data/combos.ts";
 import {
   calcularCombo,
   detallePieza,
+  fotoCombinacion,
   generarCombinaciones,
   generarTodasLasCombinaciones,
   parsearIdCombinacion,
@@ -135,18 +136,18 @@ for (const f of FAMILIAS_COMBO) {
   assert.ok(existsSync(new URL(`../public${f.imagen}`, import.meta.url)), `falta la foto de la familia ${f.id}`);
   assert.ok(!f.imagen.includes("placeholder"));
 }
-// 7 fotos propias; las otras 2 combinaciones usan la de la familia y quedan marcadas como referenciales
-assert.equal(Object.keys(FOTOS_COMBINACION).length, 7);
+// 9 fotos propias: todas las combinaciones del catálogo tienen la suya, ninguna es referencial
+assert.equal(Object.keys(FOTOS_COMBINACION).length, 9);
 const referenciales = FAMILIAS_COMBO.flatMap((f) => vistaCombinaciones(f, mapa))
   .filter((v) => v.imagenReferencial)
   .map((v) => v.id)
   .sort();
-assert.deepEqual(referenciales, [
-  "lux-800__LAVLUX-800BLACK__MUEBLLUX-800HONEY",
-  "lux-800__LAVLUX-800BL__MUEBLLUX-800SUNTH",
-]);
-const sinPropia = FAMILIAS_COMBO.flatMap((f) => vistaCombinaciones(f, mapa)).find((v) => v.imagenReferencial)!;
-assert.ok(sinPropia.imagen.startsWith("/images/combos/"));
+assert.deepEqual(referenciales, []);
+// una combinación sin foto propia sigue usando la de su familia, marcada como referencial
+const fam = FAMILIAS_COMBO[0];
+const sinPropia = fotoCombinacion(fam, { ...fam.lavamanos[0], sku: "OTRO" }, fam.muebles[0]);
+assert.equal(sinPropia.referencial, true);
+assert.equal(sinPropia.imagen, fam.imagen);
 
 // 14) Detalle de pieza (página del combo): medidas y título salen solo del nombre ya cargado
 assert.deepEqual(detallePieza({ sku: "X", nombre: "Lavamanos LUX-600 · 60x48 cm · blanco", etiqueta: "Blanco" }), {

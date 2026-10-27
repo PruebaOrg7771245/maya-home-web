@@ -38,6 +38,8 @@ export const FOTOS_COMBINACION: Record<string, string> = {
   "connon-sx800__LAVCONNONSX800BL__MUEBLCONNOSX-800SMOK": "/images/combos/connon-sx800-blanco.jpg",
   "lux-800__LAVLUX-800BL__MUEBLLUX-800HONEY": "/images/combos/lux-800-blanco-honey.jpg",
   "lux-800__LAVLUX-800BLACK__MUEBLLUX-800SUNTH": "/images/combos/lux-800-negro-sunth.jpg",
+  "lux-800__LAVLUX-800BL__MUEBLLUX-800SUNTH": "/images/combos/lux-800-blanco-sunth.jpg",
+  "lux-800__LAVLUX-800BLACK__MUEBLLUX-800HONEY": "/images/combos/lux-800-negro-honey.jpg",
   "lumina-1600__LAVLUMINA-1600BL__MUEBLLUMINA-1600DANI": "/images/combos/lumina-1600.jpg",
 };
 
