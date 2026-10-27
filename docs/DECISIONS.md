@@ -848,3 +848,59 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
   existencia redondeada (se decidió no mostrar nada); filtrar la existencia
   en el cliente (llegaría igual en el HTML).
 - **Estado:** vigente (26/10/2026).
+
+## ADR-36: Bambú por cajas completas con aritmética entera, cantidad escribible y contador por líneas
+- **Contexto:** el ERP factura el piso de bambú por cajas completas de
+  1,37 m² ("(1.37M-4P)"), no por los m² exactos que pide el cliente. Con
+  ADR-35 la web cobraba precio × m² y el total no coincidía con la factura.
+  Además la cantidad solo se cambiaba con − / +, incómodo para 20 o 30 m².
+- **Decisión (regla):** `VentaPorMedida.medidaPorCaja` opcional (ambos
+  bambúes: 1.37). Cajas = m² pedidos / medida por caja redondeado al entero
+  más cercano (mitad hacia arriba), mínimo 1; m² facturados = cajas × medida;
+  total = m² facturados × precio por m², redondeado a centavos al final
+  (mitad hacia arriba). Verificado con 7 ejemplos del ERP; ej. 20 m² → 15
+  cajas, 20,55 m², 111586,5 centavos → $1.115,87.
+- **Decisión (aritmética):** todo en enteros: medidas en centésimas (137),
+  precios en centavos (5430) y división con redondeo
+  `floor((2a + b) / (2b))`. El total del pedido es la suma entera de
+  centavos de las líneas, dividida por 100 una sola vez.
+- **Decisión (un solo cálculo):** `calcularVentaPorMedida(cantidad, precio,
+  medidaPorCaja?)` en `lib/unidadVenta.ts` es el único punto de cálculo del
+  importe de una línea (ficha, `CartContext`, WhatsApp, `lib/email.ts` y
+  `/api/pedido`); sin `medidaPorCaja` es cantidad × precio, como siempre
+  (también combos). El carrito guarda los m² que escribió el cliente; cajas y
+  m² facturados se derivan. `/api/pedido` recalcula siempre con
+  `medidaPorCaja` del catálogo (nunca del body) y guarda en el snapshot JSON
+  `total` y, en venta por cajas, `medidaPedida`, `cajas`, `medidaFacturada` y
+  `medidaPorCaja` (sin cambio de esquema). Siguen ADR-12 y ADR-35.
+- **Decisión (cantidad):** campo escribible para todos los productos con un
+  componente único `SelectorCantidad` (`type="text"` con
+  `inputMode="numeric"`): solo dígitos mientras se escribe; al salir o con
+  Enter, vacío o 0 → 1 y más de 9999 → 9999. `CANTIDAD_MAXIMA = 9999` vive en
+  `lib/cantidad.ts` y la comparten navegador y servidor; `/api/pedido`
+  rechaza con 400 lo que no sea entero 1..9999. No se compara con la
+  existencia: la confirma el asesor.
+- **Decisión (contador):** el ícono del carrito cuenta líneas (productos
+  distintos), no unidades: con m² la suma de cantidades no tenía sentido
+  (`totalItems` → `totalLineas`).
+- **Alternativas descartadas:** calcular con decimales y un `Math.round`
+  final (falla en los medios centavos, como el caso de 20 m²); guardar cajas
+  en el carrito (se pierde lo que escribió el cliente); `type="number"`
+  (acepta "1e3" y "-5" y cambia con la rueda del mouse).
+- **Consecuencias:** el precio se muestra "por m²" pero se cobra por cajas
+  completas; la ficha avisa la regla y el carrito muestra las cajas y los m²
+  facturados.
+- **Nota (26/10/2026, ajuste de interfaz):** sin cambiar ningún cálculo, la
+  ficha deja solo el aviso bajo el precio (se quitó la vista previa en vivo
+  junto al selector) y la línea del carrito con cajas pasa a "9 cajas ·
+  12,33 m²" (pequeña, gris) con el importe a la derecha del campo, sin el
+  precio por m². WhatsApp y correo conservan la fórmula completa. El cuadro
+  "en el pedido" queda centrado y con la misma altura (`h-12`) que el botón
+  "Agregar al pedido"; bajo 360 px se oculta el texto "en el pedido".
+  Pendiente confirmar las piezas por caja ("4P") antes de mostrarlas.
+- **Verificación:** `scripts/test-cajas.ts` nuevo (ejemplos del ERP, 3 y
+  9999 m², producto sin caja, textos y validación del servidor); tsc, lint,
+  build y los 6 scripts pasan. En navegador: 13 m² → $669,52, 25 m² →
+  $1.339,04, el contador con una piedra dice 2, WhatsApp y correo correctos,
+  el servidor rechaza 0, -5, 1.5, 10000 y "3".
+- **Estado:** vigente (26/10/2026).

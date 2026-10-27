@@ -7,7 +7,7 @@
 
 import { Resend } from "resend";
 import { formatPrice } from "@/lib/formatPrice"; // mismo formato de precio que el resto del sitio
-import { cantidadConUnidad, sufijoPrecio } from "@/lib/unidadVenta"; // "2 m²" / "por m²" en venta por medida
+import { calcularVentaPorMedida, cantidadConUnidad, sufijoPrecio, textoCajasPedido } from "@/lib/unidadVenta"; // "2 m²" / "por m²" y cajas en venta por medida
 
 // El SDK busca RESEND_API_KEY automáticamente en las variables de
 // entorno, así que no hace falta pasarla a mano acá.
@@ -28,6 +28,7 @@ type ProductoPedido = {
   cantidad: number;
   precio: number; // precio público por unidad, IVA incluido
   unidad?: string; // solo venta por medida (ej. "m²"): cantidad y precio se escriben con ella
+  medidaPorCaja?: number; // solo venta por cajas (ej. 1.37): la fila muestra m² pedidos, cajas, m² facturados y total
   sinStock?: boolean; // true si estaba agotado (out_of_stock) al hacer el pedido
   piezas?: Array<{ sku: string; nombre: string }>; // solo combos: lavamanos y mueble
 };
@@ -54,19 +55,33 @@ function filasPiezas(piezas: ProductoPedido["piezas"]): string {
     .join("");
 }
 
+// Celdas de cantidad y precio. Venta por cajas: "13 m² pedidos → 9 cajas (12,33 m²) ·
+// $669,52 ($54,30 por m² IVA incluido)" en la cantidad (misma función que el resto del
+// sitio) y el importe de la línea en la columna de precio.
+function celdasCantidadPrecio(p: ProductoPedido): { cantidad: string; precio: string } {
+  if (p.unidad && p.medidaPorCaja) {
+    const calculo = calcularVentaPorMedida(p.cantidad, p.precio, p.medidaPorCaja);
+    return {
+      cantidad: textoCajasPedido(calculo, p.unidad, p.precio),
+      precio: formatPrice(calculo.totalCentavos / 100),
+    };
+  }
+  return { cantidad: cantidadConUnidad(p.cantidad, p.unidad), precio: `${formatPrice(p.precio)}${sufijoPrecio(p.unidad)}` };
+}
+
 // Arma el cuerpo HTML del correo. Nombre y dirección van en MAYÚSCULAS -
 // misma regla que ya aplicamos en el mensaje de WhatsApp, porque el
 // asesor termina cargando estos 2 campos así en su sistema.
 function construirHtmlPedido(pedido: DatosPedido): string {
   const filasProductos = pedido.productos
-    .map(
-      (p) =>
-        `<tr>
+    .map((p) => {
+      const celdas = celdasCantidadPrecio(p);
+      return `<tr>
           <td style="padding:8px;border-bottom:1px solid #D8D4CC;">${p.nombre}${p.sinStock ? ' <strong style="color:#B3261E;">(sin stock)</strong>' : ""}${filasPiezas(p.piezas)}</td>
-          <td style="padding:8px;border-bottom:1px solid #D8D4CC;text-align:center;">${cantidadConUnidad(p.cantidad, p.unidad)}</td>
-          <td style="padding:8px;border-bottom:1px solid #D8D4CC;text-align:right;">${formatPrice(p.precio)}${sufijoPrecio(p.unidad)}</td>
-        </tr>`
-    )
+          <td style="padding:8px;border-bottom:1px solid #D8D4CC;text-align:center;">${celdas.cantidad}</td>
+          <td style="padding:8px;border-bottom:1px solid #D8D4CC;text-align:right;">${celdas.precio}</td>
+        </tr>`;
+    })
     .join("");
 
   return `
@@ -116,6 +131,9 @@ function construirHtmlPedido(pedido: DatosPedido): string {
 // route.ts, vía round-robin o el respaldo de emergencia). Devuelve
 // { exito: true } o { exito: false, error } para que quien la llame
 // decida qué guardar en estado_correo.
+// Exportada solo para revisar el HTML en pruebas, sin enviar nada
+export { construirHtmlPedido };
+
 export async function enviarCorreoAsesor(
   pedido: DatosPedido,
   destinatario: DestinatarioAsesor

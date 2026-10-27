@@ -13,6 +13,8 @@
 "use client"; // todo este archivo corre en el navegador, ya que maneja estado interactivo
 
 import { createContext, useContext, useState, ReactNode } from "react";
+import { acotarCantidad } from "@/lib/cantidad";
+import { calcularVentaPorMedida } from "@/lib/unidadVenta";
 
 // Forma de un producto YA AGREGADO al carrito (distinto del tipo Product completo,
 // aquí solo guardamos lo mínimo necesario para mostrar el carrito y calcular el total)
@@ -21,9 +23,10 @@ export type CartItem = {
   name: string;
   image: string;
   price: number | null; // precio público del ERP (IVA incluido) - null si no hay precio cargado
-  quantity: number; // cuántas unidades de este producto están en el carrito
+  quantity: number; // cuántas unidades (o m² que escribió el cliente) de este producto hay en el carrito, de 1 a CANTIDAD_MAXIMA
   sinStock?: boolean; // true si se agregó estando agotado: el asesor debe confirmar la disponibilidad
   unidad?: string; // solo productos vendidos por medida (ej. "m²"): cantidad y precio se leen en esa unidad. Solo para mostrar: el servidor la saca del catálogo
+  medidaPorCaja?: number; // solo venta por cajas (ej. 1.37 m²): cajas y m² facturados se derivan de quantity. El servidor la saca del catálogo
 };
 
 // Forma de todo lo que el Context va a exponer a quien lo use
@@ -32,8 +35,8 @@ type CartContextType = {
   addItem: (item: Omit<CartItem, "quantity">) => void; // agrega un producto (o suma 1 si ya existe)
   removeItem: (id: string) => void; // quita un producto completamente
   updateQuantity: (id: string, quantity: number) => void; // cambia la cantidad de un producto específico
-  totalItems: number; // cantidad total de productos (para el badge del carrito)
-  totalPrice: number; // suma de todos los precios (ignorando los que son null)
+  totalLineas: number; // productos DISTINTOS en el carrito (para el badge del carrito), no la suma de cantidades
+  totalPrice: number; // suma de los importes de cada línea (ignorando los que son null)
 };
 
 // Creamos el Context - empieza en "undefined" porque su valor real se define en el Provider de abajo
@@ -55,7 +58,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (existing) {
         // Si ya existe, devolvemos el arreglo con ESE producto actualizado (+1 cantidad)
         return currentItems.map((item) =>
-          item.id === newItem.id ? { ...item, quantity: item.quantity + 1 } : item
+          item.id === newItem.id ? { ...item, quantity: acotarCantidad(item.quantity + 1) } : item
         );
       }
 
@@ -77,23 +80,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
     setItems((currentItems) =>
-      currentItems.map((item) => (item.id === id ? { ...item, quantity } : item))
+      currentItems.map((item) => (item.id === id ? { ...item, quantity: acotarCantidad(quantity) } : item))
     );
   }
 
-  // Calculamos el total de unidades sumando las cantidades de todos los productos
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  // El badge cuenta líneas (productos distintos): 13 m² de piso y 1 piedra = 2
+  const totalLineas = items.length;
 
-  // Calculamos el precio total - solo sumamos productos que SÍ tienen precio definido (no null)
-  const totalPrice = items.reduce((sum, item) => {
+  // Precio total: suma en centavos del importe de cada línea (misma función que el
+  // servidor: con medidaPorCaja se cobran cajas completas). Solo productos con precio.
+  const totalCentavos = items.reduce((sum, item) => {
     if (item.price === null) return sum; // ignoramos productos sin precio confirmado
-    return sum + item.price * item.quantity;
+    return sum + calcularVentaPorMedida(item.quantity, item.price, item.medidaPorCaja).totalCentavos;
   }, 0);
+  const totalPrice = totalCentavos / 100;
 
   return (
     // Proveemos todo el estado y funciones a quien esté "adentro" de este Provider
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, totalItems, totalPrice }}
+      value={{ items, addItem, removeItem, updateQuantity, totalLineas, totalPrice }}
     >
       {children}
     </CartContext.Provider>

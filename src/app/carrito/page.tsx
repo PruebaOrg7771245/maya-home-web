@@ -23,7 +23,15 @@ import {
 import { limpiarTelefono, validarTelefono } from "@/lib/telefono";
 import { parsearIdCombinacion } from "@/lib/combos";
 import { formatPrice } from "@/lib/formatPrice";
-import { cantidadConUnidad, sufijoPrecio, textoCantidad } from "@/lib/unidadVenta";
+import {
+  calcularVentaPorMedida,
+  detalleCajasCarrito,
+  formatCentavos,
+  sufijoPrecio,
+  textoCajasPedido,
+  textoCantidad,
+} from "@/lib/unidadVenta";
+import SelectorCantidad from "@/components/SelectorCantidad";
 
 // Igual que antes con el correo: lo leemos de una variable de entorno
 // (ver .env.local.example) en vez de quemarlo en el código. El "?? " define
@@ -177,12 +185,19 @@ export default function CarritoPage() {
     const itemsList = items
       .map(
         (item) =>
-          // Cantidad: "x2" o, en venta por medida, "2 m²"; el precio va "por m²"
-          `- ${item.name} ${textoCantidad(item.quantity, item.unidad)} (${
-            item.price !== null
-              ? `${formatPrice(item.price)}${sufijoPrecio(item.unidad)} IVA incluido`
-              : "precio a confirmar"
-          })` +
+          (item.medidaPorCaja && item.unidad && item.price !== null
+            ? // Venta por cajas: "13 m² pedidos → 9 cajas (12,33 m²) · $669,52 ($54,30 por m² IVA incluido)"
+              `- ${item.name}: ${textoCajasPedido(
+                calcularVentaPorMedida(item.quantity, item.price, item.medidaPorCaja),
+                item.unidad,
+                item.price
+              )}`
+            : // Cantidad: "x2" o, en venta por medida, "2 m²"; el precio va "por m²"
+              `- ${item.name} ${textoCantidad(item.quantity, item.unidad)} (${
+                item.price !== null
+                  ? `${formatPrice(item.price)}${sufijoPrecio(item.unidad)} IVA incluido`
+                  : "precio a confirmar"
+              })`) +
           // Se agregó estando agotado: el asesor debe confirmar la disponibilidad con el cliente
           (item.sinStock ? " (sin stock: confirmar disponibilidad)" : "") +
           // Combo: las dos piezas (lavamanos y mueble) bajo el combo; null = producto normal
@@ -301,9 +316,15 @@ export default function CarritoPage() {
               {items.map((item) => {
                 // Si el id es de un combo, sacamos sus dos piezas para mostrarlas bajo el nombre
                 const combo = parsearIdCombinacion(item.id);
+                // Venta por cajas (bambú): cajas, m² facturados e importe de la línea
+                const calculoCajas =
+                  item.medidaPorCaja && item.unidad && item.price !== null
+                    ? calcularVentaPorMedida(item.quantity, item.price, item.medidaPorCaja)
+                    : null;
 
                 return (
-                <div key={item.id} className="flex items-center gap-4 p-4">
+                // flex-wrap: en móvil los controles bajan a su propia fila, alineados con el texto
+                <div key={item.id} className="flex flex-wrap items-center gap-x-4 gap-y-3 p-4">
                   {/* Miniatura de la foto del producto */}
                   <div className="relative h-20 w-20 shrink-0 overflow-hidden bg-[#EFEDE7]">
                     <Image src={item.image} alt={item.name} fill sizes="80px" className="object-cover" />
@@ -319,9 +340,19 @@ export default function CarritoPage() {
                         <p className="break-words text-xs text-[#6B6862]">· {combo.mueble.nombre}</p>
                       </>
                     )}
-                    <p className="text-sm text-[#6B6862]">
-                      {item.price !== null ? `${formatPrice(item.price)} (IVA incluido)` : "Precio a confirmar"}
-                    </p>
+                    {/* Venta por cajas: solo "9 cajas · 12,33 m²" (el precio por m² ya está en la
+                        ficha; los m² pedidos van en el campo y el importe a su derecha) */}
+                    {calculoCajas && item.unidad ? (
+                      <p aria-live="polite" className="text-xs text-[#6B6862]">
+                        {detalleCajasCarrito(calculoCajas, item.unidad)}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-[#6B6862]">
+                        {item.price !== null
+                          ? `${formatPrice(item.price)}${sufijoPrecio(item.unidad)} (IVA incluido)`
+                          : "Precio a confirmar"}
+                      </p>
+                    )}
                     {/* Producto agregado estando agotado: aviso corto en su línea */}
                     {item.sinStock && (
                       <p className="mt-1 text-xs text-[#6B6862]">
@@ -330,39 +361,32 @@ export default function CarritoPage() {
                     )}
                   </div>
 
-                  {/* Controles de cantidad: botones - y + */}
-                  <div className="flex items-center gap-2">
+                  {/* Cantidad, importe (venta por cajas) y "Quitar". En móvil, fila propia a todo el
+                      ancho; si aun así no cabe (320 px), "Quitar" baja a otra línea */}
+                  <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 sm:w-auto">
+                    {/* Selector compartido con la ficha; el − en 1 quita la línea */}
+                    <SelectorCantidad
+                      cantidad={item.quantity}
+                      onCambiar={(cantidad) => updateQuantity(item.id, cantidad)}
+                      unidad={item.unidad}
+                      tamano="compacto"
+                    />
+
+                    {/* Venta por cajas: importe de la línea a la derecha del campo */}
+                    {calculoCajas && (
+                      <span className="whitespace-nowrap text-sm font-medium text-[#232320]">
+                        {formatCentavos(calculoCajas.totalCentavos)}
+                      </span>
+                    )}
+
+                    {/* Botón para quitar el producto completamente */}
                     <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="h-7 w-7 border border-[#D8D4CC] text-[#232320] hover:bg-[#EFEDE7]"
-                      aria-label="Disminuir cantidad"
+                      onClick={() => removeItem(item.id)}
+                      className="text-sm text-[#6B6862] underline hover:text-[#A8562E]"
                     >
-                      −
-                    </button>
-                    {/* Con unidad ("2 m²") el ancho fijo w-6 no alcanza: crece sin partirse */}
-                    <span
-                      className={
-                        item.unidad ? "min-w-6 whitespace-nowrap text-center text-sm" : "w-6 text-center text-sm"
-                      }
-                    >
-                      {cantidadConUnidad(item.quantity, item.unidad)}
-                    </span>
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="h-7 w-7 border border-[#D8D4CC] text-[#232320] hover:bg-[#EFEDE7]"
-                      aria-label="Aumentar cantidad"
-                    >
-                      +
+                      Quitar
                     </button>
                   </div>
-
-                  {/* Botón para quitar el producto completamente */}
-                  <button
-                    onClick={() => removeItem(item.id)}
-                    className="ml-2 text-sm text-[#6B6862] underline hover:text-[#A8562E]"
-                  >
-                    Quitar
-                  </button>
                 </div>
                 );
               })}

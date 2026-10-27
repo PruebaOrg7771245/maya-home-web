@@ -90,7 +90,12 @@ function NavegacionConRuta(props: Omit<NavegacionProps, "activa">) {
 }
 
 export default function Header() {
-  const { totalItems } = useCart();
+  // Productos DISTINTOS en el pedido (13 m² de piso y 1 piedra = 2), no la suma de cantidades
+  const { totalLineas } = useCart();
+  const etiquetaCarrito =
+    totalLineas === 0
+      ? "Ver carrito de pedido"
+      : `Ver carrito de pedido (${totalLineas} ${totalLineas === 1 ? "producto" : "productos"})`;
   const [menuAbierto, setMenuAbierto] = useState(false);
   const botonMenu = useRef<HTMLButtonElement>(null);
 
@@ -151,7 +156,7 @@ export default function Header() {
           <Link
             href="/carrito"
             onClick={cerrarMenu}
-            aria-label="Ver carrito de pedido"
+            aria-label={etiquetaCarrito}
             className="relative flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-[#EFEDE7]"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -166,9 +171,14 @@ export default function Header() {
               <circle cx="17" cy="20" r="1.4" fill="#232320" />
             </svg>
 
-            {totalItems > 0 && (
-              <span className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#A8562E] text-[10px] font-medium text-white">
-                {totalItems}
+            {/* El número ya va en el aria-label del enlace: el badge es solo visual.
+                min-w-4 + px-1: con 10 o más productos crece a lo ancho en vez de desbordar */}
+            {totalLineas > 0 && (
+              <span
+                aria-hidden="true"
+                className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#A8562E] px-1 text-[10px] font-medium text-white"
+              >
+                {totalLineas}
               </span>
             )}
           </Link>

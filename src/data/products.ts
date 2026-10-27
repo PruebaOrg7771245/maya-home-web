@@ -83,7 +83,9 @@ export type Product = {
   // Con este campo: el precio y la cantidad se muestran con la unidad ("$X por m²", "2 m²"),
   // la existencia NUNCA se muestra ni viaja al navegador (solo el estado) y "Pocas
   // unidades" va de más de 0 hasta umbralPocas inclusive. Sin él, todo como siempre.
-  // Ejemplo: ventaPorMedida: { unidad: "m²", umbralPocas: 20 },
+  // Con medidaPorCaja se vende por cajas completas: la cantidad pedida se ajusta a cajas
+  // (calcularVentaPorMedida en src/lib/unidadVenta.ts, ADR-36).
+  // Ejemplo: ventaPorMedida: { unidad: "m²", umbralPocas: 20, medidaPorCaja: 1.37 },
   ventaPorMedida?: VentaPorMedida;
 };
 
@@ -92,6 +94,10 @@ export type Product = {
 export type VentaPorMedida = {
   unidad: "m²";
   umbralPocas: number;
+  // OPCIONAL. Medida que trae cada caja (dato del ERP, ej. "(1.37M-4P)" en el nombre).
+  // Con él, cajas = m² pedidos / medidaPorCaja (mitad hacia arriba, mínimo 1) y se
+  // factura cajas × medidaPorCaja. Sin él: cantidad × precio.
+  medidaPorCaja?: number;
 };
 
 export type ProductDetalle = {
@@ -867,8 +873,8 @@ export const products: Product[] = [
   // ==========================================
   // CATEGORÍA: PISOS DE BAMBÚ (venta por m², ADR-35)
   // ==========================================
-  // Sin fotos todavía (images: [] usa el placeholder). "Contenido por caja" pendiente de
-  // confirmar en el ERP: no se carga hasta tenerlo.
+  // Sin fotos todavía (images: [] usa el placeholder). Cajas de 1,37 m² (ERP: "(1.37M-4P)");
+  // las 4 piezas por caja faltan confirmar: no se cargan.
   {
     id: "piso-bambu-natural",
     name: "Piso de bambú · natural",
@@ -887,11 +893,12 @@ export const products: Product[] = [
       { etiqueta: "Material", valor: "100 % bambú" },
       { etiqueta: "Sistema de instalación", valor: "Clic" },
       { etiqueta: "Acabado", valor: "Natural" },
+      { etiqueta: "Contenido por caja", valor: "1,37 m²" },
     ],
     variants: [{ attribute: "medidas", value: "1850 × 185 mm (largo × ancho)" }],
     prices: { minorista: null, mayorista: null },
     sku: "BAMBNATU18501514MM",
-    ventaPorMedida: { unidad: "m²", umbralPocas: 20 },
+    ventaPorMedida: { unidad: "m²", umbralPocas: 20, medidaPorCaja: 1.37 },
   },
   {
     id: "piso-bambu-carbonized",
@@ -911,11 +918,12 @@ export const products: Product[] = [
       { etiqueta: "Material", valor: "100 % bambú" },
       { etiqueta: "Sistema de instalación", valor: "Clic" },
       { etiqueta: "Acabado", valor: "Carbonized" },
+      { etiqueta: "Contenido por caja", valor: "1,37 m²" },
     ],
     variants: [{ attribute: "medidas", value: "1850 × 185 mm (largo × ancho)" }],
     prices: { minorista: null, mayorista: null },
     sku: "BAMBCARBO185018514MM",
-    ventaPorMedida: { unidad: "m²", umbralPocas: 20 },
+    ventaPorMedida: { unidad: "m²", umbralPocas: 20, medidaPorCaja: 1.37 },
   },
 
   // ==========================================

@@ -18,6 +18,14 @@ Formato de entrada:
 
 ---
 
+## 26/10/2026 - Interfaz más limpia en la venta por cajas
+- Ficha: se quitó la vista previa en vivo ("13 m² → 9 cajas…"); se queda el aviso bajo el precio. El cuadro "en el pedido" se centra y mide lo mismo que el botón "Agregar al pedido" (`h-12`), sin salto; bajo 360 px se oculta el texto "en el pedido" para que quepa el selector con "m²".
+- Carrito: en líneas con cajas, sin precio por m²; solo "9 cajas · 12,33 m²" (pequeña, gris) bajo el nombre y el importe a la derecha del campo. En móvil la fila de controles va a todo el ancho y "Quitar" baja si no cabe (antes desbordaba a 390 px). Sin cambios en cálculos, WhatsApp ni correo. `resumenCajasCarrito` y `vistaPreviaCajas` se reemplazan por `detalleCajasCarrito`. Ver nota en ADR-36.
+
+## 26/10/2026 - Bambú por cajas completas, cantidad escribible y contador por líneas
+- Bambú (natural y carbonized): `ventaPorMedida.medidaPorCaja` = 1,37 m² (ERP "(1.37M-4P)"). Como el ERP: cajas = m² / 1,37 redondeado (mitad arriba, mínimo 1), se cobran cajas × 1,37 m² y el total se redondea a centavos al final, todo en enteros (ej. 20 m² → 15 cajas, 20,55 m², $1.115,87). Una sola `calcularVentaPorMedida` en `lib/unidadVenta.ts` para ficha, carrito, WhatsApp, correo y `/api/pedido`, que recalcula siempre y guarda `total` (y cajas/m² facturados) en el snapshot, sin cambio de esquema. Especificación "Contenido por caja: 1,37 m²"; las piezas por caja siguen sin confirmar. Ver ADR-36.
+- Cantidad escribible en ficha, combos y carrito con `SelectorCantidad` (− / campo / +, solo dígitos, 1..9999; lógica en `lib/cantidad.ts`, mismo máximo en el servidor, que rechaza con 400 lo demás). El ícono del carrito cuenta productos distintos (`totalLineas`). Metadata y `sitio.descripcion` mencionan pisos de bambú y piedras flexibles. Nuevo `scripts/test-cajas.ts`.
+
 ## 26/10/2026 - Pisos de bambú y piedras flexibles en el catálogo (28 → 35 productos)
 - `data/products.ts`: 7 productos nuevos en 2 categorías al final, "Pisos de bambú" (natural y carbonized, `ventaPorMedida` m² con umbral 20, sin fotos aún) y "Piedras flexibles" (Star Moon, Linen Weaving, 3D Travertine y las de poliuretano Volcanic Gray y White Jade; por unidad, 5 fotos nuevas). Salen solas en la cinta, el pie, el resumen de "/" y el buscador. Skus, precios y medidas verificados en el ERP; los 7 tienen precio en `stock_espejo`. Pendiente: "Contenido por caja" del bambú (sin confirmar, no se cargó).
 - `ProductCard`: el código de la tarjeta compacta se parte (`break-all`) porque "BAMBCARBO185018514MM" desbordaba a 390 px; el alt de la foto de relleno dice "<nombre> - sin foto disponible", como la galería. `test-ficha.ts` cuenta 35 productos.

@@ -10,7 +10,7 @@ import { urlCatalogo } from "@/lib/catalogoUrl";
 import { products } from "@/data/products";
 import ProductGallery from "@/components/ProductGallery";
 import { formatPrice } from "@/lib/formatPrice";
-import { sufijoPrecio } from "@/lib/unidadVenta";
+import { avisoCajas, sufijoPrecio } from "@/lib/unidadVenta";
 import AddToCartButton from "@/components/AddToCartButton"; // nuevo botón interactivo
 import StockBadge from "@/components/StockBadge"; // nuevo badge de disponibilidad
 import AvisoSinPrecio from "@/components/AvisoSinPrecio"; // qué mostrar cuando el producto no tiene precio
@@ -73,6 +73,8 @@ export default async function ProductoPage({
   const agotado = stock.status === "out_of_stock";
   // Venta por medida (ej. piso por m²): precio y cantidad se leen en esa unidad
   const unidad = product.ventaPorMedida?.unidad;
+  // Venta por cajas completas (ej. bambú, 1,37 m² por caja); undefined = no se vende por cajas
+  const medidaPorCaja = product.ventaPorMedida?.medidaPorCaja;
 
   // Bloques de información: cada uno aparece SOLO si tiene contenido (no se muestran
   // títulos vacíos ni "pendiente"). "Medidas" es la primera fila de la tabla.
@@ -139,6 +141,10 @@ export default async function ProductoPage({
                       )}
                     </span>
                   </div>
+                  {/* Venta por cajas: aviso fijo de que la cantidad se redondea a cajas completas */}
+                  {unidad && medidaPorCaja && (
+                    <p className="mt-2 text-sm text-[#6B6862]">{avisoCajas(medidaPorCaja, unidad)}</p>
+                  )}
                 </div>
 
                 {/* Componente interactivo (cliente): botón "Agregar al pedido" / selector de
@@ -150,6 +156,7 @@ export default async function ProductoPage({
                   price={precio}
                   agotado={agotado}
                   unidad={unidad}
+                  medidaPorCaja={medidaPorCaja}
                 />
               </>
             )}

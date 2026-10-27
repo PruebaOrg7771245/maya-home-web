@@ -19,8 +19,8 @@ antes de asumir nada sobre el estado del proyecto.
 - No hay framework de tests configurado. La lógica pura tiene scripts sueltos
   que corren con Node 22.18+ (ejecuta TypeScript directo):
   `node scripts/test-combos.ts`, `node scripts/test-busqueda.ts`,
-  `node scripts/test-ficha.ts`, `node scripts/test-resumen.ts` y
-  `node scripts/test-stock.ts`.
+  `node scripts/test-ficha.ts`, `node scripts/test-resumen.ts`,
+  `node scripts/test-stock.ts` y `node scripts/test-cajas.ts`.
 - Al terminar una prueba con servidor (`npm run start` o `npm run dev`),
   cerrar el proceso que se levantó con
   `taskkill /PID <pid> /T /F`, usando el PID exacto del proceso que
@@ -55,6 +55,7 @@ src/
                           # Portada, CarruselPortada,
                           # CatalogoConFiltro, ProductCard, ComboCard,
                           # SelectorCombo, ProductGallery, AddToCartButton,
+                          # SelectorCantidad,
                           # StockBadge, AvisoSinPrecio, IconosSitio;
                           # useDesplegable.ts (hook) y estilosNav.ts (clases)
   context/CartContext.tsx # estado del carrito (useCart)
@@ -67,7 +68,9 @@ src/
   lib/stock.ts            # stock y precio (getStock, getStockPorSkus)
   lib/umbralStock.ts      # umbrales y estados de stock (clasificarExistencia,
                           # estadoDeProducto, stockParaInterfaz); puro
-  lib/unidadVenta.ts      # textos "2 m²" / "por m²" de la venta por medida
+  lib/unidadVenta.ts      # venta por medida: textos "2 m²" / "por m²" y regla
+                          # de cajas (calcularVentaPorMedida, ADR-36); puro
+  lib/cantidad.ts         # cantidad escrita (1..CANTIDAD_MAXIMA = 9999); puro
   lib/catalogoUrl.ts      # urlCatalogo() y nombres de categoría "Todos"/"Combos"
   lib/categorias.ts       # orden de las opciones de la cinta de /catalogo
   lib/busqueda.ts         # lógica pura del buscador (sin React ni red)
@@ -115,7 +118,27 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
   y guarda el estado con `estadoDeProducto()` y la unidad (del catálogo, nunca
   del body). Precio "$X por m²" (ficha y tarjetas) y cantidad "2 m²"
   (carrito, botón, WhatsApp, correo) con `lib/unidadVenta.ts`. Cantidad
-  entera; total = precio * cantidad. Los combos no usan esto.
+  entera. Los combos no usan esto.
+- **Venta por cajas (`ventaPorMedida.medidaPorCaja`, ADR-36):** opcional
+  (bambú: 1.37 m²). Igual que el ERP: cajas = m² pedidos / medidaPorCaja
+  redondeado al entero más cercano (mitad hacia arriba), mínimo 1; m²
+  facturados = cajas × medidaPorCaja; total = m² facturados × precio,
+  redondeado a centavos AL FINAL. Aritmética ENTERA (centésimas y centavos),
+  nunca decimales. UNA sola función, `calcularVentaPorMedida()` en
+  `lib/unidadVenta.ts`, para el importe de TODA línea (sin medidaPorCaja =
+  cantidad × precio; también combos): en la ficha solo
+  va el aviso bajo el precio ("Se vende por cajas de 1,37 m²…", sin vista
+  previa en vivo); `CartContext.totalPrice`; en el carrito, sin precio por
+  m², una línea gris "9 cajas · 12,33 m²" bajo el nombre y el importe a la
+  derecha del campo ("13 m²"); WhatsApp y correo con la fórmula completa
+  (`textoCajasPedido`); y `/api/pedido`. El carrito guarda los m² que
+  escribió el cliente; cajas y m² facturados se derivan.
+- **Cantidad (`SelectorCantidad`, `lib/cantidad.ts`):** componente ÚNICO −
+  / campo / + (ficha vía `AddToCartButton` y líneas de `/carrito`). Campo
+  `type="text" inputMode="numeric"`: solo dígitos mientras se escribe, el
+  total se actualiza al instante, al salir o con Enter vacío/0 → 1 y más de
+  9999 → 9999. `CANTIDAD_MAXIMA` es compartida con `/api/pedido`, que
+  rechaza (400) lo que no sea entero 1..9999 y no compara con la existencia.
 - **Reglas de interfaz (ADR-13):** sin precio = no se vende (sin sku:
   "Próximamente"; con sku sin precio: "No disponible por ahora", ambos vía
   `AvisoSinPrecio`). Agotado con precio = se puede agregar, con el aviso
@@ -186,7 +209,8 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
   Catálogo (`/catalogo` sin parámetros) / Combos lavamanos (su filtro); en
   `/catalogo` se marca solo uno de los dos; sin desplegable de categorías,
   ADR-33; lupa
-  de búsqueda, carrito con contador; menú plegable accesible en móvil; la
+  de búsqueda, carrito con contador de líneas (productos distintos,
+  `totalLineas`; el número va en el `aria-label`); menú plegable accesible en móvil; la
   fila nunca se parte en dos líneas y el texto junto al logo sale solo desde
   `md`, recortándose antes que los iconos) y
   `Footer` (marca, categorías, contacto, redes solo con iconos SVG inline).
@@ -206,7 +230,10 @@ App Router de Next.js 15 + React 19 + Tailwind v4, alias `@/*` → `src/*`.
   `object-contain`: nunca recorta una foto (ADR-20).
 - **`POST /api/pedido`** — valida, calcula el total en el servidor con el
   precio del ERP (una consulta `getStockPorSkus`) y guarda en `pedidos` un
-  snapshot `{ id, nombre, cantidad, precio, stock }`. Rechaza productos sin
+  snapshot `{ id, nombre, cantidad, precio, total, stock }` (+ `unidad` en
+  venta por medida y `medidaPedida`, `cajas`, `medidaFacturada`,
+  `medidaPorCaja` en venta por cajas). El total del pedido es la suma
+  entera de centavos de `calcularVentaPorMedida`; nunca se lee del body. Rechaza productos sin
   precio (400) y acepta agotados (ADR-12). Para canal "correo" reparte entre
   asesores (ADR-10) y envía con Resend.
 - **Carrito:** `src/context/CartContext.tsx` (`CartProvider` envuelve toda la

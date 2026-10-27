@@ -22,8 +22,10 @@ const inter = Inter({
 
 // Actualizado de "Comercial Maya" a "Maya Home"
 export const metadata: Metadata = {
-  title: "Maya Home | Sanitarios y acabados para el hogar",
-  description: "Catálogo de lavamanos, sanitarios y acabados cerámicos para el hogar.",
+  // Lo que hay hoy en el catálogo; la misma descripción vive en sitio.descripcion
+  title: "Maya Home | Sanitarios, pisos de bambú y acabados para el hogar",
+  description:
+    "Catálogo de lavamanos, sanitarios, pisos de bambú, piedras flexibles y acabados para el hogar.",
 };
 
 export default function RootLayout({

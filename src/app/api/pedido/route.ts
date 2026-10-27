@@ -10,6 +10,11 @@
 // intenta el envío real con Resend (src/lib/email.ts) - el resultado
 // actualiza esa misma fila a "enviado" o "fallido". Nunca al revés: la
 // acción externa no debe decidir si el pedido se guarda o no.
+//
+// El importe de cada línea y el total se calculan acá, en centavos enteros,
+// con calcularVentaPorMedida (src/lib/unidadVenta.ts; cajas completas en
+// productos con ventaPorMedida.medidaPorCaja, ADR-36). Del body nunca se lee
+// un precio ni un total.
 
 import { NextRequest, NextResponse } from "next/server";
 import { products } from "@/data/products";
@@ -20,6 +25,8 @@ import { validarIdentificacion } from "@/lib/identificacion";
 import { validarTelefono } from "@/lib/telefono";
 import { supabaseServidor } from "@/lib/supabase";
 import { enviarCorreoAsesor } from "@/lib/email";
+import { CANTIDAD_MAXIMA, esCantidadValida } from "@/lib/cantidad";
+import { calcularVentaPorMedida } from "@/lib/unidadVenta";
 
 // Forma esperada del cuerpo de la petición. El navegador solo manda el id
 // del producto y la cantidad - nunca el nombre ni el precio, esos los
@@ -157,9 +164,11 @@ export async function POST(request: NextRequest) {
       if (!combo) {
         return NextResponse.json({ error: `Combo inválido: ${idItem}` }, { status: 400 });
       }
-      if (!Number.isInteger(item.cantidad) || item.cantidad < 1) {
+      if (!esCantidadValida(item.cantidad)) {
         return NextResponse.json(
-          { error: `Cantidad inválida para ${nombreCombinacion(combo.familia)}` },
+          {
+            error: `Cantidad inválida para ${nombreCombinacion(combo.familia)} (debe ser un entero entre 1 y ${CANTIDAD_MAXIMA})`,
+          },
           { status: 400 }
         );
       }
@@ -176,9 +185,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!Number.isInteger(item.cantidad) || item.cantidad < 1) {
+    // Solo el rango; no se compara con la existencia (la confirma el asesor)
+    if (!esCantidadValida(item.cantidad)) {
       return NextResponse.json(
-        { error: `Cantidad inválida para ${producto.name}` },
+        { error: `Cantidad inválida para ${producto.name} (debe ser un entero entre 1 y ${CANTIDAD_MAXIMA})` },
         { status: 400 }
       );
     }
@@ -203,12 +213,20 @@ export async function POST(request: NextRequest) {
   const productosDelPedido: Array<{
     id: string;
     nombre: string;
-    cantidad: number;
-    precio: number; // precio público CON IVA por unidad
+    cantidad: number; // lo que pidió el cliente (unidades, o m² en venta por medida)
+    precio: number; // precio público CON IVA por unidad (o por m²)
+    total: number; // importe de la línea CON IVA, en dólares (calculado en centavos enteros)
     stock: StockStatus; // estado de stock al momento del pedido
     unidad?: string; // solo venta por medida (ej. "m²"); sale del catálogo, nunca del body
+    // Solo venta por cajas (ventaPorMedida.medidaPorCaja, ej. bambú); todo sale del catálogo:
+    medidaPedida?: number; // m² que pidió el cliente (= cantidad)
+    cajas?: number; // cajas completas a entregar
+    medidaFacturada?: number; // m² facturados = cajas × medidaPorCaja (ej. 12.33)
+    medidaPorCaja?: number; // m² por caja (ej. 1.37)
     piezas?: Array<{ sku: string; nombre: string }>; // solo en combos: lavamanos y mueble
   }> = [];
+  // Total del pedido en centavos enteros: suma de las líneas, y recién al final / 100
+  let totalCentavos = 0;
 
   for (const it of itemsValidados) {
     if (it.tipo === "combo") {
@@ -224,11 +242,14 @@ export async function POST(request: NextRequest) {
         );
       }
       const piezas = [lavamanos, mueble].map(({ sku, nombre }: PiezaCombo) => ({ sku, nombre }));
+      const lineaCombo = calcularVentaPorMedida(it.cantidad, calculo.precio);
+      totalCentavos += lineaCombo.totalCentavos;
       productosDelPedido.push({
         id: it.id,
         nombre: nombreCombinacion(familia),
         cantidad: it.cantidad,
         precio: calculo.precio,
+        total: lineaCombo.totalCentavos / 100,
         stock: calculo.status,
         piezas,
       });
@@ -247,21 +268,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // medidaPorCaja sale SIEMPRE del catálogo, nunca del body
+    const medidaPorCaja = producto.ventaPorMedida?.medidaPorCaja;
+    const linea = calcularVentaPorMedida(cantidad, info.precio, medidaPorCaja);
+    totalCentavos += linea.totalCentavos;
+
     productosDelPedido.push({
       id: producto.id,
       nombre: producto.name,
       cantidad,
       precio: info.precio,
+      total: linea.totalCentavos / 100,
       stock: estadoDeProducto(info, producto.ventaPorMedida), // umbral propio en venta por medida
       ...(producto.ventaPorMedida ? { unidad: producto.ventaPorMedida.unidad } : {}),
+      ...(medidaPorCaja && linea.cajas !== null
+        ? {
+            medidaPedida: cantidad,
+            cajas: linea.cajas,
+            medidaFacturada: linea.medidaFacturadaCentesimas / 100,
+            medidaPorCaja,
+          }
+        : {}),
     });
   }
 
-  // Total con IVA, redondeado a centavos para evitar residuos de punto flotante.
-  const total =
-    Math.round(
-      productosDelPedido.reduce((suma, p) => suma + p.precio * p.cantidad, 0) * 100
-    ) / 100;
+  // Total con IVA: suma entera de centavos, convertida a dólares una sola vez
+  const total = totalCentavos / 100;
 
   const ip = obtenerIp(request);
 
@@ -415,6 +447,7 @@ export async function POST(request: NextRequest) {
               cantidad: p.cantidad,
               precio: p.precio,
               unidad: p.unidad,
+              medidaPorCaja: p.medidaPorCaja, // solo venta por cajas: la fila muestra cajas e importe
               sinStock: p.stock === "out_of_stock",
               piezas: p.piezas, // solo combos: el asesor ve lavamanos y mueble
             })),

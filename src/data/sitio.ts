@@ -35,9 +35,10 @@ export const sitio: Sitio = {
   nombre: "Maya Home",
   // Empresa propietaria (franja legal del pie: "© <año> Comercial Maya")
   empresa: "Comercial Maya",
-  // Texto ya existente en el proyecto (la descripción de metadata en layout.tsx);
-  // se usa en la portada y en la columna de marca del pie
-  descripcion: "Catálogo de lavamanos, sanitarios y acabados cerámicos para el hogar.",
+  // Mismo texto que la descripción de metadata en layout.tsx (si cambia uno, cambiar
+  // el otro); se usa en la portada y en la columna de marca del pie
+  descripcion:
+    "Catálogo de lavamanos, sanitarios, pisos de bambú, piedras flexibles y acabados para el hogar.",
   // Ciudad (columna de contacto del pie)
   ubicacion: "Ambato",
   // Cobertura de entregas (columna de contacto del pie)

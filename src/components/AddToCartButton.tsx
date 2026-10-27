@@ -11,7 +11,7 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
-import { cantidadConUnidad } from "@/lib/unidadVenta";
+import SelectorCantidad from "@/components/SelectorCantidad";
 
 type AddToCartButtonProps = {
   id: string;
@@ -19,7 +19,8 @@ type AddToCartButtonProps = {
   image: string;
   price: number; // precio público (IVA incluido); siempre existe, si no hay precio no se muestra este componente
   agotado?: boolean; // tiene precio pero no hay existencias: igual se puede agregar, con aviso
-  unidad?: string; // producto vendido por medida (ej. "m²"): el contador dice "N m² en el pedido"
+  unidad?: string; // producto vendido por medida (ej. "m²"): la cantidad se escribe en esa unidad
+  medidaPorCaja?: number; // venta por cajas completas (ej. 1.37 m²): viaja al carrito, que muestra las cajas
 };
 
 export default function AddToCartButton({
@@ -29,6 +30,7 @@ export default function AddToCartButton({
   price,
   agotado = false,
   unidad,
+  medidaPorCaja,
 }: AddToCartButtonProps) {
   const { items, addItem, updateQuantity } = useCart();
 
@@ -43,30 +45,23 @@ export default function AddToCartButton({
     <div className="mt-8">
       {!cartItem ? (
         <button
-          onClick={() => addItem({ id, name, image, price, sinStock: agotado, unidad })}
-          className="w-full bg-[#232320] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#A8562E] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8562E]"
+          onClick={() => addItem({ id, name, image, price, sinStock: agotado, unidad, medidaPorCaja })}
+          // h-12 fija: misma altura que el cuadro "en el pedido", sin salto al cambiar de estado
+          className="h-12 w-full bg-[#232320] px-6 text-sm font-medium text-white transition-colors hover:bg-[#A8562E] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8562E]"
         >
           Agregar al pedido
         </button>
       ) : (
-        <div className="flex w-full items-center justify-between border border-[#D8D4CC] bg-white px-6 py-3">
-          <button
-            onClick={() => updateQuantity(id, cartItem.quantity - 1)}
-            aria-label="Disminuir cantidad"
-            className="h-8 w-8 border border-[#D8D4CC] text-[#232320] transition-colors hover:bg-[#EFEDE7] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8562E]"
-          >
-            −
-          </button>
-          <span aria-live="polite" className="text-sm font-medium text-[#232320]">
-            {cantidadConUnidad(cartItem.quantity, unidad)} en el pedido
-          </span>
-          <button
-            onClick={() => updateQuantity(id, cartItem.quantity + 1)}
-            aria-label="Aumentar cantidad"
-            className="h-8 w-8 border border-[#D8D4CC] text-[#232320] transition-colors hover:bg-[#EFEDE7] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8562E]"
-          >
-            +
-          </button>
+        // Selector + "en el pedido", centrados en la caja (misma h-12 que el botón).
+        // El − en 1 quita el producto del pedido y vuelve el botón.
+        <div className="flex h-12 w-full items-center justify-center gap-3 border border-[#D8D4CC] bg-white px-4">
+          <SelectorCantidad
+            cantidad={cartItem.quantity}
+            onCambiar={(cantidad) => updateQuantity(id, cantidad)}
+            unidad={unidad}
+          />
+          {/* Por debajo de 360 px no cabe junto al selector con "m²": se oculta (el campo ya dice la cantidad) */}
+          <span className="hidden whitespace-nowrap text-sm text-[#6B6862] min-[360px]:inline">en el pedido</span>
         </div>
       )}
 
