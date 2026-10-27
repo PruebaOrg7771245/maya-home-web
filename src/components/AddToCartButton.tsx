@@ -69,11 +69,11 @@ export default function AddToCartButton({
       {/* Fila reservada (h-5) en ambos estados: "Ver carrito" aparece solo con el selector
           visible y el bloque no cambia de altura. Va debajo (no en la fila del selector)
           porque a 360 px ahí no cabe junto a "en el pedido". */}
-      <div className="mt-2 h-5 text-center text-xs">
+      <div className="mt-2 h-5 text-center text-sm">
         {cartItem && (
           <Link
             href="/carrito"
-            className="text-[#6B6862] underline-offset-2 hover:text-[#232320] hover:underline focus-visible:text-[#232320] focus-visible:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8562E]"
+            className="font-medium text-[#A8562E] underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8562E]"
           >
             Ver carrito
           </Link>
