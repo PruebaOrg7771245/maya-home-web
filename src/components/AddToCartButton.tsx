@@ -10,6 +10,7 @@
 
 "use client";
 
+import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import SelectorCantidad from "@/components/SelectorCantidad";
 
@@ -65,10 +66,24 @@ export default function AddToCartButton({
         </div>
       )}
 
+      {/* Fila reservada (h-5) en ambos estados: "Ver carrito" aparece solo con el selector
+          visible y el bloque no cambia de altura. Va debajo (no en la fila del selector)
+          porque a 360 px ahí no cabe junto a "en el pedido". */}
+      <div className="mt-2 h-5 text-center text-xs">
+        {cartItem && (
+          <Link
+            href="/carrito"
+            className="text-[#6B6862] underline-offset-2 hover:text-[#232320] hover:underline focus-visible:text-[#232320] focus-visible:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8562E]"
+          >
+            Ver carrito
+          </Link>
+        )}
+      </div>
+
       {/* Aviso de agotado: se mantiene tanto con el botón como con el selector
           de cantidad, para que no desaparezca después de agregar */}
       {agotado && (
-        <p className="mt-2 text-xs text-[#6B6862]">
+        <p className="mt-1 text-xs text-[#6B6862]">
           Sin stock por ahora. Consulta la disponibilidad con tu asesor.
         </p>
       )}

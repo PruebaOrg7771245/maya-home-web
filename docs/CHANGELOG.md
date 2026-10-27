@@ -18,6 +18,9 @@ Formato de entrada:
 
 ---
 
+## 27/10/2026 - Enlace "Ver carrito" en la ficha
+- `AddToCartButton` muestra un enlace "Ver carrito" a `/carrito` bajo el selector de cantidad (solo con el producto en el carrito), en una fila reservada para que el bloque no cambie de altura.
+
 ## 27/10/2026 - Nombres de piezas de combos según el ERP
 - `nombre` de las 13 piezas en `src/data/combos.ts` ahora es el del ERP (ej. "LAV LUX-600 BLANCO · 60*48"; se conserva " · " antes de las medidas para que la ficha las siga mostrando) y el buscador añade "lavamanos" al texto de cada combo porque el ERP abrevia "LAV". Etiquetas, SKUs, fotos y lógica de combos sin cambios.
 
