@@ -261,6 +261,11 @@ Después de un cambio no trivial (funcionalidad nueva, decisión de
 arquitectura), usar el agente `trazabilidad` para dejar registro en esos
 archivos. No hace falta para cambios triviales (typos, estilo).
 
+Al cerrar cada cambio no trivial, además del CHANGELOG, actualizar
+[`docs/ESTADO.md`](./docs/ESTADO.md) (hecho, antes de publicar, datos
+pendientes, ideas, deuda técnica): mover lo resuelto, agregar lo nuevo y
+renovar la fecha de "Última actualización".
+
 ## Agentes y skills del proyecto
 
 Este repo tiene cuatro agentes versionados en `.claude/agents/`
