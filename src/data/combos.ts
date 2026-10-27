@@ -51,12 +51,12 @@ export const FAMILIAS_COMBO: FamiliaCombo[] = [
       "Lavamanos de bordes suaves. Mueble de 2 cajones con marco y tiradores negros. Incluye desagüe tipo push metálico.",
     imagen: "/images/combos/lux-600.jpg",
     lavamanos: [
-      { sku: "LAVLUX-600BL", nombre: "Lavamanos LUX-600 · 60x48 cm · blanco", etiqueta: "Blanco" },
+      { sku: "LAVLUX-600BL", nombre: "LAV LUX-600 BLANCO · 60*48", etiqueta: "Blanco" },
     ],
     muebles: [
       {
         sku: "MUEBLLUX-600SMOKE",
-        nombre: "Mueble LUX-600 · 59,2x47,4 cm · nogal ahumado",
+        nombre: "MUEBL LUX-600 SMOKE WALNUT · 59.2*47.4",
         etiqueta: "Nogal ahumado",
       },
     ],
@@ -68,12 +68,12 @@ export const FAMILIAS_COMBO: FamiliaCombo[] = [
       "Lavamanos de líneas rectas. Mueble de 2 cajones con tiradores negros. Incluye desagüe tipo push metálico.",
     imagen: "/images/combos/flute-800.jpg",
     lavamanos: [
-      { sku: "LAVFLUTE800BL", nombre: "Lavamanos FLUTE-800 · 80x48 cm · blanco", etiqueta: "Blanco" },
+      { sku: "LAVFLUTE800BL", nombre: "LAV FLUTE 800 WHITE · 80*48", etiqueta: "Blanco" },
     ],
     muebles: [
       {
         sku: "MUEBLFLUTE800NATURA",
-        nombre: "Mueble FLUTE-800 · 79,2x47,4 cm · roble claro",
+        nombre: "MUEBL FLUTE 800 NATURAL OAK · 79.2*47.4",
         etiqueta: "Roble claro",
       },
     ],
@@ -84,17 +84,17 @@ export const FAMILIAS_COMBO: FamiliaCombo[] = [
     descripcion: "Lavamanos ovalado. Mueble de 2 cajones con frente acanalado, sin tiradores.",
     imagen: "/images/combos/connon-sx800.jpg",
     lavamanos: [
-      { sku: "LAVCONNONSX800BL", nombre: "Lavamanos CONNON SX800 · 80x52,5 cm · blanco", etiqueta: "Blanco" },
+      { sku: "LAVCONNONSX800BL", nombre: "LAV CONNON SX-800 WHITE · 80*52.5", etiqueta: "Blanco" },
       {
         sku: "LAVCONNONSX800BLACK",
-        nombre: "Lavamanos CONNON SX800 · 80x52,5 cm · negro mate",
+        nombre: "LAV CONNON SX-800 BLACK · 80*52.5",
         etiqueta: "Negro mate",
       },
     ],
     muebles: [
       {
         sku: "MUEBLCONNOSX-800SMOK",
-        nombre: "Mueble CONNON SX800 · 79,2x51,9 cm · nogal oscuro",
+        nombre: "MUEBL CONNON SX-800 SMOKE WALNUT · 79.2*51.9",
         etiqueta: "Nogal oscuro",
       },
     ],
@@ -106,16 +106,16 @@ export const FAMILIAS_COMBO: FamiliaCombo[] = [
       "Lavamanos de bordes suaves. Mueble de 2 cajones con marco y tiradores negros. Incluye desagüe tipo push metálico.",
     imagen: "/images/combos/lux-800-blanco-honey.jpg",
     lavamanos: [
-      { sku: "LAVLUX-800BL", nombre: "Lavamanos LUX-800 · 80x48 cm · blanco", etiqueta: "Blanco" },
+      { sku: "LAVLUX-800BL", nombre: "LAV LUX-800 WHITE · 80*48", etiqueta: "Blanco" },
       {
         sku: "LAVLUX-800BLACK",
-        nombre: "Lavamanos LUX-800 · 80x48 cm · negro mate",
+        nombre: "LAV LUX-800 BLACK · 80*48",
         etiqueta: "Negro mate",
       },
     ],
     muebles: [
-      { sku: "MUEBLLUX-800HONEY", nombre: "Mueble LUX-800 · 79,2x47,4 cm · nogal miel", etiqueta: "Nogal miel" },
-      { sku: "MUEBLLUX-800SUNTH", nombre: "Mueble LUX-800 · 79,2x47,4 cm · roble claro", etiqueta: "Roble claro" },
+      { sku: "MUEBLLUX-800HONEY", nombre: "MUEBL LUX-800 HONEY GOLD WALNUT · 79.2*47.4", etiqueta: "Nogal miel" },
+      { sku: "MUEBLLUX-800SUNTH", nombre: "MUEBL LUX-800 SUN THIN WALNUT · 79.2*47.4", etiqueta: "Roble claro" },
     ],
   },
   {
@@ -124,12 +124,12 @@ export const FAMILIAS_COMBO: FamiliaCombo[] = [
     descripcion: "Dos lavamanos de sobreponer sobre mueble de 4 cajones, para baños principales.",
     imagen: "/images/combos/lumina-1600.jpg",
     lavamanos: [
-      { sku: "LAVLUMINA-1600BL", nombre: "Lavamanos LUMINA-1600 · 60x40 cm · blanco", etiqueta: "Blanco" },
+      { sku: "LAVLUMINA-1600BL", nombre: "LAV LUMINA-1600 BLANCO · 60*40", etiqueta: "Blanco" },
     ],
     muebles: [
       {
         sku: "MUEBLLUMINA-1600DANI",
-        nombre: "Mueble LUMINA-1600 · 160x52,5 cm · oscuro",
+        nombre: "MUEBL LUMINA-1600 DANISH WALNUT · 160*52.5",
         etiqueta: "Oscuro",
       },
     ],

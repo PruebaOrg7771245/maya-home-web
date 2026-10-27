@@ -18,6 +18,9 @@ Formato de entrada:
 
 ---
 
+## 27/10/2026 - Nombres de piezas de combos según el ERP
+- `nombre` de las 13 piezas en `src/data/combos.ts` ahora es el del ERP (ej. "LAV LUX-600 BLANCO · 60*48"; se conserva " · " antes de las medidas para que la ficha las siga mostrando) y el buscador añade "lavamanos" al texto de cada combo porque el ERP abrevia "LAV". Etiquetas, SKUs, fotos y lógica de combos sin cambios.
+
 ## 27/10/2026 - Fotos propias para las 4 combinaciones de LUX-800
 - Se agregan `lux-800-blanco-sunth.jpg` y `lux-800-negro-honey.jpg` y se reemplazan las dos existentes (1448 × 1086) en `public/images/combos/`; `FOTOS_COMBINACION` suma las dos claves nuevas. Ninguna combinación de LUX-800 muestra ya "Imagen referencial".
 

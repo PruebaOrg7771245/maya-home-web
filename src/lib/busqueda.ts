@@ -105,12 +105,13 @@ export function textoBusquedaProducto(producto: {
 }
 
 // Texto buscable de una familia de combos: su nombre y el nombre y la etiqueta
-// de cada pieza (lavamanos y muebles). Incluye la palabra "combo".
+// de cada pieza (lavamanos y muebles). Incluye las palabras "combo" y "lavamanos"
+// (los nombres del ERP abrevian "LAV"/"MUEBL").
 export function textoBusquedaCombo(familia: {
   nombre: string;
   lavamanos: { nombre: string; etiqueta: string }[];
   muebles: { nombre: string; etiqueta: string }[];
 }): string {
   const piezas = [...familia.lavamanos, ...familia.muebles].map((p) => `${p.nombre} ${p.etiqueta}`);
-  return normalizar(["combo", familia.nombre, ...piezas].join(" "));
+  return normalizar(["combo", "lavamanos", familia.nombre, ...piezas].join(" "));
 }
