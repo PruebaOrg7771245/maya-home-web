@@ -25,7 +25,6 @@ Resumen vivo de dónde está el proyecto. No repite el detalle de
 ## Datos pendientes
 - LUMINA-1600: ¿son dos lavamanos o uno? En el ERP solo hay un SKU (60×40); sin confirmar.
 - "4 piezas por caja" del bambú: el ERP dice "(1.37M-4P)", pero no está confirmado.
-- Fotos de los 2 pisos de bambú: sin confirmar si ya hay fotos propias.
 - Fotos de los otros 5 combos al estilo de las de LUX-800 (hoy usan la foto de la familia).
 - Color de los muebles de LUX-800 frente a "WALNUT" del ERP: sin confirmar cuál es el correcto.
 - Título del sitio: pendiente de definir.

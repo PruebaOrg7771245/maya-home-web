@@ -873,7 +873,7 @@ export const products: Product[] = [
   // ==========================================
   // CATEGORÍA: PISOS DE BAMBÚ (venta por m², ADR-35)
   // ==========================================
-  // Sin fotos todavía (images: [] usa el placeholder). Cajas de 1,37 m² (ERP: "(1.37M-4P)");
+  // Cajas de 1,37 m² (ERP: "(1.37M-4P)");
   // las 4 piezas por caja faltan confirmar: no se cargan.
   {
     id: "piso-bambu-natural",
@@ -881,7 +881,7 @@ export const products: Product[] = [
     category: "Pisos de bambú",
     description:
       "Piso de bambú 100 % natural de alta resistencia y durabilidad, con sistema clic para facilitar la instalación.",
-    images: [],
+    images: ["/images/products/piso-bambu-natural.jpg"],
     caracteristicas: [
       "100 % bambú",
       "Alta resistencia y durabilidad",
@@ -906,7 +906,7 @@ export const products: Product[] = [
     category: "Pisos de bambú",
     description:
       "Piso de bambú carbonized de alta resistencia y durabilidad, con sistema clic para facilitar la instalación.",
-    images: [],
+    images: ["/images/products/piso-bambu-carbonized.jpg"],
     caracteristicas: [
       "100 % bambú",
       "Alta resistencia y durabilidad",

@@ -18,6 +18,9 @@ Formato de entrada:
 
 ---
 
+## 27/10/2026 - Fotos principales de dispensadores, secadores y bambú
+- Se reemplazan 6 fotos (4 dispensadores, 2 secadores) y se agregan las de los 2 pisos de bambú (1448 × 1086) en `public/images/products/`; `piso-bambu-*` pasan de `images: []` a su foto. Ids, precios, stock y lógica sin cambios.
+
 ## 27/10/2026 - Enlace "Ver carrito" en la ficha
 - `AddToCartButton` muestra un enlace "Ver carrito" a `/carrito` bajo el selector de cantidad (solo con el producto en el carrito), en una fila reservada para que el bloque no cambie de altura.
 
