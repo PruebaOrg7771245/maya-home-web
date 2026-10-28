@@ -21,6 +21,8 @@ Resumen vivo de dónde está el proyecto. No repite el detalle de
 - Confirmar el número de WhatsApp real (`NEXT_PUBLIC_ADVISOR_PHONE`).
 - Poner los correos reales de los asesores (`ADVISOR_EMAIL`, Resend).
 - Definir el dominio.
+- Search Console: registrar el sitio y subir el sitemap cuando salga la app.
+- Pasar cuentas a Comercial Maya (Vercel Pro, Supabase, GitHub); hacer el repo privado y revisar que no haya claves en el historial.
 - Revisar la vista previa de Vercel de punta a punta antes de publicar.
 
 ## Datos pendientes

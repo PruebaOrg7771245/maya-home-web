@@ -18,6 +18,9 @@ Formato de entrada:
 
 ---
 
+## 27/10/2026 - Sitemap y robots
+- `src/app/sitemap.ts` (home, /catalogo, fichas de productos y de combos) y `src/app/robots.ts` (bloquea /api/ y /carrito); la URL base vive en `src/lib/site.ts` y también alimenta `metadataBase` en `layout.tsx` (arregla el `og:image` con URL de localhost).
+
 ## 27/10/2026 - Título, descripción y tarjeta de vista previa
 - `layout.tsx`: título y descripción nuevos, más Open Graph (`siteName`, `es_EC`, `website`); `src/app/opengraph-image.jpg` (1200x630) genera `og:image` y `twitter:image` sola. Sin `metadataBase`: hoy el `og:image` sale con URL absoluta de localhost en el build local.
 

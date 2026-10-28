@@ -4,6 +4,7 @@ import { Archivo, Inter } from "next/font/google"; // importamos las 2 fuentes q
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { URL_BASE } from "@/lib/site";
 import { CartProvider } from "@/context/CartContext"; // importamos el proveedor del carrito
 
 // Fuente para títulos - Archivo, en pesos semi-bold y bold
@@ -26,6 +27,7 @@ const descripcion =
 
 // La imagen de vista previa sale sola de src/app/opengraph-image.jpg
 export const metadata: Metadata = {
+  metadataBase: new URL(URL_BASE),
   title: titulo,
   description: descripcion,
   openGraph: {
