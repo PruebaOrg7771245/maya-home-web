@@ -18,6 +18,9 @@ Formato de entrada:
 
 ---
 
+## 28/10/2026 - Fotos ambientadas de productos
+- 12 productos (lavamanos, espejo 3 en 1, dispensadores) y las 2 pérgolas suman 2 fotos ambientadas cada uno en `images` y en `detalles` (alt y medidas del `ambientados.json`); las pérgolas comparten los mismos 2 archivos.
+
 ## 27/10/2026 - Sitemap y robots
 - `src/app/sitemap.ts` (home, /catalogo, fichas de productos y de combos) y `src/app/robots.ts` (bloquea /api/ y /carrito); la URL base vive en `src/lib/site.ts` y también alimenta `metadataBase` en `layout.tsx` (arregla el `og:image` con URL de localhost).
 

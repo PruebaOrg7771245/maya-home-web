@@ -117,7 +117,11 @@ export const products: Product[] = [
     category: "Lavamanos",
     description:
       "Lavabo de cerámica tipo vessel, rectangular, para instalar sobre mesón.",
-    images: ["/images/products/lavamanos-9636m001.jpg"],
+    images: ["/images/products/lavamanos-9636m001.jpg", "/images/products/lavamanos-9636m001-2.jpg", "/images/products/lavamanos-9636m001-3.jpg"],
+    detalles: [
+      { src: "/images/products/lavamanos-9636m001-2.jpg", alt: "Lavamanos rectangular negro mate 9636 M-001 sobre encimera clara, con grifería de pared", width: 1254, height: 1254 },
+      { src: "/images/products/lavamanos-9636m001-3.jpg", alt: "Lavamanos rectangular negro mate 9636 M-001, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Lavabo de cerámica tipo vessel, de instalación sobre mesón",
       "Modelo rectangular",
@@ -139,7 +143,11 @@ export const products: Product[] = [
     category: "Lavamanos",
     description:
       "Lavabo de cerámica tipo vessel, rectangular, para instalar sobre mesón.",
-    images: ["/images/products/lavamanos-9636.jpg"],
+    images: ["/images/products/lavamanos-9636.jpg", "/images/products/lavamanos-9636-2.jpg", "/images/products/lavamanos-9636-3.jpg"],
+    detalles: [
+      { src: "/images/products/lavamanos-9636-2.jpg", alt: "Lavamanos rectangular blanco 9636 sobre encimera oscura, con grifería de pared y espejo redondo", width: 1254, height: 1254 },
+      { src: "/images/products/lavamanos-9636-3.jpg", alt: "Lavamanos rectangular blanco 9636, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Lavabo de cerámica tipo vessel, de instalación sobre mesón",
       "Modelo rectangular",
@@ -163,7 +171,11 @@ export const products: Product[] = [
     // Nota interna: en el ERP figura como "LAV BAJO TOPE BLANCO" ("bajo tope" = bajo encimera). NO mostrar al cliente.
     description:
       "Lavabo de cerámica rectangular para instalar incrustado bajo mesón.", // texto visible, tomado del PDF
-    images: ["/images/products/lavamanos-4243.jpg"], // foto principal
+    images: ["/images/products/lavamanos-4243.jpg", "/images/products/lavamanos-4243-2.jpg", "/images/products/lavamanos-4243-3.jpg"],
+    detalles: [
+      { src: "/images/products/lavamanos-4243-2.jpg", alt: "Lavamanos bajo encimera 4243 instalado en una encimera clara con mueble de madera y espejo redondo", width: 1254, height: 1254 },
+      { src: "/images/products/lavamanos-4243-3.jpg", alt: "Lavamanos bajo encimera 4243, vista desde arriba sobre fondo de piedra gris", width: 1254, height: 1254 },
+    ], // foto principal
     caracteristicas: [
       "Lavabo de cerámica de instalación incrustada bajo mesón",
       "Modelo rectangular",
@@ -186,7 +198,11 @@ export const products: Product[] = [
     category: "Lavamanos",
     description:
       "Lavabo de cerámica con pedestal, de cuerpo completo e instalación al piso.",
-    images: ["/images/products/lavamanos-b191.jpg"],
+    images: ["/images/products/lavamanos-b191.jpg", "/images/products/lavamanos-b191-2.jpg", "/images/products/lavamanos-b191-3.jpg"],
+    detalles: [
+      { src: "/images/products/lavamanos-b191-2.jpg", alt: "Lavamanos de pedestal B-191 en un baño con ducha de vidrio y puerta de madera", width: 1254, height: 1254 },
+      { src: "/images/products/lavamanos-b191-3.jpg", alt: "Lavamanos de pedestal B-191, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Lavabo de cerámica de cuerpo completo (pedestal), de instalación al piso",
       "Desagüe normal a la pared",
@@ -358,7 +374,11 @@ export const products: Product[] = [
     category: "Dispensadores de jabón",
     description:
       "Dispensador de jabón manual de plástico, con depósito interno y recarga interna con apertura de llave.",
-    images: ["/images/products/dispensador-jabon-manual-blanco.jpg"],
+    images: ["/images/products/dispensador-jabon-manual-blanco.jpg", "/images/products/dispensador-jabon-manual-blanco-2.jpg", "/images/products/dispensador-jabon-manual-blanco-3.jpg"],
+    detalles: [
+      { src: "/images/products/dispensador-jabon-manual-blanco-2.jpg", alt: "Dispensadores de jabón manual blancos instalados en la pared, junto a lavamanos", width: 1254, height: 1254 },
+      { src: "/images/products/dispensador-jabon-manual-blanco-3.jpg", alt: "Dispensador de jabón manual blanco, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Dispensador de jabón manual de plástico",
       "Depósito interno",
@@ -405,7 +425,11 @@ export const products: Product[] = [
     category: "Dispensadores de jabón",
     description:
       "Dispensador de jabón de plástico, eléctrico o a pilas, con 2 velocidades de caída del jabón y control de la distancia del sensor.",
-    images: ["/images/products/dispensador-jabon-automatico-blanco.jpg"],
+    images: ["/images/products/dispensador-jabon-automatico-blanco.jpg", "/images/products/dispensador-jabon-automatico-blanco-2.jpg", "/images/products/dispensador-jabon-automatico-blanco-3.jpg"],
+    detalles: [
+      { src: "/images/products/dispensador-jabon-automatico-blanco-2.jpg", alt: "Dispensador de jabón automático blanco en la pared, entregando jabón a una mano", width: 1254, height: 1254 },
+      { src: "/images/products/dispensador-jabon-automatico-blanco-3.jpg", alt: "Dispensador de jabón automático blanco, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Dispensador de jabón de plástico, eléctrico o a pilas (4 pilas AA)",
       "2 velocidades para la caída del jabón",
@@ -430,7 +454,11 @@ export const products: Product[] = [
     category: "Dispensadores de jabón",
     description:
       "Dispensador de jabón de acero inoxidable antivandálico, eléctrico o a pilas, con 2 velocidades de caída del jabón y control de la distancia del sensor.",
-    images: ["/images/products/dispensador-jabon-automatico-acero.jpg"],
+    images: ["/images/products/dispensador-jabon-automatico-acero.jpg", "/images/products/dispensador-jabon-automatico-acero-2.jpg", "/images/products/dispensador-jabon-automatico-acero-3.jpg"],
+    detalles: [
+      { src: "/images/products/dispensador-jabon-automatico-acero-2.jpg", alt: "Dispensador de jabón automático de acero en una pared oscura, entregando jabón a una mano", width: 1254, height: 1254 },
+      { src: "/images/products/dispensador-jabon-automatico-acero-3.jpg", alt: "Dispensador de jabón automático de acero, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Dispensador de jabón eléctrico o a pilas (4 pilas AA)",
       "Acero inoxidable antivandálico",
@@ -460,7 +488,11 @@ export const products: Product[] = [
     category: "Dispensadores de papel",
     description:
       "Dispensador de papel manual de plástico para papel rectangular.",
-    images: ["/images/products/dispensador-papel-blanco.jpg"],
+    images: ["/images/products/dispensador-papel-blanco.jpg", "/images/products/dispensador-papel-blanco-2.jpg", "/images/products/dispensador-papel-blanco-3.jpg"],
+    detalles: [
+      { src: "/images/products/dispensador-papel-blanco-2.jpg", alt: "Dispensador de papel blanco en la pared, con una mano tomando una toalla", width: 1254, height: 1254 },
+      { src: "/images/products/dispensador-papel-blanco-3.jpg", alt: "Dispensador de papel blanco, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Dispensador de papel manual de plástico",
       "Recarga de papel rectangular",
@@ -482,7 +514,11 @@ export const products: Product[] = [
     category: "Dispensadores de papel",
     description:
       "Dispensador de papel manual de plástico para papel redondo.",
-    images: ["/images/products/dispensador-papel-manual-blanco.jpg"],
+    images: ["/images/products/dispensador-papel-manual-blanco.jpg", "/images/products/dispensador-papel-manual-blanco-2.jpg", "/images/products/dispensador-papel-manual-blanco-3.jpg"],
+    detalles: [
+      { src: "/images/products/dispensador-papel-manual-blanco-2.jpg", alt: "Dispensador de papel en rollo, blanco y redondo, instalado en la pared de un baño", width: 1254, height: 1254 },
+      { src: "/images/products/dispensador-papel-manual-blanco-3.jpg", alt: "Dispensador de papel en rollo blanco, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Dispensador de papel manual de plástico",
       "Recarga de papel redondo",
@@ -507,7 +543,11 @@ export const products: Product[] = [
     category: "Dispensadores de papel",
     description:
       "Dispensador de papel manual de acero inoxidable antivandálico para papel rectangular.",
-    images: ["/images/products/dispensador-papel-manual-acero.jpg"],
+    images: ["/images/products/dispensador-papel-manual-acero.jpg", "/images/products/dispensador-papel-manual-acero-2.jpg", "/images/products/dispensador-papel-manual-acero-3.jpg"],
+    detalles: [
+      { src: "/images/products/dispensador-papel-manual-acero-2.jpg", alt: "Dispensador de papel manual de acero instalado en la pared sobre un lavamanos", width: 1071, height: 1468 },
+      { src: "/images/products/dispensador-papel-manual-acero-3.jpg", alt: "Dispensador de papel manual de acero, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Dispensador de papel manual",
       "Acero inoxidable antivandálico",
@@ -527,7 +567,11 @@ export const products: Product[] = [
     category: "Dispensadores de papel",
     description:
       "Dispensador de papel eléctrico o a pilas (4 pilas D), de acero inoxidable antivandálico, para papel redondo de 20x21 cm, con control del largo del papel y panel digital frontal.",
-    images: ["/images/products/dispensador-papel-automatico-acero.jpg"],
+    images: ["/images/products/dispensador-papel-automatico-acero.jpg", "/images/products/dispensador-papel-automatico-acero-2.jpg", "/images/products/dispensador-papel-automatico-acero-3.jpg"],
+    detalles: [
+      { src: "/images/products/dispensador-papel-automatico-acero-2.jpg", alt: "Dispensador automático de papel de acero en la pared, con papelera de acero debajo", width: 1254, height: 1254 },
+      { src: "/images/products/dispensador-papel-automatico-acero-3.jpg", alt: "Dispensador automático de papel de acero, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Dispensador de papel eléctrico o a pilas (4 pilas D)",
       "Acero inoxidable antivandálico",
@@ -674,7 +718,11 @@ export const products: Product[] = [
     category: "Accesorios",
     description:
       "Espejo de 75 x 110 cm con luz LED, que integra secador de manos con sensor, dispensador de jabón y espacio para recarga de papel rectangular.",
-    images: ["/images/products/espejo-3-en-1.jpg"],
+    images: ["/images/products/espejo-3-en-1.jpg", "/images/products/espejo-3-en-1-2.jpg", "/images/products/espejo-3-en-1-3.jpg"],
+    detalles: [
+      { src: "/images/products/espejo-3-en-1-2.jpg", alt: "Espejo 3 en 1 instalado sobre un lavamanos, con una mano bajo el dispensador", width: 1254, height: 1254 },
+      { src: "/images/products/espejo-3-en-1-3.jpg", alt: "Espejo 3 en 1, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Espejo con luz LED",
       "Espacio interno para recarga de papel rectangular",
@@ -805,7 +853,11 @@ export const products: Product[] = [
     category: "Pérgolas",
     description:
       "Pérgola de aluminio premium de 3 x 4 m, con cubierta de policarbonato y malla anti insectos.",
-    images: ["/images/products/pergola-3x4.jpg"],
+    images: ["/images/products/pergola-3x4.jpg", "/images/products/pergola-ambientado-2.jpg", "/images/products/pergola-ambientado-3.jpg"],
+    detalles: [
+      { src: "/images/products/pergola-ambientado-2.jpg", alt: "Pérgola de aluminio con techo de policarbonato y cortinas, instalada en un patio con muebles de exterior", width: 1254, height: 1254 },
+      { src: "/images/products/pergola-ambientado-3.jpg", alt: "Pérgola de aluminio con techo de policarbonato y cortinas color taupe, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     altFoto: "Pérgola de aluminio con techo oscuro y cortinas color taupe recogidas en las columnas",
     caracteristicas: [
       "Estructura de aluminio",
@@ -827,7 +879,11 @@ export const products: Product[] = [
     category: "Pérgolas",
     description:
       "Pérgola de aluminio premium de 3 x 3 m, con cubierta de policarbonato y malla anti insectos.",
-    images: ["/images/products/pergola-3x3.jpg"], // foto original de baja resolución (359 px): reemplazar cuando haya una mejor
+    images: ["/images/products/pergola-3x3.jpg", "/images/products/pergola-ambientado-2.jpg", "/images/products/pergola-ambientado-3.jpg"],
+    detalles: [
+      { src: "/images/products/pergola-ambientado-2.jpg", alt: "Pérgola de aluminio con techo de policarbonato y cortinas, instalada en un patio con muebles de exterior", width: 1254, height: 1254 },
+      { src: "/images/products/pergola-ambientado-3.jpg", alt: "Pérgola de aluminio con techo de policarbonato y cortinas color taupe, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ], // foto original de baja resolución (359 px): reemplazar cuando haya una mejor
     altFoto: "Pérgola de aluminio con techo oscuro de doble nivel y cortinas color taupe",
     caracteristicas: [
       "Estructura de aluminio",
