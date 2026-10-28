@@ -12,6 +12,7 @@
 
 import { useId, useState } from "react";
 import ProductGallery from "@/components/ProductGallery";
+import AvisoReferencial from "@/components/AvisoReferencial";
 import type { FamiliaCombo, PiezaCombo } from "@/data/combos"; // solo los TIPOS
 import { detallePieza, idCombinacion, nombreCombinacion, type CombinacionVista } from "@/lib/combos";
 import type { StockInfo } from "@/lib/stock"; // solo el TIPO: no arrastra el cliente de servidor al navegador
@@ -117,6 +118,7 @@ export default function SelectorCombo({ familia, combinaciones }: SelectorComboP
             ...combo.extras.map((e) => e.alt),
           ]}
         />
+        <AvisoReferencial />
         {/* Sin foto propia se muestra la de la familia: se avisa que el color puede variar */}
         {combo.imagenReferencial && (
           <p className="mt-1 text-xs text-[#6B6862]">Imagen referencial: el color puede variar</p>

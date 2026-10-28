@@ -18,6 +18,9 @@ Formato de entrada:
 
 ---
 
+## 28/10/2026 - Aviso de imágenes referenciales
+- Componente único `AvisoReferencial` ("Imágenes referenciales.") bajo la galería de las fichas de producto y de combo; no va en las tarjetas.
+
 ## 28/10/2026 - Galería de fotos ambientadas en las fichas de combos
 - Las 9 combinaciones suman 1-2 fotos extra (`FOTOS_EXTRA_COMBINACION` en `data/combos.ts`, validado en `test-combos.ts`); `SelectorCombo` usa `ProductGallery` (foto principal sin recorte + miniaturas) y cambia con la combinación. `test-ficha.ts` actualizado a los productos con detalles y a las 3 fotos de las pérgolas.
 

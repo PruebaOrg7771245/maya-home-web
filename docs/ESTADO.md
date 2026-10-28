@@ -2,7 +2,7 @@
 
 Resumen vivo de dónde está el proyecto. No repite el detalle de
 [`CHANGELOG.md`](./CHANGELOG.md) ni de [`DECISIONS.md`](./DECISIONS.md).
-Última actualización: 27/10/2026.
+Última actualización: 28/10/2026.
 
 ## Hecho
 - Catálogo de 35 productos en 11 categorías, con precio y stock desde `stock_espejo`.
@@ -10,6 +10,7 @@ Resumen vivo de dónde está el proyecto. No repite el detalle de
 - Combos lavamanos + mueble con nombres de pieza según el ERP; LUX-800 con foto propia en sus 4 combinaciones.
 - Venta por medida del piso de bambú: estado sin existencia visible y cobro por cajas de 1,37 m² (ADR-35, ADR-36).
 - Carrito en 3 pasos con pedido por WhatsApp o correo; el total se calcula en el servidor.
+- Fotos ambientadas: 14 productos (lavamanos, espejo, dispensadores, pérgolas) y los 9 combos con galería de miniaturas, más el aviso "Imágenes referenciales." bajo la galería.
 - Enlace "Ver carrito" en la ficha, junto al selector de cantidad.
 - Portada con carrusel y catálogo resumido en "/".
 - LUMINA-1600 resuelto: los 2 lavamanos se venden bajo un solo SKU del ERP (60×40) porque el mueble es específico para el par; el precio es correcto.
@@ -36,7 +37,6 @@ Resumen vivo de dónde está el proyecto. No repite el detalle de
 - Barra fija "Ver carrito" en celular.
 - Aviso de descuento en combos.
 - Horarios de atención.
-- Galería de ángulos de los combos.
 - Pasarela Datafast: Datalink es el proceso; Dataweb solo si el cliente lo quiere.
 
 ## Deuda técnica
