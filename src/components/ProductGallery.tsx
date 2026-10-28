@@ -27,12 +27,13 @@ type ProductGalleryProps = {
   images: string[]; // rutas de las fotos (ya con el placeholder si el producto no tiene ninguna)
   productName: string; // base del texto alternativo de cada foto
   altFoto?: string; // texto alternativo de la foto principal (products.ts), si existe
+  alts?: string[]; // OPCIONAL: alt de cada foto por posición (combos); si falta una, se usa el genérico
 };
 
 // Distancia mínima (px) de un deslizamiento horizontal para cambiar de foto
 const UMBRAL_DESLIZAMIENTO = 40;
 
-export default function ProductGallery({ images, productName, altFoto }: ProductGalleryProps) {
+export default function ProductGallery({ images, productName, altFoto, alts }: ProductGalleryProps) {
   // Índice de la foto que se ve grande. Empieza en la primera (la principal).
   const [indice, setIndice] = useState(0);
   const botones = useRef<(HTMLButtonElement | null)[]>([]);
@@ -87,9 +88,11 @@ export default function ProductGallery({ images, productName, altFoto }: Product
   const altDe = (ruta: string, posicion: number) =>
     esPlaceholder(ruta)
       ? `${productName} - sin foto disponible`
-      : posicion === 1 && altFoto
-        ? altFoto
-        : `${productName} - vista ${posicion}`;
+      : alts?.[posicion - 1]
+        ? alts[posicion - 1]
+        : posicion === 1 && altFoto
+          ? altFoto
+          : `${productName} - vista ${posicion}`;
 
   return (
     <div role="group" aria-label={`Fotos de ${productName}`}>

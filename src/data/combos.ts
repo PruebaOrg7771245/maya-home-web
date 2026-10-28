@@ -43,6 +43,51 @@ export const FOTOS_COMBINACION: Record<string, string> = {
   "lumina-1600__LAVLUMINA-1600BL__MUEBLLUMINA-1600DANI": "/images/combos/lumina-1600.jpg",
 };
 
+// Foto ambientada o de vista extra de una combinación: se muestra como miniatura en la
+// ficha del combo, después de la foto principal. width y height son los px del archivo.
+export type FotoExtraCombo = { src: string; alt: string; width: number; height: number };
+
+// FOTOS EXTRA (un solo sitio): { id de combinación -> fotos extra }, mismo id que
+// FOTOS_COMBINACION. Una combinación que no aparece aquí no muestra miniaturas.
+// El test (scripts/test-combos.ts) falla si alguna clave no es una combinación válida
+// o si falta algún archivo.
+export const FOTOS_EXTRA_COMBINACION: Record<string, FotoExtraCombo[]> = {
+  "lux-600__LAVLUX-600BL__MUEBLLUX-600SMOKE": [
+    { src: "/images/combos/lux-600-2.jpg", alt: "Combo LUX-600: lavamanos blanco y mueble de nogal de dos cajones, instalado en un baño", width: 1254, height: 1254 },
+    { src: "/images/combos/lux-600-3.jpg", alt: "Combo LUX-600, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+  ],
+  "flute-800__LAVFLUTE800BL__MUEBLFLUTE800NATURA": [
+    { src: "/images/combos/flute-800-2.jpg", alt: "Combo FLUTE-800: lavamanos blanco y mueble de roble con tiradores negros, instalado en un baño", width: 1158, height: 1359 },
+    { src: "/images/combos/flute-800-3.jpg", alt: "Combo FLUTE-800, vista frontal sobre fondo gris", width: 1158, height: 1359 },
+  ],
+  "connon-sx800__LAVCONNONSX800BL__MUEBLCONNOSX-800SMOK": [
+    { src: "/images/combos/connon-sx800-blanco-2.jpg", alt: "Combo CONNON SX-800 con lavamanos blanco y mueble acanalado de nogal, instalado en un baño", width: 1122, height: 1402 },
+    { src: "/images/combos/connon-sx800-blanco-3.jpg", alt: "Combo CONNON SX-800 con lavamanos blanco, vista frontal sobre fondo gris", width: 1123, height: 1401 },
+  ],
+  "connon-sx800__LAVCONNONSX800BLACK__MUEBLCONNOSX-800SMOK": [
+    { src: "/images/combos/connon-sx800-2.jpg", alt: "Combo CONNON SX-800 con lavamanos negro y mueble acanalado de nogal, instalado en un baño", width: 1127, height: 1396 },
+    { src: "/images/combos/connon-sx800-3.jpg", alt: "Combo CONNON SX-800 con lavamanos negro, vista frontal sobre fondo gris", width: 1127, height: 1396 },
+  ],
+  "lumina-1600__LAVLUMINA-1600BL__MUEBLLUMINA-1600DANI": [
+    { src: "/images/combos/lumina-1600-2.jpg", alt: "Combo LUMINA-1600: dos lavamanos blancos sobre mueble oscuro de cuatro cajones, instalado en un baño", width: 1254, height: 1254 },
+    { src: "/images/combos/lumina-1600-3.jpg", alt: "Combo LUMINA-1600, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+  ],
+  "lux-800__LAVLUX-800BL__MUEBLLUX-800HONEY": [
+    { src: "/images/combos/lux-800-blanco-honey-2.jpg", alt: "Combo LUX-800 con lavamanos blanco y mueble de nogal miel dorado, instalado en un baño", width: 1254, height: 1254 },
+    { src: "/images/combos/lux-800-blanco-honey-3.jpg", alt: "Combo LUX-800 con lavamanos blanco y mueble de nogal miel dorado, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+  ],
+  "lux-800__LAVLUX-800BL__MUEBLLUX-800SUNTH": [
+    { src: "/images/combos/lux-800-blanco-sunth-2.jpg", alt: "Combo LUX-800 con lavamanos blanco y mueble de nogal Sun Thin, instalado en un baño", width: 1024, height: 1536 },
+  ],
+  "lux-800__LAVLUX-800BLACK__MUEBLLUX-800HONEY": [
+    { src: "/images/combos/lux-800-negro-honey-2.jpg", alt: "Combo LUX-800 con lavamanos negro y mueble de nogal miel dorado, instalado en un baño", width: 1024, height: 1536 },
+  ],
+  "lux-800__LAVLUX-800BLACK__MUEBLLUX-800SUNTH": [
+    { src: "/images/combos/lux-800-negro-sunth-2.jpg", alt: "Combo LUX-800 con lavamanos negro y mueble de nogal Sun Thin, instalado en un baño", width: 1254, height: 1254 },
+    { src: "/images/combos/lux-800-negro-sunth-3.jpg", alt: "Combo LUX-800 con lavamanos negro y mueble de nogal Sun Thin, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+  ],
+};
+
 export const FAMILIAS_COMBO: FamiliaCombo[] = [
   {
     id: "lux-600",

@@ -6,7 +6,7 @@
 
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
-import { FAMILIAS_COMBO, FOTOS_COMBINACION } from "../src/data/combos.ts";
+import { FAMILIAS_COMBO, FOTOS_COMBINACION, FOTOS_EXTRA_COMBINACION } from "../src/data/combos.ts";
 import {
   calcularCombo,
   detallePieza,
@@ -148,6 +148,23 @@ const fam = FAMILIAS_COMBO[0];
 const sinPropia = fotoCombinacion(fam, { ...fam.lavamanos[0], sku: "OTRO" }, fam.muebles[0]);
 assert.equal(sinPropia.referencial, true);
 assert.equal(sinPropia.imagen, fam.imagen);
+
+// 13b) Fotos extra: cada clave es una combinación válida con foto propia, y cada archivo existe,
+// con alt y medidas reales; vistaCombinaciones las entrega (sin extras = lista vacía)
+for (const [id, extras] of Object.entries(FOTOS_EXTRA_COMBINACION)) {
+  assert.ok(parsearIdCombinacion(id), `clave de fotos extra inválida: ${id}`);
+  assert.ok(FOTOS_COMBINACION[id], `fotos extra sin foto principal: ${id}`);
+  assert.ok(extras.length > 0, `lista de extras vacía: ${id}`);
+  for (const e of extras) {
+    assert.ok(existsSync(new URL(`../public${e.src}`, import.meta.url)), `falta el archivo ${e.src}`);
+    assert.ok(e.alt.trim() !== "" && e.width > 0 && e.height > 0, `extra incompleta: ${e.src}`);
+    assert.notEqual(e.src, FOTOS_COMBINACION[id], `la extra repite la principal: ${id}`);
+  }
+}
+assert.equal(Object.keys(FOTOS_EXTRA_COMBINACION).length, 9);
+const vistasTodas = FAMILIAS_COMBO.flatMap((f) => vistaCombinaciones(f, mapa));
+for (const v of vistasTodas) assert.deepEqual(v.extras, FOTOS_EXTRA_COMBINACION[v.id] ?? []);
+assert.equal(vistaCombinaciones(fam, { ...mapa })[0].extras.length, 2);
 
 // 14) Detalle de pieza (página del combo): medidas y título salen solo del nombre ya cargado
 assert.deepEqual(detallePieza({ sku: "X", nombre: "Lavamanos LUX-600 · 60x48 cm · blanco", etiqueta: "Blanco" }), {

@@ -18,6 +18,9 @@ Formato de entrada:
 
 ---
 
+## 28/10/2026 - Galería de fotos ambientadas en las fichas de combos
+- Las 9 combinaciones suman 1-2 fotos extra (`FOTOS_EXTRA_COMBINACION` en `data/combos.ts`, validado en `test-combos.ts`); `SelectorCombo` usa `ProductGallery` (foto principal sin recorte + miniaturas) y cambia con la combinación. `test-ficha.ts` actualizado a los productos con detalles y a las 3 fotos de las pérgolas.
+
 ## 28/10/2026 - Fotos ambientadas de productos
 - 12 productos (lavamanos, espejo 3 en 1, dispensadores) y las 2 pérgolas suman 2 fotos ambientadas cada uno en `images` y en `detalles` (alt y medidas del `ambientados.json`); las pérgolas comparten los mismos 2 archivos.
 

@@ -156,8 +156,27 @@ prueba("168W: galería con principal + 2 fotos; 8 características; 2 detalles c
   assert.deepEqual([detalles[1].width, detalles[1].height], [1227, 1282]);
 });
 
-prueba("solo el 168W y los dos saunas tienen imágenes de detalle", () => {
-  const conDetalles = ["sanitario-168w", "sauna-120x100x200", "sauna-135x110x210"];
+// 168W y saunas (collages) + los 14 productos con fotos ambientadas (ambientados.json)
+prueba("solo estos productos tienen imágenes de detalle", () => {
+  const conDetalles = [
+    "sanitario-168w",
+    "sauna-120x100x200",
+    "sauna-135x110x210",
+    "lavamanos-4243",
+    "lavamanos-9636",
+    "lavamanos-9636m001",
+    "lavamanos-b191",
+    "espejo-3-en-1",
+    "dispensador-jabon-manual-blanco",
+    "dispensador-jabon-automatico-blanco",
+    "dispensador-jabon-automatico-acero",
+    "dispensador-papel-blanco",
+    "dispensador-papel-manual-blanco",
+    "dispensador-papel-manual-acero",
+    "dispensador-papel-automatico-acero",
+    "pergola-3x3",
+    "pergola-3x4",
+  ];
   for (const p of products) {
     assert.equal(detallesProducto(p.detalles).length > 0, conDetalles.includes(p.id), p.id);
   }
@@ -258,9 +277,9 @@ prueba("los 3 productos nuevos coinciden con el JSON", () => {
     assert.equal(p.description, n.descripcion, sku);
     assert.deepEqual(p.caracteristicas, n.car, sku);
     assert.deepEqual(filasEspecificaciones(p).map((f) => [f.etiqueta, f.valor]), n.esp, sku);
-    // Desde el 22/10/2026 tienen una foto principal propia (sin galería) y su alt
+    // Desde el 22/10/2026 tienen una foto principal propia y su alt; desde el 28/10/2026 suman las 2 ambientadas
     const fotos = fotosProducto(p.images);
-    assert.equal(fotos.length, 1, `${sku}: una sola foto`);
+    assert.equal(fotos.length, p.id.startsWith("pergola-") ? 3 : 1, `${sku}: fotos`);
     assert.notEqual(fotos[0], IMAGEN_PLACEHOLDER, `${sku}: ya no usa el placeholder`);
     assert.ok(p.altFoto?.trim(), `${sku}: debe tener altFoto`);
   }

@@ -11,7 +11,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import Image from "next/image";
+import ProductGallery from "@/components/ProductGallery";
 import type { FamiliaCombo, PiezaCombo } from "@/data/combos"; // solo los TIPOS
 import { detallePieza, idCombinacion, nombreCombinacion, type CombinacionVista } from "@/lib/combos";
 import type { StockInfo } from "@/lib/stock"; // solo el TIPO: no arrastra el cliente de servidor al navegador
@@ -106,18 +106,20 @@ export default function SelectorCombo({ familia, combinaciones }: SelectorComboP
     <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
       {/* Foto grande de la combinación elegida */}
       <div className="min-w-0">
-        <div className="relative aspect-[4/3] w-full overflow-hidden border border-[#D8D4CC] bg-[#EFEDE7]">
-          <Image
-            src={combo.imagen}
-            alt={`${nombreCombinacion(familia)}: ${lavamanos.nombre} y ${mueble.nombre}`}
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover"
-          />
-        </div>
+        {/* Foto principal + miniaturas de las extras. key = id: al cambiar de combinación la
+            galería se reinicia en la foto principal. Sin extras no hay miniaturas. */}
+        <ProductGallery
+          key={combo.id}
+          images={[combo.imagen, ...combo.extras.map((e) => e.src)]}
+          productName={nombreCombinacion(familia)}
+          alts={[
+            `${nombreCombinacion(familia)}: ${lavamanos.nombre} y ${mueble.nombre}`,
+            ...combo.extras.map((e) => e.alt),
+          ]}
+        />
         {/* Sin foto propia se muestra la de la familia: se avisa que el color puede variar */}
         {combo.imagenReferencial && (
-          <p className="mt-2 text-xs text-[#6B6862]">Imagen referencial: el color puede variar</p>
+          <p className="mt-1 text-xs text-[#6B6862]">Imagen referencial: el color puede variar</p>
         )}
       </div>
 

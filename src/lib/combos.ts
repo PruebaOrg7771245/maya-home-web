@@ -10,8 +10,8 @@ import type { StockInfo } from "./stock.ts";
 // Umbral y clasificación de existencia, compartidos con stock.ts
 import { clasificarExistencia } from "./umbralStock.ts";
 // Datos de las familias
-import { FAMILIAS_COMBO, FOTOS_COMBINACION } from "../data/combos.ts";
-import type { FamiliaCombo, PiezaCombo } from "../data/combos.ts";
+import { FAMILIAS_COMBO, FOTOS_COMBINACION, FOTOS_EXTRA_COMBINACION } from "../data/combos.ts";
+import type { FamiliaCombo, FotoExtraCombo, PiezaCombo } from "../data/combos.ts";
 
 // Una combinación concreta: una familia + un lavamanos + un mueble
 export type Combinacion = {
@@ -167,6 +167,7 @@ export type CombinacionVista = ComboInfo & {
   muebleSku: string;
   imagen: string;
   imagenReferencial: boolean; // true: es la foto de la familia, el color puede variar
+  extras: FotoExtraCombo[]; // fotos ambientadas/vistas extra (miniaturas de la ficha); vacío = sin miniaturas
 };
 
 // Calcula todas las combinaciones de UNA familia con el mapa de stock ya consultado
@@ -181,6 +182,7 @@ export function vistaCombinaciones(
     muebleSku: c.mueble.sku,
     imagen: fotoCombinacion(c.familia, c.lavamanos, c.mueble).imagen,
     imagenReferencial: fotoCombinacion(c.familia, c.lavamanos, c.mueble).referencial,
+    extras: FOTOS_EXTRA_COMBINACION[c.id] ?? [],
   }));
 }
 
