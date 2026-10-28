@@ -144,7 +144,7 @@ export default function Header() {
                 ya no aplica porque el catálogo real es de línea sanitaria.
                 Ajustar cuando el cliente confirme cómo quiere describirse.
                 Solo desde md; si no cabe se recorta (truncate) antes que los iconos. */}
-            <p className="hidden truncate text-xs text-[#6B6862] md:block">
+            <p className="hidden truncate text-base text-[#6B6862] md:block">
               Accesorios y acabados para el hogar
             </p>
           </div>

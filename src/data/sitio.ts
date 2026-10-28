@@ -11,6 +11,7 @@ type Sitio = {
   nombre: string;
   empresa: string;
   descripcion: string;
+  eslogan: string;
   ubicacion: string;
   envios: string;
   telefono: string;
@@ -39,6 +40,8 @@ export const sitio: Sitio = {
   // el otro); se usa en la portada y en la columna de marca del pie
   descripcion:
     "Catálogo de lavamanos, sanitarios, pisos de bambú, piedras flexibles y acabados para el hogar.",
+  // Eslogan de la columna de marca del pie
+  eslogan: "70 años acompañando los mejores proyectos por generaciones",
   // Ciudad (columna de contacto del pie)
   ubicacion: "Ambato",
   // Cobertura de entregas (columna de contacto del pie)

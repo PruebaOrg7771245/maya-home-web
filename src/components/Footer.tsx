@@ -52,7 +52,7 @@ export default function Footer() {
             />
             <span className="sr-only"> — ir al inicio</span>
           </Link>
-          <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#6B6862]">{sitio.descripcion}</p>
+          <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#6B6862]">{sitio.eslogan}</p>
         </div>
 
         {/* Catálogo por categoría (más la pestaña de combos) */}
