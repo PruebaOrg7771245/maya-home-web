@@ -18,6 +18,9 @@ Formato de entrada:
 
 ---
 
+## 27/10/2026 - Icono de Maya Home
+- `src/app/icon.png` y `apple-icon.png` reemplazan el `favicon.ico` de Vercel (borrado, venía de la plantilla y nada lo referenciaba).
+
 ## 27/10/2026 - Título del header más grande y eslogan en el pie
 - Texto junto al logo del header de `text-xs` a `text-base` (solo desde md); el pie muestra el eslogan "70 años acompañando los mejores proyectos por generaciones" (nuevo campo `sitio.eslogan`; `sitio.descripcion` queda igual, espejo de la metadata).
 
