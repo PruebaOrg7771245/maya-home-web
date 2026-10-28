@@ -12,6 +12,7 @@ Resumen vivo de dónde está el proyecto. No repite el detalle de
 - Carrito en 3 pasos con pedido por WhatsApp o correo; el total se calcula en el servidor.
 - Enlace "Ver carrito" en la ficha, junto al selector de cantidad.
 - Portada con carrusel y catálogo resumido en "/".
+- LUMINA-1600 resuelto: los 2 lavamanos se venden bajo un solo SKU del ERP (60×40) porque el mueble es específico para el par; el precio es correcto.
 
 ## Antes de publicar
 - Hacer un pedido de prueba (13 m² de bambú → $669,52, 9 cajas, 12,33 m²) y borrarlo después.
@@ -23,7 +24,6 @@ Resumen vivo de dónde está el proyecto. No repite el detalle de
 - Revisar la vista previa de Vercel de punta a punta antes de publicar.
 
 ## Datos pendientes
-- LUMINA-1600: ¿son dos lavamanos o uno? En el ERP solo hay un SKU (60×40); sin confirmar.
 - "4 piezas por caja" del bambú: el ERP dice "(1.37M-4P)", pero no está confirmado.
 - Fotos de los otros 5 combos al estilo de las de LUX-800 (hoy usan la foto de la familia).
 - Color de los muebles de LUX-800 frente a "WALNUT" del ERP: sin confirmar cuál es el correcto.
