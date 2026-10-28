@@ -20,12 +20,21 @@ const inter = Inter({
   weight: ["400", "500"],
 });
 
-// Actualizado de "Comercial Maya" a "Maya Home"
+const titulo = "Maya Home | Catálogo de Comercial Maya";
+const descripcion =
+  "Catálogo virtual de Comercial Maya: sanitarios, lavamanos, pisos de bambú, saunas y más. Arma tu pedido y un asesor te atiende.";
+
+// La imagen de vista previa sale sola de src/app/opengraph-image.jpg
 export const metadata: Metadata = {
-  // Lo que hay hoy en el catálogo; la misma descripción vive en sitio.descripcion
-  title: "Maya Home | Sanitarios, pisos de bambú y acabados para el hogar",
-  description:
-    "Catálogo de lavamanos, sanitarios, pisos de bambú, piedras flexibles y acabados para el hogar.",
+  title: titulo,
+  description: descripcion,
+  openGraph: {
+    title: titulo,
+    description: descripcion,
+    siteName: "Maya Home",
+    locale: "es_EC",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

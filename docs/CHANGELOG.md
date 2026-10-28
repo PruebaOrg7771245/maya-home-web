@@ -18,6 +18,9 @@ Formato de entrada:
 
 ---
 
+## 27/10/2026 - Título, descripción y tarjeta de vista previa
+- `layout.tsx`: título y descripción nuevos, más Open Graph (`siteName`, `es_EC`, `website`); `src/app/opengraph-image.jpg` (1200x630) genera `og:image` y `twitter:image` sola. Sin `metadataBase`: hoy el `og:image` sale con URL absoluta de localhost en el build local.
+
 ## 27/10/2026 - Icono de Maya Home
 - `src/app/icon.png` y `apple-icon.png` reemplazan el `favicon.ico` de Vercel (borrado, venía de la plantilla y nada lo referenciaba).
 
