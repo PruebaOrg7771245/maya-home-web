@@ -156,29 +156,19 @@ prueba("168W: galería con principal + 2 fotos; 8 características; 2 detalles c
   assert.deepEqual([detalles[1].width, detalles[1].height], [1227, 1282]);
 });
 
-// 168W y saunas (collages) + los 14 productos con fotos ambientadas (ambientados.json)
-prueba("solo estos productos tienen imágenes de detalle", () => {
-  const conDetalles = [
-    "sanitario-168w",
-    "sauna-120x100x200",
-    "sauna-135x110x210",
-    "lavamanos-4243",
-    "lavamanos-9636",
-    "lavamanos-9636m001",
-    "lavamanos-b191",
-    "espejo-3-en-1",
-    "dispensador-jabon-manual-blanco",
-    "dispensador-jabon-automatico-blanco",
-    "dispensador-jabon-automatico-acero",
-    "dispensador-papel-blanco",
-    "dispensador-papel-manual-blanco",
-    "dispensador-papel-manual-acero",
-    "dispensador-papel-automatico-acero",
-    "pergola-3x3",
-    "pergola-3x4",
-  ];
+// Los conteos salen de los datos: todo producto con detalles los declara en `images` y a la inversa
+prueba("detalles e images son coherentes: cada foto ambientada (-2, -3) está en ambos", () => {
+  const conDetalles = products.filter((p) => detallesProducto(p.detalles).length > 0);
+  assert.ok(conDetalles.length > 0);
   for (const p of products) {
-    assert.equal(detallesProducto(p.detalles).length > 0, conDetalles.includes(p.id), p.id);
+    const fotos = fotosProducto(p.images);
+    const ambientadas = fotos.filter((f) => /-[23]\.jpg$/.test(f));
+    for (const d of detallesProducto(p.detalles)) {
+      if (/-[23]\.jpg$/.test(d.src)) assert.ok(fotos.includes(d.src), `${p.id}: ${d.src} falta en images`);
+    }
+    for (const f of ambientadas) {
+      assert.ok((p.detalles ?? []).some((d) => d.src === f), `${p.id}: ${f} falta en detalles`);
+    }
   }
 });
 
@@ -279,7 +269,7 @@ prueba("los 3 productos nuevos coinciden con el JSON", () => {
     assert.deepEqual(filasEspecificaciones(p).map((f) => [f.etiqueta, f.valor]), n.esp, sku);
     // Desde el 22/10/2026 tienen una foto principal propia y su alt; desde el 28/10/2026 suman las 2 ambientadas
     const fotos = fotosProducto(p.images);
-    assert.equal(fotos.length, p.id.startsWith("pergola-") ? 3 : 1, `${sku}: fotos`);
+    assert.equal(fotos.length, 1 + (p.detalles ?? []).length, `${sku}: fotos`);
     assert.notEqual(fotos[0], IMAGEN_PLACEHOLDER, `${sku}: ya no usa el placeholder`);
     assert.ok(p.altFoto?.trim(), `${sku}: debe tener altFoto`);
   }
@@ -292,6 +282,7 @@ const sinTabla = products.filter((p) => filasEspecificaciones(p).length === 0).m
 const conExtra = products.filter((p) => (p.especificaciones ?? []).length > 0).map((p) => p.id);
 const conMedidas = products.filter((p) => filasEspecificaciones(p)[0]?.etiqueta === "Medidas").length;
 console.log(`\nProductos: ${products.length}`);
+console.log(`  con galería (detalles): ${products.filter((p) => (p.detalles ?? []).length > 0).length}; imágenes en total: ${products.reduce((n, p) => n + fotosProducto(p.images).length, 0)}`);
 console.log(`  con miniaturas (más de una foto): ${conMiniaturas.length} ${JSON.stringify(conMiniaturas)}`);
 console.log(`  sin bloque Descripción: ${sinDescripcion.length} ${JSON.stringify(sinDescripcion)}`);
 console.log(`  sin bloque Especificaciones: ${sinTabla.length} ${JSON.stringify(sinTabla)}`);

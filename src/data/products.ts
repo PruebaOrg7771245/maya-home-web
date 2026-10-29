@@ -229,7 +229,11 @@ export const products: Product[] = [
     category: "Sanitarios",
     description:
       "Sanitario de cerámica de lujo con bidet de doble chorro, asiento hidráulico y doble flujo de agua.",
-    images: ["/images/products/sanitario-sd1001.jpg"],
+    images: ["/images/products/sanitario-sd1001.jpg", "/images/products/sanitario-sd1001-2.jpg", "/images/products/sanitario-sd1001-3.jpg"],
+    detalles: [
+      { src: "/images/products/sanitario-sd1001-2.jpg", alt: "Sanitario SD-1001 con bidet, blanco, instalado en un baño junto a un mueble de madera", width: 1254, height: 1254 },
+      { src: "/images/products/sanitario-sd1001-3.jpg", alt: "Sanitario SD-1001 con bidet, blanco, vista en ángulo sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Sanitario de cerámica de lujo, totalmente estético, que facilita la limpieza",
       "Conexión 1/2 por la parte posterior",
@@ -253,7 +257,11 @@ export const products: Product[] = [
     category: "Sanitarios",
     description:
       "Sanitario de cerámica de lujo con bidet de doble chorro, asiento hidráulico y doble flujo de agua.",
-    images: ["/images/products/sanitario-sd1001-mb.jpg"],
+    images: ["/images/products/sanitario-sd1001-mb.jpg", "/images/products/sanitario-sd1001-mb-2.jpg", "/images/products/sanitario-sd1001-mb-3.jpg"],
+    detalles: [
+      { src: "/images/products/sanitario-sd1001-mb-2.jpg", alt: "Sanitario SD-1001 con bidet, negro mate, instalado en un baño con pared verde y mueble de madera clara", width: 1254, height: 1254 },
+      { src: "/images/products/sanitario-sd1001-mb-3.jpg", alt: "Sanitario SD-1001 con bidet, negro mate, vista en ángulo sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Sanitario de cerámica de lujo, totalmente estético, que facilita la limpieza",
       "Conexión 1/2 por la parte posterior",
@@ -279,7 +287,11 @@ export const products: Product[] = [
     category: "Sanitarios",
     description:
       "Sanitario de cerámica de lujo, de diseño estético que facilita la limpieza, con asiento hidráulico, descarga superior y doble flujo de agua.",
-    images: ["/images/products/sanitario-717.jpg"],
+    images: ["/images/products/sanitario-717.jpg", "/images/products/sanitario-717-2.jpg", "/images/products/sanitario-717-3.jpg"],
+    detalles: [
+      { src: "/images/products/sanitario-717-2.jpg", alt: "Sanitario 717 blanco instalado en un baño con ducha de vidrio y mueble de madera", width: 1254, height: 1254 },
+      { src: "/images/products/sanitario-717-3.jpg", alt: "Sanitario 717 blanco, vista en ángulo sobre fondo gris", width: 1158, height: 1359 },
+    ],
     caracteristicas: [
       "Sanitario de cerámica de lujo, totalmente estético, que facilita la limpieza",
       "Conexión 1/2 por la parte posterior",
@@ -303,7 +315,11 @@ export const products: Product[] = [
     category: "Sanitarios",
     description:
       "Sanitario de cerámica de lujo, de diseño estético que facilita la limpieza, con asiento hidráulico, descarga superior y doble flujo de agua.",
-    images: ["/images/products/sanitario-717-mb.jpg"],
+    images: ["/images/products/sanitario-717-mb.jpg", "/images/products/sanitario-717-mb-2.jpg", "/images/products/sanitario-717-mb-3.jpg"],
+    detalles: [
+      { src: "/images/products/sanitario-717-mb-2.jpg", alt: "Sanitario 717 MB negro mate instalado en un baño con mueble de madera y luz cálida", width: 1254, height: 1254 },
+      { src: "/images/products/sanitario-717-mb-3.jpg", alt: "Sanitario 717 MB negro mate, vista en ángulo sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Sanitario de cerámica de lujo, totalmente estético, que facilita la limpieza",
       "Conexión 1/2 por la parte posterior",
@@ -401,7 +417,11 @@ export const products: Product[] = [
     category: "Dispensadores de jabón",
     description:
       "Dispensador de jabón manual de acero inoxidable antivandálico, con depósito interno y recarga superior con apertura de llave.",
-    images: ["/images/products/dispensador-jabon-manual-acero.jpg"],
+    images: ["/images/products/dispensador-jabon-manual-acero.jpg", "/images/products/dispensador-jabon-manual-acero-2.jpg", "/images/products/dispensador-jabon-manual-acero-3.jpg"],
+    detalles: [
+      { src: "/images/products/dispensador-jabon-manual-acero-2.jpg", alt: "Dispensador de jabón manual de acero instalado sobre un lavamanos, con una persona recibiendo jabón", width: 1254, height: 1254 },
+      { src: "/images/products/dispensador-jabon-manual-acero-3.jpg", alt: "Dispensador de jabón manual de acero, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Dispensador de jabón manual",
       "Acero inoxidable antivandálico",
@@ -602,7 +622,11 @@ export const products: Product[] = [
     category: "Secadores de manos",
     description:
       "Secador de manos eléctrico de 110 V y 700 W, con opción de aire caliente o frío y control de la distancia del sensor.",
-    images: ["/images/products/secador-manos-pequeno-blanco.jpg"],
+    images: ["/images/products/secador-manos-pequeno-blanco.jpg", "/images/products/secador-manos-pequeno-blanco-2.jpg", "/images/products/secador-manos-pequeno-blanco-3.jpg"],
+    detalles: [
+      { src: "/images/products/secador-manos-pequeno-blanco-2.jpg", alt: "Secador de manos pequeño blanco instalado en una pared oscura de un baño, mientras una persona se seca las manos", width: 1254, height: 1254 },
+      { src: "/images/products/secador-manos-pequeno-blanco-3.jpg", alt: "Secador de manos pequeño blanco, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Secador de manos eléctrico",
       "Opción de aire caliente o frío",
@@ -628,7 +652,11 @@ export const products: Product[] = [
     category: "Secadores de manos",
     description:
       "Secador de manos eléctrico de acero inoxidable antivandálico, de 110 V y 1800 W, con opción de aire caliente o frío y control de la distancia del sensor.",
-    images: ["/images/products/secador-manos-mediano.jpg"],
+    images: ["/images/products/secador-manos-mediano.jpg", "/images/products/secador-manos-mediano-2.jpg", "/images/products/secador-manos-mediano-3.jpg"],
+    detalles: [
+      { src: "/images/products/secador-manos-mediano-2.jpg", alt: "Secador de manos mediano de acero instalado en la pared de un baño público, usado por una persona", width: 1254, height: 1254 },
+      { src: "/images/products/secador-manos-mediano-3.jpg", alt: "Secador de manos mediano de acero, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Secador de manos eléctrico",
       "Acero inoxidable antivandálico",
@@ -654,7 +682,11 @@ export const products: Product[] = [
     category: "Secadores de manos",
     description:
       "Secador de manos eléctrico de 110 V y 1650 W, con aire caliente o frío, control de potencia alta o baja, tanque para descarga de agua y ducto de limpieza.",
-    images: ["/images/products/secador-manos-grande-blanco.jpg"],
+    images: ["/images/products/secador-manos-grande-blanco.jpg", "/images/products/secador-manos-grande-blanco-2.jpg", "/images/products/secador-manos-grande-blanco-3.jpg"],
+    detalles: [
+      { src: "/images/products/secador-manos-grande-blanco-2.jpg", alt: "Secador de manos grande blanco de chorro de aire instalado en la pared de un baño, usado por una persona", width: 1254, height: 1254 },
+      { src: "/images/products/secador-manos-grande-blanco-3.jpg", alt: "Secador de manos grande blanco, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Secador de manos eléctrico",
       "Control de encendido y apagado",
@@ -682,7 +714,11 @@ export const products: Product[] = [
     category: "Secadores de manos",
     description:
       "Secador de manos eléctrico de acero inoxidable antivandálico, de 110 V y 1650 W, con aire caliente o frío, control de potencia alta o baja, tanque para descarga de agua y ducto de limpieza.",
-    images: ["/images/products/secador-manos-grande-acero.jpg"],
+    images: ["/images/products/secador-manos-grande-acero.jpg", "/images/products/secador-manos-grande-acero-2.jpg", "/images/products/secador-manos-grande-acero-3.jpg"],
+    detalles: [
+      { src: "/images/products/secador-manos-grande-acero-2.jpg", alt: "Secador de manos grande de acero de chorro de aire, usado por una persona en un baño público", width: 1254, height: 1254 },
+      { src: "/images/products/secador-manos-grande-acero-3.jpg", alt: "Secador de manos grande de acero, vista frontal sobre fondo gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Secador de manos eléctrico",
       "Acero inoxidable antivandálico",
@@ -743,7 +779,11 @@ export const products: Product[] = [
     category: "Accesorios",
     description:
       "Barra de seguridad de acero inoxidable de 60 cm.",
-    images: ["/images/products/barra-apoyo-acero.jpg"],
+    images: ["/images/products/barra-apoyo-acero.jpg", "/images/products/barra-apoyo-acero-2.jpg", "/images/products/barra-apoyo-acero-3.jpg"],
+    detalles: [
+      { src: "/images/products/barra-apoyo-acero-2.jpg", alt: "Barra de seguridad de acero instalada en la pared de una ducha", width: 1254, height: 1254 },
+      { src: "/images/products/barra-apoyo-acero-3.jpg", alt: "Barra de seguridad de acero, vista en ángulo sobre pared gris", width: 1254, height: 1254 },
+    ],
     caracteristicas: [
       "Barra de seguridad de acero inoxidable de 60 cm",
     ],
@@ -909,7 +949,11 @@ export const products: Product[] = [
     category: "Limpieza",
     description:
       "Barredora manual plegable de 98 cm de ancho, que funciona sin baterías, motor ni electricidad y recoge hojas, polvo fino y basura.",
-    images: ["/images/products/barredora-manual.jpg"],
+    images: ["/images/products/barredora-manual.jpg", "/images/products/barredora-manual-2.jpg", "/images/products/barredora-manual-3.jpg"],
+    detalles: [
+      { src: "/images/products/barredora-manual-2.jpg", alt: "Barredora manual usada por una persona para barrer hojas en una terraza exterior", width: 1254, height: 1254 },
+      { src: "/images/products/barredora-manual-3.jpg", alt: "Barredora manual con cepillos laterales, vista en ángulo sobre fondo gris", width: 1254, height: 1254 },
+    ],
     altFoto: "Barredora manual gris y negra con dos cepillos laterales, ruedas grandes y mango plegable",
     caracteristicas: [
       "100% manual: no necesita baterías, motor ni electricidad",
@@ -937,7 +981,11 @@ export const products: Product[] = [
     category: "Pisos de bambú",
     description:
       "Piso de bambú 100 % natural de alta resistencia y durabilidad, con sistema clic para facilitar la instalación.",
-    images: ["/images/products/piso-bambu-natural.jpg"],
+    images: ["/images/products/piso-bambu-natural.jpg", "/images/products/piso-bambu-natural-2.jpg", "/images/products/piso-bambu-natural-3.jpg"],
+    detalles: [
+      { src: "/images/products/piso-bambu-natural-2.jpg", alt: "Sala luminosa con piso flotante de bambú Natural, tono dorado miel con vetas finas, junto a un ventanal.", width: 1448, height: 1086 },
+      { src: "/images/products/piso-bambu-natural-3.jpg", alt: "Dormitorio luminoso con piso flotante de bambú Natural, tono dorado miel con vetas finas, y un ventanal con cortinas blancas.", width: 1448, height: 1086 },
+    ],
     caracteristicas: [
       "100 % bambú",
       "Alta resistencia y durabilidad",
@@ -962,7 +1010,11 @@ export const products: Product[] = [
     category: "Pisos de bambú",
     description:
       "Piso de bambú carbonized de alta resistencia y durabilidad, con sistema clic para facilitar la instalación.",
-    images: ["/images/products/piso-bambu-carbonized.jpg"],
+    images: ["/images/products/piso-bambu-carbonized.jpg", "/images/products/piso-bambu-carbonized-2.jpg", "/images/products/piso-bambu-carbonized-3.jpg"],
+    detalles: [
+      { src: "/images/products/piso-bambu-carbonized-2.jpg", alt: "Sala luminosa con piso flotante de bambú Carbonized, tono caramelo marrón rojizo, junto a un ventanal.", width: 1448, height: 1086 },
+      { src: "/images/products/piso-bambu-carbonized-3.jpg", alt: "Dormitorio luminoso con piso flotante de bambú Carbonized, tono caramelo marrón rojizo, y un ventanal con cortinas claras.", width: 1448, height: 1086 },
+    ],
     caracteristicas: [
       "100 % bambú",
       "Alta resistencia y durabilidad",
@@ -991,7 +1043,11 @@ export const products: Product[] = [
     category: "Piedras flexibles",
     description:
       "Piedra flexible de acabado decorativo, perfecta para curvas y apta para interior y exterior.",
-    images: ["/images/products/piedra-flexible-star-moon.jpg"],
+    images: ["/images/products/piedra-flexible-star-moon.jpg", "/images/products/piedra-flexible-star-moon-2.jpg", "/images/products/piedra-flexible-star-moon-3.jpg"],
+    detalles: [
+      { src: "/images/products/piedra-flexible-star-moon-2.jpg", alt: "Pared curva, columna redonda y hornacina en arco de un lobby moderno revestidas con paneles flexibles de piedra Star Moon, blanco grisáceo y superficie arrugada.", width: 1448, height: 1086 },
+      { src: "/images/products/piedra-flexible-star-moon-3.jpg", alt: "Patio con pared curva y columna redonda revestidas con paneles flexibles de piedra Star Moon, junto a un espejo de agua.", width: 1448, height: 1086 },
+    ],
     altFoto: "Panel de piedra flexible Star Moon, de color gris claro y superficie rugosa",
     caracteristicas: ["Perfecta para curvas", "Apta para interior y exterior"],
     especificaciones: [
@@ -1008,7 +1064,11 @@ export const products: Product[] = [
     category: "Piedras flexibles",
     description:
       "Piedra flexible de acabado decorativo, perfecta para curvas y apta para interior y exterior.",
-    images: ["/images/products/piedra-flexible-linen-weaving.jpg"],
+    images: ["/images/products/piedra-flexible-linen-weaving.jpg", "/images/products/piedra-flexible-linen-weaving-2.jpg", "/images/products/piedra-flexible-linen-weaving-3.jpg"],
+    detalles: [
+      { src: "/images/products/piedra-flexible-linen-weaving-2.jpg", alt: "Pared curva, columna redonda y hornacina en arco de un lobby moderno revestidas con paneles flexibles de piedra Linen Weaving, beige con textura de tejido en zigzag.", width: 1448, height: 1086 },
+      { src: "/images/products/piedra-flexible-linen-weaving-3.jpg", alt: "Terraza cubierta con pared curva y columna redonda revestidas con paneles flexibles de piedra Linen Weaving, con vista a un lago.", width: 1448, height: 1086 },
+    ],
     altFoto: "Panel de piedra flexible Linen Weaving, beige, con textura de tejido en zigzag",
     caracteristicas: ["Perfecta para curvas", "Apta para interior y exterior"],
     especificaciones: [
@@ -1025,7 +1085,11 @@ export const products: Product[] = [
     category: "Piedras flexibles",
     description:
       "Piedra flexible de acabado decorativo, perfecta para curvas y apta para interior y exterior.",
-    images: ["/images/products/piedra-flexible-3d-travertine.jpg"],
+    images: ["/images/products/piedra-flexible-3d-travertine.jpg", "/images/products/piedra-flexible-3d-travertine-2.jpg", "/images/products/piedra-flexible-3d-travertine-3.jpg"],
+    detalles: [
+      { src: "/images/products/piedra-flexible-3d-travertine-2.jpg", alt: "Pared curva, columna redonda y hornacina en arco de un lobby moderno revestidas con paneles flexibles de piedra 3D Travertine, beige claro con vetas verticales y poros.", width: 1448, height: 1086 },
+      { src: "/images/products/piedra-flexible-3d-travertine-3.jpg", alt: "Terraza exterior cubierta con muro y banca curva revestidos con paneles flexibles de piedra 3D Travertine, con jardín al fondo.", width: 1448, height: 1086 },
+    ],
     altFoto: "Panel de piedra flexible 3D Travertine, beige, con vetas verticales de travertino",
     caracteristicas: ["Perfecta para curvas", "Apta para interior y exterior"],
     especificaciones: [
@@ -1043,7 +1107,11 @@ export const products: Product[] = [
     name: "Piedra de poliuretano · Volcanic Gray",
     category: "Piedras flexibles",
     description: "Panel de piedra de poliuretano para superficies planas, solo para uso interior.",
-    images: ["/images/products/piedra-poliuretano-volcanic-gray.jpg"],
+    images: ["/images/products/piedra-poliuretano-volcanic-gray.jpg", "/images/products/piedra-poliuretano-volcanic-gray-2.jpg", "/images/products/piedra-poliuretano-volcanic-gray-3.jpg"],
+    detalles: [
+      { src: "/images/products/piedra-poliuretano-volcanic-gray-2.jpg", alt: "Pared de acento detrás de un mueble de TV en una sala, revestida con paneles rígidos de poliuretano Volcanic Gray, gris oscuro con relieve de roca.", width: 1448, height: 1086 },
+      { src: "/images/products/piedra-poliuretano-volcanic-gray-3.jpg", alt: "Recibidor moderno con una pared revestida con paneles de poliuretano Volcanic Gray y una consola blanca al frente.", width: 1448, height: 1086 },
+    ],
     altFoto: "Panel de piedra de poliuretano Volcanic Gray, gris oscuro, con relieve de roca",
     caracteristicas: ["Para superficies planas", "Solo para interiores"],
     especificaciones: [
@@ -1061,7 +1129,11 @@ export const products: Product[] = [
     name: "Piedra de poliuretano · White Jade",
     category: "Piedras flexibles",
     description: "Panel de piedra de poliuretano para superficies planas, solo para uso interior.",
-    images: ["/images/products/piedra-poliuretano-white-jade.jpg"],
+    images: ["/images/products/piedra-poliuretano-white-jade.jpg", "/images/products/piedra-poliuretano-white-jade-2.jpg", "/images/products/piedra-poliuretano-white-jade-3.jpg"],
+    detalles: [
+      { src: "/images/products/piedra-poliuretano-white-jade-2.jpg", alt: "Pared de acento detrás de un mueble de TV en una sala, revestida con paneles rígidos de poliuretano White Jade, blanco hueso con relieve de roca.", width: 1448, height: 1086 },
+      { src: "/images/products/piedra-poliuretano-white-jade-3.jpg", alt: "Dormitorio moderno con la pared de la cabecera revestida con paneles de poliuretano White Jade, blanco hueso con relieve de roca.", width: 1448, height: 1086 },
+    ],
     altFoto: "Panel de piedra de poliuretano White Jade, blanco hueso, con relieve de roca",
     caracteristicas: ["Para superficies planas", "Solo para interiores"],
     especificaciones: [

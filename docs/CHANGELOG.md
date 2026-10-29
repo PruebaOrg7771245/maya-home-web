@@ -18,6 +18,9 @@ Formato de entrada:
 
 ---
 
+## 29/10/2026 - Galerías del segundo lote de fotos ambientadas
+- 18 productos (4 sanitarios, 4 secadores de manos, dispensador de jabón, barra de apoyo, barredora, 5 piedras y 2 pisos de bambú) suman 2 fotos cada uno en `images` y `detalles`; ahora los 35 productos tienen galería (antes 17). `test-ficha.ts` calcula esos conteos desde los datos.
+
 ## 28/10/2026 - Aviso de imágenes referenciales
 - Componente único `AvisoReferencial` ("Imágenes referenciales.") bajo la galería de las fichas de producto y de combo; no va en las tarjetas.
 

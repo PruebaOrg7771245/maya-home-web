@@ -2,7 +2,7 @@
 
 Resumen vivo de dónde está el proyecto. No repite el detalle de
 [`CHANGELOG.md`](./CHANGELOG.md) ni de [`DECISIONS.md`](./DECISIONS.md).
-Última actualización: 28/10/2026.
+Última actualización: 29/10/2026.
 
 ## Hecho
 - Catálogo de 35 productos en 11 categorías, con precio y stock desde `stock_espejo`.
@@ -11,7 +11,7 @@ Resumen vivo de dónde está el proyecto. No repite el detalle de
 - Venta por medida del piso de bambú: estado sin existencia visible y cobro por cajas de 1,37 m² (ADR-35, ADR-36).
 - Revisión de secretos antes de mover cuentas: sin hallazgos de llaves en el historial ni en .env* (nunca versionado); solo datos de contacto de la empresa en el código. Los datos comerciales internos (existencias, precios sin IVA) se quitaron de docs/MAPEO-PRODUCTOS-ERP.md.
 - Carrito en 3 pasos con pedido por WhatsApp o correo; el total se calcula en el servidor.
-- Fotos ambientadas: 14 productos (lavamanos, espejo, dispensadores, pérgolas) y los 9 combos con galería de miniaturas, más el aviso "Imágenes referenciales." bajo la galería.
+- Fotos ambientadas: los 35 productos tienen galería (antes 17: los 14 del primer lote más 168W y las 2 saunas; el segundo lote sumó 18: sanitarios, secadores, barredora, dispensador, barra, piedras y pisos de bambú) y los 9 combos con galería de miniaturas, más el aviso "Imágenes referenciales." bajo la galería.
 - Enlace "Ver carrito" en la ficha, junto al selector de cantidad.
 - Portada con carrusel y catálogo resumido en "/".
 - LUMINA-1600 resuelto: los 2 lavamanos se venden bajo un solo SKU del ERP (60×40) porque el mueble es específico para el par; el precio es correcto.
@@ -41,6 +41,6 @@ Resumen vivo de dónde está el proyecto. No repite el detalle de
 - Pasarela Datafast: Datalink es el proceso; Dataweb solo si el cliente lo quiere.
 
 ## Deuda técnica
-- `scripts/test-ficha.ts` usa conteos fijos (falla si cambian las características o los detalles de un producto).
+- `scripts/test-ficha.ts` ya no usa conteos fijos para las galerías (salen de los datos); siguen fijos los de características de algunos productos.
 - `PESTANA_COMBOS` es a la vez texto visible y valor de URL (`lib/catalogoUrl.ts`).
 - La cinta de categorías no tiene botón de pausa: incumple WCAG 2.2.2; decisión del dueño (ADR-34).
