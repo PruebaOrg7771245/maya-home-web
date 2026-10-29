@@ -9,6 +9,7 @@ Resumen vivo de dónde está el proyecto. No repite el detalle de
 - Catálogo con cinta de categorías y buscador sobre todo el catálogo (ADR-33, ADR-34).
 - Combos lavamanos + mueble con nombres de pieza según el ERP; LUX-800 con foto propia en sus 4 combinaciones.
 - Venta por medida del piso de bambú: estado sin existencia visible y cobro por cajas de 1,37 m² (ADR-35, ADR-36).
+- Revisión de secretos antes de mover cuentas: sin hallazgos de llaves en el historial ni en .env* (nunca versionado); solo datos de contacto de la empresa en el código y, en docs/MAPEO-PRODUCTOS-ERP.md, existencias y precios sin IVA (mayoristas) por producto.
 - Carrito en 3 pasos con pedido por WhatsApp o correo; el total se calcula en el servidor.
 - Fotos ambientadas: 14 productos (lavamanos, espejo, dispensadores, pérgolas) y los 9 combos con galería de miniaturas, más el aviso "Imágenes referenciales." bajo la galería.
 - Enlace "Ver carrito" en la ficha, junto al selector de cantidad.
