@@ -277,7 +277,7 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
   (`getStock`, `getStockPorSkus`, `getPrecioProducto`) y usa
   `supabaseServidor`. El `sku` de cada producto de `products.ts` es el
   `codigo_producto` del ERP. Solo se muestra el precio **público con IVA
-  incluido** (`precio_publico`); los precios mayoristas no se usan. Estados:
+  incluido** (`precio_publico`); no se usa ningún otro precio. Estados:
   sin sku -> `coming_soon`; sin fila o error -> `unknown`; existencia <= 0 ->
   `out_of_stock`; 1 a 5 -> `low_stock`; > 5 -> `in_stock`.
 - **Alternativas descartadas:**
@@ -396,9 +396,8 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
   - Precio de combo con descuento — descartada: los descuentos los maneja el
     asesor; la tarjeta solo dice "Consulta nuestros descuentos por llevarte el
     combo".
-- **Consecuencia:** el precio en vivo puede diferir hasta 1 centavo de la tabla
-  de `MAPEO-PRODUCTOS-ERP.md` (CONNON: $544,45 vs $544,44). Esa tabla es
-  referencia; manda el cálculo del código.
+- **Consecuencia:** el precio en vivo puede diferir hasta 1 centavo de un
+  cálculo que parta del precio sin IVA; manda el cálculo del código.
 - **Estado:** vigente (08/10/2026).
 
 ## ADR-16: Un solo `formatPrice` y un solo umbral de stock (`src/lib/`)
@@ -900,7 +899,7 @@ si no hubo alternativas, se escribe que ninguna se evaluó y por qué.
   Pendiente confirmar las piezas por caja ("4P") antes de mostrarlas.
 - **Verificación:** `scripts/test-cajas.ts` nuevo (ejemplos del ERP, 3 y
   9999 m², producto sin caja, textos y validación del servidor); tsc, lint,
-  build y los 6 scripts pasan. En navegador: 13 m² → $669,52, 25 m² →
-  $1.339,04, el contador con una piedra dice 2, WhatsApp y correo correctos,
+  build y los 6 scripts pasan. En navegador: 13 m² y 25 m² dan el
+  total esperado, el contador con una piedra dice 2, WhatsApp y correo correctos,
   el servidor rechaza 0, -5, 1.5, 10000 y "3".
 - **Estado:** vigente (26/10/2026).

@@ -20,7 +20,7 @@ disponibles.
   oficina. No hay sincronización automática: los datos pueden estar
   desactualizados entre corridas.
 - `precio_publico` ya incluye el 15% de IVA y es el único precio que se
-  muestra en la web; los mayoristas no se usan.
+  muestra en la web.
 - API de `stock.ts`: `getStock(sku)` (detalle de producto),
   `getStockPorSkus(skus)` (una sola consulta `.in(...)`, usada por `/` y por
   `/api/pedido`) y `getPrecioProducto(sku)` (sin uso actual en rutas).
@@ -32,7 +32,7 @@ disponibles.
 - Estados: sin sku -> `coming_soon` (no consulta); sin fila o error de
   Supabase -> `unknown` con precio `null`; `existencia <= 0` ->
   `out_of_stock`; `1..5` -> `low_stock`; `> 5` -> `in_stock`.
-- Verificado: `KW-7226WHITE` muestra 24 disponibles y $26,75.
+- Verificado: `KW-7226WHITE` muestra disponibilidad y precio público.
 - Combos (etapa 2, hecha el 08/10/2026): stock = menor existencia de las 2
   piezas, precio = suma de los públicos con IVA (ver ADR-14/15). Usan
   `getStockPorSkus` con una sola consulta por página; `stock.ts` no cambió de

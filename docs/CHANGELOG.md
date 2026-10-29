@@ -292,7 +292,7 @@ Formato de entrada:
   neutros sin `opacity`, aviso "Esta combinación no está disponible para la
   venta" en caja neutra, "Desde (IVA incluido)" apilado, pestaña Combos sin
   acento.
-- **Fotos:** 6 fotos extraídas del PDF mayorista (págs. impresas 07 y 08),
+- **Fotos:** 6 fotos extraídas del PDF del catálogo (págs. impresas 07 y 08),
   recortadas a 800x600 en `public/images/combos/`; mapa único
   `FOTOS_COMBINACION`. Tres combinaciones sin foto propia (CONNON blanco,
   LUX-800 BL+SUNTH, LUX-800 BLACK+HONEY) usan la de la familia con la leyenda
@@ -305,16 +305,15 @@ Formato de entrada:
   que Node ejecute el test con imports `.ts`.
 - **Test:** `node scripts/test-combos.ts` (Node 24 corre TypeScript directo):
   exige exactamente 9 combinaciones, ids ida y vuelta, casos de pieza
-  ausente / precio 0 / agotado / id manipulado, umbral, formato `$479,10` y
+  ausente / precio 0 / agotado / id manipulado, umbral, formato de precio y
   fotos. Test, lint, tsc y build OK. POST reales probados (combo válido 201,
   precio manipulado ignorado, cruzado 400, pieza sin precio 400, agotado 201);
   pedidos de prueba borrados y `stock_espejo` restaurado.
 - **Pendientes:** fotos de baja resolución (origen ~360 px de ancho; pedir
   originales); canal "correo" con combos no probado de punta a punta (habría
   enviado un correo real); sin pruebas visuales reales a 320 px en
-  dispositivo (solo simuladas en iframe); los precios en vivo pueden diferir
-  hasta 1 centavo de la tabla de `MAPEO-PRODUCTOS-ERP.md` (ej. CONNON $544,45
-  vs $544,44, por el redondeo único); el stock de combos que comparten pieza
+  dispositivo (solo simuladas en iframe); el precio en vivo del combo se redondea
+  una sola vez al final; el stock de combos que comparten pieza
   no se descuenta entre sí (simplificación aceptada).
 
 ## 07/10/2026 - Etapa 1 de stock y precio reales (catálogo de 25 productos, espejo en Supabase)
@@ -463,7 +462,7 @@ Formato de entrada:
   hizo falta SQL nuevo.
 - Probado end-to-end con un pedido real: `201`, fila insertada y confirmada,
   luego borrada. Para la prueba se le puso precio temporal en `products.ts`
-  al lavamanos `9636 M-001` (`minorista: 50, mayorista: 40`); quedó
+  al lavamanos `9636 M-001`; quedó
   confirmado como precio real y no se revirtió. Lint y `tsc --noEmit` sin
   errores.
 - `/carrito`: `handleSendOrder` ahora es `async` y, antes de abrir WhatsApp,
