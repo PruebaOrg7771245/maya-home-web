@@ -18,6 +18,9 @@ Formato de entrada:
 
 ---
 
+## 29/10/2026 - Fondo difuminado en todas las galerías
+- `ProductGallery` pinta siempre, detrás de la foto activa, la misma foto desenfocada llenando el marco (decorativa: `alt=""`, `aria-hidden`, descarga de 64 px); se quita la prop de prueba `fondoDifuminado`. Cubre fichas de producto y de combo.
+
 ## 29/10/2026 - Galerías del segundo lote de fotos ambientadas
 - 18 productos (4 sanitarios, 4 secadores de manos, dispensador de jabón, barra de apoyo, barredora, 5 piedras y 2 pisos de bambú) suman 2 fotos cada uno en `images` y `detalles`; ahora los 35 productos tienen galería (antes 17). `test-ficha.ts` calcula esos conteos desde los datos.
 

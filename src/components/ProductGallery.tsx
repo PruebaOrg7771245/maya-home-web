@@ -103,6 +103,17 @@ export default function ProductGallery({ images, productName, altFoto, alts }: P
         onTouchEnd={hayVarias ? alTerminarToque : undefined}
         className="relative aspect-[4/3] w-full touch-pan-y overflow-hidden border border-[#D8D4CC] bg-[#EFEDE7]"
       >
+        {/* Capa decorativa: misma foto activa, desenfocada y ampliada para que no asomen bordes claros */}
+        {!esPlaceholder(actual) && (
+          <Image
+            src={actual}
+            alt=""
+            aria-hidden="true"
+            fill
+            sizes="64px"
+            className="scale-110 object-cover opacity-40 blur-[24px]"
+          />
+        )}
         <Image
           src={actual}
           alt={altDe(actual, indice + 1)}
